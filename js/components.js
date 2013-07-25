@@ -42,6 +42,8 @@ Crafty.c('Bush', {
 Crafty.c('Path', {
     init: function() {
         this.requires('Actor, Color');
-        this.color('rgb(249, 125, 125)');
+        this.color('rgb(240, 160, 125)');
     }
-})
+});
+
+Crafty.c('')
