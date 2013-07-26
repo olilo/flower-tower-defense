@@ -46,4 +46,30 @@ Crafty.c('Path', {
     }
 });
 
-Crafty.c('')
+Crafty.c('Enemy', {
+    init: function() {
+        this.requires('Actor, Collision, Tween');
+    },
+
+    // animate this Enemy along the given path
+    animate_along: function(path, i) {
+        if (!i) {
+            // skip first entry
+            i = 1;
+        }
+        if (i == path.length) {
+            return;
+        }
+        // TODO this does not work that well ... implement tweening with own function that handles all movement
+        this.tween({x: path[i].x * Game.map_grid.tile.width, y: path[i].y * Game.map_grid.tile.height}, 20).
+            bind('TweenEnd', function() {this.animate_along(path, i + 1)});
+        console.log("Tweening to x=" + path[i].x + ", y=" + path[i].y);
+    }
+});
+
+Crafty.c('Boss', {
+    init: function() {
+        this.requires('Enemy, Text');
+        this.text("@").textFont({size: '14px', weight: 'bold'});
+    }
+})

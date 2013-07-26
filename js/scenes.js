@@ -12,13 +12,15 @@ Crafty.scene('Game', function() {
 
             if (at_edge && (x != map.start.x || y != map.start.y) && (x != map.finish.x || y != map.finish.y)) {
                 // Place a tree entity at the current tile
-                Crafty.e('Tree').at(x, y);
-                map.addObject({x: x, y: y})
+                map.addObject('Tree', x, y);
             } else if (near_path && !on_path) {
                 // Place a bush near the path
-                Crafty.e('Bush').at(x, y);
-                map.addObject({x: x, y: y});
+                map.addObject('Bush', x, y);
             }
         }
     }
+
+    // ?? wave: place the boss at the start of the path
+    var boss = map.addObject('Boss', map.start.x, map.start.y);
+    boss.animate_along(map.getPath());
 });
