@@ -32,44 +32,76 @@ Crafty.c('Tree', {
     }
 });
 
-Crafty.c('Bush', {
+Crafty.c('Path', {
     init: function() {
-        this.requires('Actor, Color');
-        this.color('rgb(20, 185, 40)');
+        this.requires('Actor, Image, Tint');
+        this.image("assets/sprite.png").tint("#969696", 0.15);
     }
 });
 
-Crafty.c('Path', {
+tween_targets = [];
+function tween_handler() {
+    for (var i = 0; i < tween_targets.length; i++) {
+        var current = tween_targets[i];
+        if (current.actor.x != current.steps[0].x ||
+                current.actor.y != current.steps[0].y) {
+            var newX = current.actor.x,
+                newY = current.actor.y;
+            if (current.actor.x < current.steps[0].x) {
+                newX++;
+            } else if (current.actor.x > current.steps[0].x) {
+                newX--;
+            }
+            if (current.actor.y < current.steps[0].y) {
+                newY++;
+            } else if (current.actor.y > current.steps[0].y) {
+                newY--;
+            }
+            current.actor.attr({x: newX, y: newY});
+        } else {
+            console.log("Arrived at x=" + current.actor.x + ", y=" + current.actor.y);
+            current.steps.shift();
+        }
+        if (current.steps.length == 0) {
+            tween_targets.splice(i, 1);
+            i--;
+        }
+    }
+}
+setInterval(tween_handler, 15);
+
+Crafty.c('PathWalker', {
     init: function() {
-        this.requires('Actor, Color');
-        this.color('rgb(240, 160, 125)');
+    },
+
+    // animate this Enemy along the given path
+    animate_along: function(path) {
+        var animation = {
+            actor: this,
+            steps: []
+        };
+        for (var i = 0; i < path.length; i++) {
+            animation.steps.push({
+                x: path[i].x * Game.map_grid.tile.width,
+                y: path[i].y * Game.map_grid.tile.height
+            });
+            console.log("Tweening to x=" + path[i].x + ", y=" + path[i].y);
+        }
+        tween_targets.push(animation);
     }
 });
 
 Crafty.c('Enemy', {
     init: function() {
-        this.requires('Actor, Collision, Tween');
-    },
-
-    // animate this Enemy along the given path
-    animate_along: function(path, i) {
-        if (!i) {
-            // skip first entry
-            i = 1;
-        }
-        if (i == path.length) {
-            return;
-        }
-        // TODO this does not work that well ... implement tweening with own function that handles all movement
-        this.tween({x: path[i].x * Game.map_grid.tile.width, y: path[i].y * Game.map_grid.tile.height}, 20).
-            bind('TweenEnd', function() {this.animate_along(path, i + 1)});
-        console.log("Tweening to x=" + path[i].x + ", y=" + path[i].y);
+        this.requires('Actor, Collision, PathWalker');
     }
 });
 
-Crafty.c('Boss', {
+Crafty.c('Witch', {
     init: function() {
-        this.requires('Enemy, Text');
-        this.text("@").textFont({size: '14px', weight: 'bold'});
+        this.requires('Enemy, spr_witch');
+        this.attr({
+            health: 100
+        });
     }
-})
+});

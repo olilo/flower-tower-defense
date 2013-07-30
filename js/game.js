@@ -1,11 +1,11 @@
 Game = {
     // This defines our grid's size and the size of each of its tiles
     map_grid: {
-        width:  36,
-        height: 24,
+        width:  25,
+        height: 15,
         tile: {
-            width:  16,
-            height: 16
+            width:  32,
+            height: 32
         }
     },
 
@@ -21,12 +21,12 @@ Game = {
         return this.map_grid.height * this.map_grid.tile.height;
     },
 
-
-
     start: function() {
         Crafty.init(Game.width(), Game.height());
         Crafty.background('rgb(249, 223, 125)');
 
-        Crafty.scene('Game');
+        Crafty.scene('Loading');
     }
 };
+
+$text_css = { 'font-size': '24px', 'font-family': 'Arial', 'color': 'white', 'text-align': 'center' };
