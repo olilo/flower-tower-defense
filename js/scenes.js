@@ -10,7 +10,8 @@ Crafty.scene('Loading', function(){
         .css($text_css);
 
     // Load our sprite map image
-    Crafty.load(['assets/heroine01.png', 'assets/background.jpg'], function(){
+    Crafty.load(['assets/heroine01.png', 'assets/transparent.png', 'assets/leafs.png',
+                 'assets/background.jpg', 'assets/flower.png'], function() {
         // Once the image is loaded...
 
         // Define the individual sprites in the image
@@ -20,6 +21,13 @@ Crafty.scene('Loading', function(){
         //  to be drawn with a certain sprite
         Crafty.sprite(32, 'assets/heroine01.png', {
             spr_witch:  [2, 2]
+        });
+
+        Crafty.sprite(16, 'assets/leafs.png', {
+            spr_leaf_left: [0, 0],
+            spr_leaf_up: [1, 0],
+            spr_leaf_down: [0, 1],
+            spr_leaf_right: [1, 1]
         });
 
         // Now that our sprites are ready to draw, start the game
@@ -33,6 +41,14 @@ Crafty.scene('Game', function() {
     // background
     Crafty.e('2D, Canvas, Image').image('assets/background.jpg');
 
+    // bind pause/unpause key 'p'
+    Crafty.e('Keyboard').bind('KeyDown', function() {
+        if (this.isDown('P')) {
+            Crafty.pause();
+
+        }
+    });
+
     // generate map
     var map = new Map();
     map.generatePath();
@@ -40,15 +56,17 @@ Crafty.scene('Game', function() {
     // Place a tree at every edge square on our grid of 16x16 tiles
     for (var x = 0; x < Game.map_grid.width; x++) {
         for (var y = 0; y < Game.map_grid.height; y++) {
-            var at_edge = x == 0 || x == Game.map_grid.width - 1 || y == 0 || y == Game.map_grid.height - 1,
-                on_path = map.isOnPath(x, y),
-                near_path = map.isOnPath(x, y + 1) || map.isOnPath(x, y - 1) ||
-                    map.isOnPath(x - 1, y) || map.isOnPath(x + 1, y);
+            var at_edge = x == 0 || x == Game.map_grid.width - 1 || y == 0 || y == Game.map_grid.height - 1;
 
             if (at_edge && (x != map.start.x || y != map.start.y) && (x != map.finish.x || y != map.finish.y)) {
                 // Place a tree entity at the current tile
                 map.addObject('Tree', x, y);
+            } else if (!map.isOnPath(x, y)) {
+                map.addObject('TowerPlace', x, y);
             }
+
+            // on click: place a flower tower on the grid
+
         }
     }
 
