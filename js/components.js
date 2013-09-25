@@ -73,7 +73,7 @@ Crafty.c('TowerPlace', {
             this.tint("#ffffff", 0.0);
         });
         this.bind('Click', function() {
-            Crafty.e('FlowerTower').at(this.at().x, this.at().y);
+            Crafty.e('FlowerTower').at(this.at().x, this.at().y).shoot();
         });
     }
 });
@@ -83,7 +83,39 @@ Crafty.c('FlowerTower', {
         this.requires('Actor, Image');
         this.image("assets/flower.png");
         // TODO AI that only shoots when an enemy is near
+    },
 
+    shoot: function() {
+        this.timeout(function() {
+            Crafty.e('LeafUp').at(this.at().x, this.at().y).animate_along([{x: this.x, y: this.y - 100}]);
+            Crafty.e('LeafRight').at(this.at().x, this.at().y).animate_along([{x: this.x + 100, y: this.y}]);
+            Crafty.e('LeafDown').at(this.at().x, this.at().y).animate_along([{x: this.x, y: this.y + 100}]);
+            Crafty.e('LeafLeft').at(this.at().x, this.at().y).animate_along([{x: this.x - 100, y: this.y}]);
+        }, 1000, -1);
+    }
+});
+
+Crafty.c('LeafUp', {
+    init: function() {
+        this.requires('Actor, Collision, PathWalker, spr_leaf_up');
+    }
+});
+
+Crafty.c('LeafRight', {
+    init: function() {
+        this.requires('Actor, Collision, PathWalker, spr_leaf_right');
+    }
+});
+
+Crafty.c('LeafDown', {
+    init: function() {
+        this.requires('Actor, Collision, PathWalker, spr_leaf_down');
+    }
+});
+
+Crafty.c('LeafLeft', {
+    init: function() {
+        this.requires('Actor, Collision, PathWalker, spr_leaf_left');
     }
 });
 
