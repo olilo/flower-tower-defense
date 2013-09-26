@@ -26,9 +26,11 @@ Crafty.c('PathWalker', {
     },
 
     // animate this Enemy along the given path
-    animate_along: function(path) {
+    animate_along: function(path, speed) {
+        if (!speed) speed = 1;
         var animation = {
             actor: this,
+            speed: speed,
             steps: []
         };
         for (var i = 0; i < path.length; i++) {
@@ -36,7 +38,7 @@ Crafty.c('PathWalker', {
                 x: path[i].x * Game.map_grid.tile.width,
                 y: path[i].y * Game.map_grid.tile.height
             });
-            console.log("Tweening to x=" + path[i].x + ", y=" + path[i].y);
+            //console.log("Tweening to x=" + path[i].x + ", y=" + path[i].y);
         }
         tween_targets.push(animation);
     }
@@ -73,26 +75,27 @@ Crafty.c('TowerPlace', {
             this.tint("#ffffff", 0.0);
         });
         this.bind('Click', function() {
-            Crafty.e('FlowerTower').at(this.at().x, this.at().y).shoot();
+            Crafty.e('FlowerTower').at(this.at().x, this.at().y);
         });
     }
 });
 
 Crafty.c('FlowerTower', {
     init: function() {
-        this.requires('Actor, Image');
+        this.requires('Actor, Image, Delay');
         this.image("assets/flower.png");
-        // TODO AI that only shoots when an enemy is near
-    },
 
-    shoot: function() {
-        this.timeout(function() {
-            Crafty.e('LeafUp').at(this.at().x, this.at().y).animate_along([{x: this.x, y: this.y - 100}]);
-            Crafty.e('LeafRight').at(this.at().x, this.at().y).animate_along([{x: this.x + 100, y: this.y}]);
-            Crafty.e('LeafDown').at(this.at().x, this.at().y).animate_along([{x: this.x, y: this.y + 100}]);
-            Crafty.e('LeafLeft').at(this.at().x, this.at().y).animate_along([{x: this.x - 100, y: this.y}]);
+        this.delay(function() {
+            // TODO AI that only shoots when an enemy is near
+            // TODO consider playing field bounds for animation
+            var x = this.at().x, y = this.at().y;
+            Crafty.e('LeafUp').at(x, y).animate_along([{x: x, y: y}, {x: x, y: y - 4}], 2);
+            Crafty.e('LeafRight').at(x, y).animate_along([{x: x, y: y}, {x: x + 4, y: y}], 2);
+            Crafty.e('LeafDown').at(x, y).animate_along([{x: x, y: y}, {x: x, y: y + 4}], 2);
+            Crafty.e('LeafLeft').at(x, y).animate_along([{x: x, y: y}, {x: x - 4, y: y}], 2);
         }, 1000, -1);
     }
+
 });
 
 Crafty.c('LeafUp', {
@@ -152,20 +155,22 @@ function tween_handler() {
             var newX = current.actor.x,
                 newY = current.actor.y;
             if (current.actor.x < current.steps[0].x) {
-                newX++;
+                newX += current.speed;
             } else if (current.actor.x > current.steps[0].x) {
-                newX--;
+                newX -= current.speed;
             }
             if (current.actor.y < current.steps[0].y) {
-                newY++;
+                newY += current.speed;
             } else if (current.actor.y > current.steps[0].y) {
-                newY--;
+                newY -= current.speed;
             }
             current.actor.attr({x: newX, y: newY});
         } else {
-            console.log("Arrived at x=" + current.actor.x + ", y=" + current.actor.y);
+            //console.log("Arrived at x=" + current.actor.x + ", y=" + current.actor.y);
             current.steps.shift();
         }
+
+        // no more steps to take for current target: remove it from tween_targets array
         if (current.steps.length == 0) {
             tween_targets.splice(i, 1);
             i--;
