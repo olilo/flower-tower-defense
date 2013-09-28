@@ -83,6 +83,52 @@ Map.prototype.generatePath = function() {
     this.generateNextPart(startCopy, 1);
 };
 
+Map.prototype.decideNextPartDirection = function (current, lastDir, preLastDir) {
+    // go up? or right? or down?
+    // but we never go back (too complicated - been down one time, been down two times, never going back agaaain ^^)
+    var direction = Math.floor(Math.random() * 3),
+        needToFindNext = true;
+    switch (direction) {
+        case 0:
+            if (current.y > 1 &&
+                (lastDir === null || lastDir == 0 || lastDir == 1) &&
+                (preLastDir === null || preLastDir == 0 || preLastDir == 1) &&
+                (current.x < Game.map_grid.width - 3 || this.finish.y < current.y) &&
+                (this.pathLength <= this.pathMaxLength || this.finish.y < current.y)) {
+
+                current.y -= 1;
+                this.addToPath(current);
+                needToFindNext = false;
+                this.generateNextPart(current, direction, lastDir);
+            }
+            break;
+        case 1:
+            if (current.x < Game.map_grid.width - 2 &&
+                (current.x < Game.map_grid.width / 3 || this.pathLength >= this.pathMinLength || Math.random() < 0.2)) {
+
+                current.x += 1;
+                this.addToPath(current);
+                needToFindNext = false;
+                this.generateNextPart(current, direction, lastDir);
+            }
+            break;
+        case 2:
+            if (current.y < Game.map_grid.height - 2 &&
+                (lastDir === null || lastDir == 2 || lastDir == 1) &&
+                (preLastDir === null || preLastDir == 2 || preLastDir == 1) &&
+                (current.x < Game.map_grid.width - 3 || this.finish.y > current.y) &&
+                (this.pathLength <= this.pathMaxLength || this.finish.y > current.y)) {
+
+                current.y += 1;
+                this.addToPath(current);
+                needToFindNext = false;
+                this.generateNextPart(current, direction, lastDir);
+            }
+            break;
+    }
+    return needToFindNext;
+};
+
 Map.prototype.generateNextPart = function(current, lastDir, preLastDir) {
     // start: go right
     if (current.x == 0) {
@@ -117,46 +163,6 @@ Map.prototype.generateNextPart = function(current, lastDir, preLastDir) {
             break;
         }
 
-        // go up? or right? or down?
-        // but we never go back (too complicated - been down one time, been down two times, never going back agaaain ^^)
-        var direction = Math.floor(Math.random() * 3);
-        switch (direction) {
-            case 0:
-                if (current.y > 1 &&
-                    (lastDir === null || lastDir == 0 || lastDir == 1) &&
-                    (preLastDir === null || preLastDir == 0 || preLastDir == 1) &&
-                    (current.x < Game.map_grid.width - 3 || this.finish.y < current.y) &&
-                    (this.pathLength <= this.pathMaxLength || this.finish.y < current.y)) {
-
-                    current.y -= 1;
-                    this.addToPath(current);
-                    needToFindNext = false;
-                    this.generateNextPart(current, direction, lastDir);
-                }
-                break;
-            case 1:
-                if (current.x < Game.map_grid.width - 2 &&
-                    (current.x < Game.map_grid.width / 3 || this.pathLength >= this.pathMinLength || Math.random() < 0.2)) {
-
-                    current.x += 1;
-                    this.addToPath(current);
-                    needToFindNext = false;
-                    this.generateNextPart(current, direction, lastDir);
-                }
-                break;
-            case 2:
-                if (current.y < Game.map_grid.height - 2 &&
-                    (lastDir === null || lastDir == 2 || lastDir == 1) &&
-                    (preLastDir === null || preLastDir == 2 || preLastDir == 1) &&
-                    (current.x < Game.map_grid.width - 3 || this.finish.y > current.y) &&
-                    (this.pathLength <= this.pathMaxLength || this.finish.y > current.y)) {
-
-                    current.y += 1;
-                    this.addToPath(current);
-                    needToFindNext = false;
-                    this.generateNextPart(current, direction, lastDir);
-                }
-                break;
-        }
+        needToFindNext = this.decideNextPartDirection(current, lastDir, preLastDir);
     }
 };
