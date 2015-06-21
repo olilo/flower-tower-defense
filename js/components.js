@@ -25,7 +25,7 @@ Crafty.c('PathWalker', {
     init: function() {
     },
 
-    // animate this Enemy along the given path
+    // animate this entity along the given path
     animate_along: function(path, speed) {
         if (!speed) speed = 1;
         var animation = {
@@ -41,6 +41,21 @@ Crafty.c('PathWalker', {
             //console.log("Tweening to x=" + path[i].x + ", y=" + path[i].y);
         }
         tween_targets.push(animation);
+        return this;
+    },
+
+    animate_to: function(x, y, speed) {
+        return this.animate_along([{x: x, y: y}], speed);
+    },
+
+    destroy_after_animation: function() {
+        var that = this;
+        Crafty.bind("tweenEnded", function(actor) {
+            if (actor == that) {
+                that.destroy();
+            }
+        });
+        return this;
     }
 });
 
@@ -89,10 +104,11 @@ Crafty.c('FlowerTower', {
             // TODO AI that only shoots when an enemy is near
             // TODO consider playing field bounds for animation
             var x = this.at().x, y = this.at().y;
-            Crafty.e('LeafUp').at(x, y).animate_along([{x: x, y: y}, {x: x, y: y - 4}], 2);
-            Crafty.e('LeafRight').at(x, y).animate_along([{x: x, y: y}, {x: x + 4, y: y}], 2);
-            Crafty.e('LeafDown').at(x, y).animate_along([{x: x, y: y}, {x: x, y: y + 4}], 2);
-            Crafty.e('LeafLeft').at(x, y).animate_along([{x: x, y: y}, {x: x - 4, y: y}], 2);
+
+            Crafty.e('LeafUp').at(x, y).animate_to(x, y - 4, 2).destroy_after_animation();
+            Crafty.e('LeafRight').at(x, y).animate_to(x + 4, y, 2).destroy_after_animation();
+            Crafty.e('LeafDown').at(x, y).animate_to(x, y + 4, 2).destroy_after_animation();
+            Crafty.e('LeafLeft').at(x, y).animate_to(x - 4, y, 2).destroy_after_animation();
         }, 1000, -1);
     }
 
@@ -174,6 +190,7 @@ function tween_handler() {
         if (current.steps.length == 0) {
             tween_targets.splice(i, 1);
             i--;
+            Crafty.trigger("tweenEnded", current.actor);
         }
     }
 }

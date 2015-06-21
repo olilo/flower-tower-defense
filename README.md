@@ -1,4 +1,6 @@
-ascii-tower-defense
+flower-tower-defense
 ===================
 
-ASCII style tower defense (at least the enemies and turrets will be ASCII characters).
+Tower defense with sharp shooting flowers.
+
+Beware the badly drawn flowers, shooting their petals at witches from open game art.
