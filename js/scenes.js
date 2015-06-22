@@ -19,7 +19,8 @@ Crafty.scene('Difficulty', function() {
             Game.lifes = 15;
             Game.moneyAfterWave = 7;
             Game.towers = {
-                'FlowerTower': 10
+                'FlowerTower': 10,
+                'SniperTower': 20
             };
             Crafty.scene('Loading');
         });
@@ -41,7 +42,8 @@ Crafty.scene('Difficulty', function() {
             Game.lifes = 10;
             Game.moneyAfterWave = 4;
             Game.towers = {
-                'FlowerTower': 11
+                'FlowerTower': 11,
+                'SniperTower': 20
             };
             Crafty.scene('Loading');
         });
@@ -63,7 +65,8 @@ Crafty.scene('Difficulty', function() {
             Game.lifes = 10;
             Game.moneyAfterWave = 2;
             Game.towers = {
-                'FlowerTower': 12
+                'FlowerTower': 12,
+                'SniperTower': 25
             };
             Crafty.scene('Loading');
         });
@@ -108,6 +111,10 @@ Crafty.scene('Game', function() {
     Crafty.e('HudElement').observe('Enemies', 'enemyCount').at(2);
     Crafty.e('HudElement').observe('Wave', 'currentWave').at(3);
     Crafty.e('HudElement').observe('Cost', 'towerCost').at(4);
+
+    // tower selectors
+    Crafty.e('TowerSelector').forTower('FlowerTower').withImage("assets/flower.png").withHotkey('C').at(1);
+    Crafty.e('TowerSelector').forTower('SniperTower').withImage("assets/leafs.png").withHotkey('V').at(2);
 
     // win/lose conditions
     Crafty.bind('EnterFrame', function() {

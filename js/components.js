@@ -137,7 +137,7 @@ Crafty.c('Wave', {
                     this.destroy();
                 }
             })
-        }, 30000);
+        }, 15000);
     }
 });
 
@@ -163,6 +163,47 @@ Crafty.c('HudElement', {
 
     at: function(x) {
         this.attr({ x: x * 150});
+        return this;
+    }
+});
+
+Crafty.c('TowerSelector', {
+    init: function() {
+        this.requires('2D, DOM, Text, Image, Mouse, Keyboard');
+        this.x = 0;
+        this.y = Game.height() - Game.map_grid.tile.height;
+        this.w = 100;
+        this.h = Game.map_grid.tile.height;
+        this.textFont(Game.towerSelectorFont);
+        this.textColor(Game.textColor);
+        this.css(Game.towerSelectorCss);
+    },
+
+    forTower: function(towerName) {
+        this.targetTower = towerName;
+        this.text(Game.towers[towerName]);
+        this.bind('Click', function() {
+            Game.selectedTower = towerName;
+        });
+        return this;
+    },
+
+    withImage: function(imageUrl) {
+        this.image(imageUrl);
+        return this;
+    },
+
+    withHotkey: function(hotkey) {
+        this.bind('KeyDown', function() {
+            if (this.isDown(hotkey)) {
+                Game.selectedTower = this.targetTower;
+            }
+        });
+        return this;
+    },
+
+    at: function(x) {
+        this.x = x * 100;
         return this;
     }
 });
@@ -213,6 +254,7 @@ Crafty.c('TowerPlace', {
         });
         this.bind('MouseOut', function() {
             this.color("#ffffff", 0.0);
+            Game.towerCost = 0;
         });
         this.bind('Click', function() {
             if (Game.money >= Game.towers[Game.selectedTower]) {
@@ -229,34 +271,41 @@ Crafty.c('TowerPlace', {
 // Towers
 // ------
 
-Crafty.c('FlowerTower', {
+Crafty.c('Upgradable', {
     init: function() {
-        this.requires('Actor, Image, Delay, Mouse, Color');
-        this.image("assets/flower.png");
+        this.requires('Mouse, Color');
         this.attr({
             level: 1
         });
 
-        this.bind('MouseOver', function() {
+        this.bind('MouseOver', function () {
             this.color("#6666b6", 0.2);
             Game.towerCost = this.getUpgradeCost();
         });
-        this.bind('MouseOut', function() {
+        this.bind('MouseOut', function () {
             this.color("#ffffff", 0.0);
+            Game.towerCost = 0;
         });
-        this.bind('Click', function() {
+        this.bind('Click', function () {
             var upgradeCost = this.getUpgradeCost();
             if (Game.money >= upgradeCost) {
                 this.level++;
                 Game.money -= upgradeCost;
+                Game.towerCost = this.getUpgradeCost();
             }
         });
+    }
+});
 
-        var that = this;
+Crafty.c('FlowerTower', {
+    init: function() {
+        this.requires('Actor, Image, Delay, Upgradable');
+        this.image("assets/flower.png");
+
         this.delay(function() {
             // TODO AI that only shoots when an enemy is near
             // TODO consider playing field bounds for animation
-            var x = that.at().x, y = that.at().y;
+            var x = this.at().x, y = this.at().y;
 
             Crafty.e('Bullet, leaf_up').attr({damage: this.level}).at(x, y).animate_to(x, y - 4, 4).destroy_after_animation();
             Crafty.e('Bullet, leaf_right').attr({damage: this.level}).at(x, y).animate_to(x + 4, y, 4).destroy_after_animation();
@@ -269,6 +318,30 @@ Crafty.c('FlowerTower', {
         return Math.floor(Game.towers['FlowerTower'] * 1.5 * Math.sqrt(this.level));
     }
 
+});
+
+Crafty.c('SniperTower', {
+    init: function() {
+        this.requires('Actor, leaf_right, SpriteAnimation, Delay, Upgradable');
+        // This is the same animation definition, but using the alternative method
+        this.attr({w: 32, h: 32});
+        this.reel('LeafSpinning', 2000, [[0, 0], [0, 1], [1, 1], [1, 0]]);
+        this.animate('LeafSpinning', -1);
+
+        this.delay(function() {
+            if (Game.enemyCount == 0) {
+                return;
+            }
+
+            var firstEnemy = Crafty('Enemy').get(0), damage = this.level * 5;
+            var x = this.at().x, y = this.at().y, x2 = Math.floor(firstEnemy.at().x), y2 = Math.floor(firstEnemy.at().y);
+            Crafty.e('Bullet, leaf_right').attr({damage: damage}).at(x, y).animate_to(x2, y2, 35).destroy_after_animation();
+        }, 5000, -1);
+    },
+
+    getUpgradeCost: function() {
+        return Math.floor(Game.towers['SniperTower'] * 1.5 * Math.sqrt(this.level));
+    }
 });
 
 Crafty.c('MoneyTower', {
@@ -334,64 +407,72 @@ Crafty.c('Knight', {
 // custom Tween handling
 // ---------------------
 
-Tweening = {
-    targets: [],
-    lastExecuted: new Date().getTime(),
-    fps: 25,
-    speedup: 1
-};
+Crafty.c('Tweening', {
+    init: function() {
+        this.requires('Keyboard');
+        this.attr({
+            targets: [],
+            lastExecuted: new Date().getTime(),
+            fps: 25,
+            speedup: 1
+        });
 
-// bind speedup key 's'
-Crafty.e('Keyboard').bind('KeyDown', function() {
-    if (this.isDown('S')) {
-        if (Tweening.speedup == 1) {
-            Tweening.speedup = 4;
-        } else {
-            Tweening.speedup = 1;
+        // bind speedup key 's'
+        this.bind('KeyDown', function() {
+            if (this.isDown('S')) {
+                if (this.speedup == 1) {
+                    this.speedup = 4;
+                } else {
+                    this.speedup = 1;
+                }
+            }
+        });
+
+        this.bind('EnterFrame', this.tween_handler)
+    },
+
+    tween_handler: function() {
+        var newLastExecuted = new Date().getTime();
+        var delay = this.fps * this.speedup * (newLastExecuted - this.lastExecuted) / 1000.0;
+        Tweening.lastExecuted = newLastExecuted;
+
+        if (Crafty.isPaused()) {
+            return;
+        }
+
+        for (var i = 0; i < this.targets.length; i++) {
+            var current = this.targets[i],
+                distanceX = current.speed * delay * Game.map_grid.tile.width / this.fps,
+                distanceY = current.speed * delay * Game.map_grid.tile.height / this.fps;
+            if (current.actor.x != current.steps[0].x ||
+                current.actor.y != current.steps[0].y) {
+                var newX = current.actor.x,
+                    newY = current.actor.y;
+                if (current.actor.x < current.steps[0].x) {
+                    newX = Math.min(current.actor.x + distanceX, current.steps[0].x);
+                } else if (current.actor.x > current.steps[0].x) {
+                    newX = Math.max(current.actor.x - distanceX, current.steps[0].x);
+                }
+                if (current.actor.y < current.steps[0].y) {
+                    newY = Math.min(current.actor.y + distanceY, current.steps[0].y);
+                } else if (current.actor.y > current.steps[0].y) {
+                    newY = Math.max(current.actor.y - distanceY, current.steps[0].y);
+                }
+                current.actor.attr({x: newX, y: newY});
+            } else {
+                //console.log("Arrived at x=" + current.actor.x + ", y=" + current.actor.y);
+                current.steps.shift();
+                // TODO emit event that tells the actor in which direction we move next (down, up, right, left)
+            }
+
+            // no more steps to take for current target: remove it from tween_targets array
+            if (current.steps.length == 0) {
+                this.targets.splice(i, 1);
+                i--;
+                Crafty.trigger("TweenEnded", current.actor);
+            }
         }
     }
 });
 
-function tween_handler() {
-    var newLastExecuted = new Date().getTime();
-    var delay = Tweening.fps * Tweening.speedup * (newLastExecuted - Tweening.lastExecuted) / 1000.0;
-    Tweening.lastExecuted = newLastExecuted;
-
-    if (Crafty.isPaused()) {
-        return;
-    }
-
-    for (var i = 0; i < Tweening.targets.length; i++) {
-        var current = Tweening.targets[i],
-            distanceX = current.speed * delay * Game.map_grid.tile.width / Tweening.fps,
-            distanceY = current.speed * delay * Game.map_grid.tile.height / Tweening.fps;
-        if (current.actor.x != current.steps[0].x ||
-                current.actor.y != current.steps[0].y) {
-            var newX = current.actor.x,
-                newY = current.actor.y;
-            if (current.actor.x < current.steps[0].x) {
-                newX = Math.min(current.actor.x + distanceX, current.steps[0].x);
-            } else if (current.actor.x > current.steps[0].x) {
-                newX = Math.max(current.actor.x - distanceX, current.steps[0].x);
-            }
-            if (current.actor.y < current.steps[0].y) {
-                newY = Math.min(current.actor.y + distanceY, current.steps[0].y);
-            } else if (current.actor.y > current.steps[0].y) {
-                newY = Math.max(current.actor.y - distanceY, current.steps[0].y);
-            }
-            current.actor.attr({x: newX, y: newY});
-        } else {
-            //console.log("Arrived at x=" + current.actor.x + ", y=" + current.actor.y);
-            current.steps.shift();
-            // TODO emit event that tells the actor in which direction we move next (down, up, right, left)
-        }
-
-        // no more steps to take for current target: remove it from tween_targets array
-        if (current.steps.length == 0) {
-            Tweening.targets.splice(i, 1);
-            i--;
-            Crafty.trigger("TweenEnded", current.actor);
-        }
-    }
-}
-setInterval(tween_handler, 1000 / Tweening.fps);
+Tweening = Crafty.e('Tweening');

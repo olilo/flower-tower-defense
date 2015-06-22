@@ -16,6 +16,8 @@ Game = {
     loadingFont: { 'size': '48px', 'family': 'Arial' },
     loadingCss: { 'text-align': 'center'},
     hudFont: { 'size': '20px', 'family': 'Arial' },
+    towerSelectorFont: { 'size': '20px', 'family': 'Arial' },
+    towerSelectorCss: { 'text-align': 'center', 'cursor': 'pointer'},
     difficultyFont: { 'size': '36px', 'family': 'Arial' },
     difficultyCss: { 'text-align': 'center', 'cursor': 'pointer'},
     gameOverFont: { 'size': '48px', 'family': 'Arial' },
