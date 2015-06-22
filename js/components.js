@@ -162,7 +162,7 @@ Crafty.c('HudElement', {
     },
 
     at: function(x) {
-        this.attr({ x: x * 150});
+        this.attr({ x: Game.map_grid.tile.width +  x * 150});
         return this;
     }
 });

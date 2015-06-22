@@ -63,7 +63,7 @@ Crafty.scene('Difficulty', function() {
         .bind('Click', function() {
             Game.money = 15;
             Game.lifes = 10;
-            Game.moneyAfterWave = 2;
+            Game.moneyAfterWave = 3;
             Game.towers = {
                 'FlowerTower': 12,
                 'SniperTower': 25
