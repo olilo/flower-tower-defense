@@ -16,6 +16,8 @@ Game = {
     loadingFont: { 'size': '48px', 'family': 'Arial' },
     loadingCss: { 'text-align': 'center'},
     hudFont: { 'size': '20px', 'family': 'Arial' },
+    difficultyFont: { 'size': '36px', 'family': 'Arial' },
+    difficultyCss: { 'text-align': 'center', 'cursor': 'pointer'},
     gameOverFont: { 'size': '48px', 'family': 'Arial' },
     gameOverCss: { 'text-align': 'center'},
     gameOverColor: 'red',
@@ -31,9 +33,9 @@ Game = {
         ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch'],
         ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Squid'],
         ['Witch', 'Witch', 'Witch', 'Witch', 'Squid', 'Witch', 'Witch', 'Squid'],
-        ['Squid', 'Squid', 'Squid', 'Squid'],
-        ['Squid', 'Witch', 'Squid', 'Witch', 'Squid', 'Witch', 'Squid', 'Witch', 'Squid', 'Witch', 'Squid', 'Witch', 'Squid'],
-        ['Squid', 'Squid', 'Squid', 'Squid', 'Knight', 'Squid', 'Squid', 'Squid', 'Squid', 'Knight']
+        ['Squid', 'Squid', 'Squid', 'FastSquid'],
+        ['Squid', 'FastSquid', 'Knight', 'Squid', 'FastSquid', 'Knight'],
+        ['FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight']
     ],
 
     // sounds, images, spritesheets, all handy at one place
@@ -95,7 +97,7 @@ Game = {
     // the function that gets the ball rolling
     start: function() {
         Crafty.init(Game.width(), Game.height());
-        Crafty.background('rgb(249, 223, 125)');
-        Crafty.scene('Loading');
+        Crafty.background('rgb(169, 153, 145)');
+        Crafty.scene('Difficulty');
     }
 };

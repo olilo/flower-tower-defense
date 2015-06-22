@@ -30,7 +30,6 @@ Path.prototype.addToPath = function(point) {
         console.log("Illegal point!! at x=" + point.x + ";y=" + point.y);
         return;
     }
-    Crafty.e('Path').at(point.x, point.y);
     this.path[point.x][point.y] = true;
     this.occupied[point.x][point.y] = true;
 };
@@ -67,10 +66,13 @@ Path.prototype.getPath = function() {
 };
 
 Path.prototype.isOnEdge = function(x, y) {
-    var at_edge = x == 0 || x == this.width - 1 || y == 0 || y == this.height - 1;
-    return at_edge &&
-        (x != this.start.x || y != this.start.y) &&
-        (x != this.finish.x || y != this.finish.y);
+    if (x == this.start.x && y == this.start.y) {
+        return false;
+    }
+    if (x == this.finish.x && y == this.finish.y) {
+        return false;
+    }
+    return x == 0 || x == this.width - 1 || y == 0 || y == this.height - 1;
 };
 
 Path.prototype.isOnPath = function(x, y) {

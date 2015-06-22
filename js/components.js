@@ -72,7 +72,7 @@ Crafty.c('Actor', {
 Crafty.c('Bullet', {
     init: function() {
         this.requires('Actor, Collision, PathWalker');
-
+        this.attr({damage: 1});
         this.checkHits('Enemy');
         this.bind('HitOn', function() {
             this.destroy();
@@ -82,13 +82,13 @@ Crafty.c('Bullet', {
 
 Crafty.c('Enemy', {
     init: function() {
-        this.requires('Actor, Collision, PathWalker');
+        this.requires('Actor, Collision, PathWalker, Delay');
 
         Game.enemyCount++;
 
         this.checkHits('Bullet');
-        this.bind('HitOn', function() {
-            this.attr({health: this.health - 1});
+        this.bind('HitOn', function(hitData) {
+            this.attr({health: this.health - hitData[0].obj.damage});
             if (this.health <= 0) {
                 Game.money += this.reward;
                 Game.enemyCount--;
@@ -98,7 +98,9 @@ Crafty.c('Enemy', {
         });
 
         var that = this;
-        this.animate_along(Game.path.getPath(), this.speed);
+        this.delay(function() {
+            that.animate_along(Game.path.getPath(), that.speed);
+        }, 500, 0);
         this.bind('TweenEnded', function(actor) {
             if (that == actor) {
                 Game.lifes--;
@@ -181,7 +183,7 @@ Crafty.c('RestartButton', {
         });
         this.bind('Click', function() {
             console.log('Restaaaaaart');
-            Crafty.scene('Loading');
+            Crafty.scene('Difficulty');
         });
     }
 });
@@ -207,6 +209,7 @@ Crafty.c('TowerPlace', {
         this.image("assets/transparent.png").color("#ffffff", 0.0);
         this.bind('MouseOver', function() {
             this.color("#b66666", 0.2);
+            Game.towerCost = Game.towers[Game.selectedTower];
         });
         this.bind('MouseOut', function() {
             this.color("#ffffff", 0.0);
@@ -215,6 +218,7 @@ Crafty.c('TowerPlace', {
             if (Game.money >= Game.towers[Game.selectedTower]) {
                 Crafty.e(Game.selectedTower).at(this.at().x, this.at().y);
                 Game.money -= Game.towers[Game.selectedTower];
+                this.destroy();
             }
         });
     }
@@ -227,8 +231,26 @@ Crafty.c('TowerPlace', {
 
 Crafty.c('FlowerTower', {
     init: function() {
-        this.requires('Actor, Image, Delay');
+        this.requires('Actor, Image, Delay, Mouse, Color');
         this.image("assets/flower.png");
+        this.attr({
+            level: 1
+        });
+
+        this.bind('MouseOver', function() {
+            this.color("#6666b6", 0.2);
+            Game.towerCost = this.getUpgradeCost();
+        });
+        this.bind('MouseOut', function() {
+            this.color("#ffffff", 0.0);
+        });
+        this.bind('Click', function() {
+            var upgradeCost = this.getUpgradeCost();
+            if (Game.money >= upgradeCost) {
+                this.level++;
+                Game.money -= upgradeCost;
+            }
+        });
 
         var that = this;
         this.delay(function() {
@@ -236,13 +258,23 @@ Crafty.c('FlowerTower', {
             // TODO consider playing field bounds for animation
             var x = that.at().x, y = that.at().y;
 
-            Crafty.e('Bullet, leaf_up').at(x, y).animate_to(x, y - 4, 4).destroy_after_animation();
-            Crafty.e('Bullet, leaf_right').at(x, y).animate_to(x + 4, y, 4).destroy_after_animation();
-            Crafty.e('Bullet, leaf_down').at(x, y).animate_to(x, y + 4, 4).destroy_after_animation();
-            Crafty.e('Bullet, leaf_left').at(x, y).animate_to(x - 4, y, 4).destroy_after_animation();
+            Crafty.e('Bullet, leaf_up').attr({damage: this.level}).at(x, y).animate_to(x, y - 4, 4).destroy_after_animation();
+            Crafty.e('Bullet, leaf_right').attr({damage: this.level}).at(x, y).animate_to(x + 4, y, 4).destroy_after_animation();
+            Crafty.e('Bullet, leaf_down').attr({damage: this.level}).at(x, y).animate_to(x, y + 4, 4).destroy_after_animation();
+            Crafty.e('Bullet, leaf_left').attr({damage: this.level}).at(x, y).animate_to(x - 4, y, 4).destroy_after_animation();
         }, 1000, -1);
+    },
+
+    getUpgradeCost: function() {
+        return Math.floor(Game.towers['FlowerTower'] * 1.5 * Math.sqrt(this.level));
     }
 
+});
+
+Crafty.c('MoneyTower', {
+    init: function() {
+        this.requires('Actor, knight_down');
+    }
 });
 
 
@@ -254,9 +286,9 @@ Crafty.c('Witch', {
     init: function() {
         this.requires('Enemy, witch_right');
         this.attr({
-            health: 8,
+            health: 5,
             reward: 1,
-            speed: 2
+            speed: 1.8
         });
     }
 });
@@ -266,9 +298,21 @@ Crafty.c('Squid', {
         this.requires('Enemy, Image');
         this.image("assets/squid.png");
         this.attr({
-            health: 40,
+            health: 30,
             reward: 5,
-            speed: 1.6
+            speed: 1.0
+        });
+    }
+});
+
+Crafty.c('FastSquid', {
+    init: function() {
+        this.requires('Enemy, Image');
+        this.image("assets/squid.png");
+        this.attr({
+            health: 23,
+            reward: 7,
+            speed: 2.5
         });
     }
 });
@@ -277,9 +321,9 @@ Crafty.c('Knight', {
     init: function() {
         this.requires('Enemy, knight_right');
         this.attr({
-            health: 100,
+            health: 50,
             reward: 20,
-            speed: 2.5
+            speed: 1.3
         });
     }
 });
@@ -297,7 +341,7 @@ Tweening = {
     speedup: 1
 };
 
-// bind pause/unpause key 'p'
+// bind speedup key 's'
 Crafty.e('Keyboard').bind('KeyDown', function() {
     if (this.isDown('S')) {
         if (Tweening.speedup == 1) {
