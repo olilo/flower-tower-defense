@@ -13,21 +13,24 @@ Game = {
 
     // text colors and fonts (maybe we get fancy later on)
     textColor: 'white',
+    highlightColor: 'black',
+    alertColor: 'red',
+
+    centerCss: { 'text-align': 'center'},
+    buttonCss: { 'text-align': 'center', 'cursor': 'pointer'},
+
     loadingFont: { 'size': '48px', 'family': 'Arial' },
-    loadingCss: { 'text-align': 'center'},
     hudFont: { 'size': '20px', 'family': 'Arial' },
-    towerSelectorFont: { 'size': '20px', 'family': 'Arial' },
-    towerSelectorCss: { 'text-align': 'center', 'cursor': 'pointer'},
+    towerSelectorFont: { 'size': '18px', 'family': 'Arial' },
+    explanationFont: { 'size': '12px', 'family': 'Arial' },
     difficultyFont: { 'size': '36px', 'family': 'Arial' },
-    difficultyCss: { 'text-align': 'center', 'cursor': 'pointer'},
+    waveFont: { 'size': '20px', 'family': 'Arial', 'weight': 'bold' },
+
     gameOverFont: { 'size': '48px', 'family': 'Arial' },
-    gameOverCss: { 'text-align': 'center'},
     gameOverColor: 'red',
     wonFont: { 'size': '48px', 'family': 'Arial' },
-    wonCss: { 'text-align': 'center'},
-    wonColor: 'green',
+    wonColor: 'rgb(109, 203, 105)',
     restartFont: { 'size': '36px', 'family': 'Arial' },
-    restartCss: { 'text-align': 'center', 'cursor': 'pointer'},
     restartColor: 'brown',
 
     // handy overview which wave spawns which enemies
@@ -36,8 +39,17 @@ Game = {
         ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Squid'],
         ['Witch', 'Witch', 'Witch', 'Witch', 'Squid', 'Witch', 'Witch', 'Squid'],
         ['Squid', 'Squid', 'Squid', 'FastSquid'],
-        ['Squid', 'FastSquid', 'Knight', 'Squid', 'FastSquid', 'Knight'],
-        ['FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight']
+        ['Squid', 'FastSquid', 'Knight', 'Squid', 'FastSquid', 'Witch', 'Witch', 'Witch', 'Knight'],
+        ['FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight'],
+        ['FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid'],
+        ['FastSquid', 'Spider', 'FastSquid', 'Spider', 'Witch', 'Witch', 'Knight', 'Knight', 'MightyWitch'],
+        ['Spider', 'Witch', 'MightyWitch', 'FastSquid', 'Witch', 'MightyWitch', 'Orc'],
+        ['Orc', 'Orc', 'Orc', 'Orc', 'Orc', 'FastSquid', 'FastSquid', 'Witch', 'FastKnight'],
+        ['FastKnight', 'FastKnight', 'FastKnight', 'MightyWitch', 'MightyWitch', 'MightyWitch'],
+        ['Spider', 'FastSquid', 'Spider', 'FastSquid', 'Orc', 'Orc', 'Squid', 'GreenDragon'],
+        ['Spider', 'Spider', 'Orc', 'Orc', 'GreenDragon', 'FastSquid', 'FastSquid', 'Orc', 'GreenDragon'],
+        ['Witch', 'Squid', 'FastSquid', 'Knight', 'Spider', 'MightyWitch', 'Orc', 'FastKnight', 'GreenDragon'],
+        ['SilverDragon']
     ],
 
     // sounds, images, spritesheets, all handy at one place
@@ -55,8 +67,9 @@ Game = {
                 "tile": 29,
                 "tileh": 30,
                 "map": {
-                    "witch_right": [2, 2],
-                    "witch_up": [0, 0]
+                    witch_right: [2, 2],
+                    witch_up: [0, 0],
+                    witch_down: [1, 2]
                 },
                 "paddingX": 4,
                 "paddingY": 3
@@ -79,6 +92,16 @@ Game = {
                     knight_left: [1, 0],
                     knight_down: [2, 0],
                     knight_up: [3, 0]
+                }
+            },
+            "assets/roguelikebosses.png": {
+                "tile": 32,
+                "tileh": 32,
+                "map": {
+                    green_dragon: [0, 0],
+                    silver_dragon: [1, 1],
+                    orc: [0, 2],
+                    spider: [1, 2]
                 }
             }
         }

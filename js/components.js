@@ -91,8 +91,7 @@ Crafty.c('Enemy', {
             this.attr({health: this.health - hitData[0].obj.damage});
             if (this.health <= 0) {
                 Game.money += this.reward;
-                Game.enemyCount--;
-                this.destroy();
+                this.kill();
             }
             console.log("Health: " + this.health);
         });
@@ -103,41 +102,90 @@ Crafty.c('Enemy', {
         }, 500, 0);
         this.bind('TweenEnded', function(actor) {
             if (that == actor) {
-                Game.lifes--;
-                Game.enemyCount--;
-                this.destroy();
+                Game.lifes -= this.livesTaken || 1;
+                this.kill();
             }
         })
+    },
+
+    kill: function() {
+        Game.enemyCount--;
+        this.destroy();
     }
 });
 
 Crafty.c('Wave', {
     init: function() {
-        this.requires('Delay');
+        this.requires('2D, DOM, Grid, Text, Delay, Mouse');
+        this.attr({w: 150});
+        this.text('Next Wave');
+        this.textFont(Game.waveFont);
+        this.textColor(Game.textColor);
+        this.css(Game.buttonCss);
+        this.bind('Click', this.startNextWave);
+        this.currentWave = Game.currentWave;
+        this.finishedEventTriggered = false;
 
-        var enemies = Game.waves[Game.currentWave - 1];
-        var i = 0;
+        this.bind('EnterFrame', function() {
+            if (this.isWaveFinished()) {
+                if (!this.finishedEventTriggered) {
+                    Crafty.trigger("WaveFinished", this.currentWave);
+                    this.finishedEventTriggered = true;
+                }
+
+                if (this.isNextWavePossible()) {
+                    Game.money += Game.moneyAfterWave;
+                    this.startNextWave();
+                    console.log("Started wave " + this.currentWave);
+                    this.finishedEventTriggered = false;
+                }
+            }
+        });
+    },
+
+    isWaveFinished: function() {
+        return Game.enemyCount == 0 && this.spawnFinished;
+    },
+
+    isNextWavePossible: function() {
+        if (Game.lifes == 0) {
+            return false;
+        }
+        return Game.endless || this.currentWave < Game.waves.length;
+    },
+
+    startNextWave: function() {
+        this.spawnFinished = false;
+
+        var i = 0, enemies = this.getEnemies();
         this.delay(function() {
             Crafty.e(enemies[i]).at(Game.path.start.x, Game.path.start.y);
-            //console.log("Added new " + enemies[i] + " at " + Game.path.start.x + "/" + Game.path.start.y);
             i++;
+            if (i == enemies.length) {
+                this.spawnFinished = true;
+            }
         }, 3000, enemies.length - 1);
 
-        this.delay(function() {
-            this.bind('EnterFrame', function() {
-                if (Game.enemyCount == 0) {
-                    Game.currentWave++;
-                    Game.money += Game.moneyAfterWave;
-                    if (Game.currentWave <= Game.waves.length && Game.lifes > 0) {
-                        console.log("Started wave " + Game.currentWave);
-                        Crafty.e('Wave');
-                    } else {
-                        console.log("Last wave or lifes reached 0");
-                    }
-                    this.destroy();
-                }
-            })
-        }, 15000);
+        this.currentWave++;
+        Game.currentWave = this.currentWave;
+    },
+
+    getEnemies: function() {
+        if (this.currentWave < Game.waves.length) {
+            return Game.waves[this.currentWave];
+        } else {
+            // TODO auto generate waves randomly, based on reward
+            var enemies = ['GreenDragon', 'Orc'];
+            for (var i = 0; i < this.currentWave - Game.waves.length; i++) {
+                enemies.push(
+                    i % 20 == 0 ? 'SilverDragon' :
+                        (i % 6 == 0 ? 'GreenDragon' :
+                            (i % 2 == 0 ? 'MightyWitch' :
+                                'FastSquid')));
+            }
+            enemies.push('GreenDragon');
+            return enemies;
+        }
     }
 });
 
@@ -149,39 +197,67 @@ Crafty.c('Wave', {
 Crafty.c('HudElement', {
     init: function() {
         this.requires('2D, DOM, Text');
-        this.attr({ x: 0, y: 0, w: 150 });
+        this.attr({ x: 0, y: 0, w: 133 });
         this.textFont(Game.hudFont);
         this.textColor(Game.textColor);
     },
 
     observe: function(prefix, observable) {
+        this.observable = observable;
         this.bind('EnterFrame', function() {
-            this.text(prefix + ": " + Game[observable])
+            this.text(prefix + ": " + Game[this.observable])
+        });
+        return this;
+    },
+
+    alertIfBelow: function(threshold) {
+        this.bind('EnterFrame', function() {
+            if (Game[this.observable] < threshold) {
+                this.textColor(Game.alertColor);
+            } else {
+                this.textColor(Game.textColor);
+            }
+        });
+        return this;
+    },
+
+    highlight: function() {
+        this.bind('EnterFrame', function() {
+            if (Game[this.observable] > 0) {
+                this.textColor(Game.highlightColor);
+            } else {
+                this.textColor(Game.textColor);
+            }
         });
         return this;
     },
 
     at: function(x) {
-        this.attr({ x: Game.map_grid.tile.width +  x * 150});
+        this.attr({ x: Game.map_grid.tile.width +  x * 133});
         return this;
     }
 });
 
 Crafty.c('TowerSelector', {
     init: function() {
-        this.requires('2D, DOM, Text, Image, Mouse, Keyboard');
+        this.requires('2D, DOM, Grid, Text, Image, Mouse, Keyboard');
         this.x = 0;
         this.y = Game.height() - Game.map_grid.tile.height;
-        this.w = 100;
-        this.h = Game.map_grid.tile.height;
         this.textFont(Game.towerSelectorFont);
         this.textColor(Game.textColor);
-        this.css(Game.towerSelectorCss);
+        this.css(Game.buttonCss);
     },
 
     forTower: function(towerName) {
         this.targetTower = towerName;
-        this.text(Game.towers[towerName]);
+        this.bind('EnterFrame', function() {
+            this.text(Game.towers[towerName]);
+            if (Game.selectedTower == this.targetTower) {
+                this.textColor(Game.highlightColor);
+            } else {
+                this.textColor(Game.textColor);
+            }
+        });
         this.bind('Click', function() {
             Game.selectedTower = towerName;
         });
@@ -200,11 +276,6 @@ Crafty.c('TowerSelector', {
             }
         });
         return this;
-    },
-
-    at: function(x) {
-        this.x = x * 100;
-        return this;
     }
 });
 
@@ -215,7 +286,7 @@ Crafty.c('RestartButton', {
         this.attr({ x: 0, y: Game.height() - 100, w: Game.width(), h: 50});
         this.textFont(Game.restartFont);
         this.textColor(Game.restartColor);
-        this.css(Game.restartCss);
+        this.css(Game.buttonCss);
         this.bind('MouseOver', function() {
             this.textColor('white');
         });
@@ -224,6 +295,9 @@ Crafty.c('RestartButton', {
         });
         this.bind('Click', function() {
             console.log('Restaaaaaart');
+            if (Crafty.isPaused()) {
+                Crafty.pause();
+            }
             Crafty.scene('Difficulty');
         });
     }
@@ -240,7 +314,7 @@ Crafty.c('Tree', {
 Crafty.c('Path', {
     init: function() {
         this.requires('Actor, Image, Color');
-        this.image("assets/transparent.png").color("#969696", 0.15);
+        this.image("assets/transparent.png").color("#969600", 0.15);
     }
 });
 
@@ -251,6 +325,7 @@ Crafty.c('TowerPlace', {
         this.bind('MouseOver', function() {
             this.color("#b66666", 0.2);
             Game.towerCost = Game.towers[Game.selectedTower];
+            Game.towerLevel = 0;
         });
         this.bind('MouseOut', function() {
             this.color("#ffffff", 0.0);
@@ -258,8 +333,10 @@ Crafty.c('TowerPlace', {
         });
         this.bind('Click', function() {
             if (Game.money >= Game.towers[Game.selectedTower]) {
-                Crafty.e(Game.selectedTower).at(this.at().x, this.at().y);
+                var tower = Crafty.e(Game.selectedTower).at(this.at().x, this.at().y);
                 Game.money -= Game.towers[Game.selectedTower];
+                Game.towerLevel = 1;
+                Crafty.trigger('TowerCreated', tower);
                 this.destroy();
             }
         });
@@ -271,20 +348,28 @@ Crafty.c('TowerPlace', {
 // Towers
 // ------
 
-Crafty.c('Upgradable', {
+Crafty.c('Tower', {
     init: function() {
-        this.requires('Mouse, Color');
-        this.attr({
-            level: 1
+        this.requires('Actor, Mouse, Color, Delay');
+        this.attr({level: 1});
+
+        this.bind('TowerUpgraded', function(actor) {
+            if (actor == this) {
+                if (this.level == this.maxLevel) {
+                    this.disableUpgrade();
+                }
+            }
         });
 
         this.bind('MouseOver', function () {
             this.color("#6666b6", 0.2);
             Game.towerCost = this.getUpgradeCost();
+            Game.towerLevel = this.level;
         });
         this.bind('MouseOut', function () {
             this.color("#ffffff", 0.0);
             Game.towerCost = 0;
+            Game.towerLevel = 0;
         });
         this.bind('Click', function () {
             var upgradeCost = this.getUpgradeCost();
@@ -292,55 +377,120 @@ Crafty.c('Upgradable', {
                 this.level++;
                 Game.money -= upgradeCost;
                 Game.towerCost = this.getUpgradeCost();
+                Game.towerLevel = this.level;
+                Crafty.trigger('TowerUpgraded', this);
             }
         });
+    },
+
+    disable: function() {
+        this.disabled = true;
+        this.color("#990000", 0.5);
+        this.delay(function() {
+            this.disabled = false;
+            this.color("#ffffff", 0.0);
+        }, 20000, 0);
+    },
+
+    disableUpgrade: function() {
+        this.unbind('Click');
     }
 });
 
 Crafty.c('FlowerTower', {
     init: function() {
-        this.requires('Actor, Image, Delay, Upgradable');
+        this.requires('Tower, Image');
         this.image("assets/flower.png");
+        this.range = 4;
+        this.maxLevel = 10;
+
+        // max level and range increase
+        this.bind('TowerUpgraded', function(actor) {
+            if (actor == this) {
+                if (this.level == 4) {
+                    this.range = 5;
+                } else if (this.level == this.maxLevel) {
+                    this.range = 6;
+                    this.disableUpgrade();
+                }
+            }
+        });
 
         this.delay(function() {
+            if (this.disabled) {
+                return;
+            }
+
             // TODO AI that only shoots when an enemy is near
             // TODO consider playing field bounds for animation
             var x = this.at().x, y = this.at().y;
 
-            Crafty.e('Bullet, leaf_up').attr({damage: this.level}).at(x, y).animate_to(x, y - 4, 4).destroy_after_animation();
-            Crafty.e('Bullet, leaf_right').attr({damage: this.level}).at(x, y).animate_to(x + 4, y, 4).destroy_after_animation();
-            Crafty.e('Bullet, leaf_down').attr({damage: this.level}).at(x, y).animate_to(x, y + 4, 4).destroy_after_animation();
-            Crafty.e('Bullet, leaf_left').attr({damage: this.level}).at(x, y).animate_to(x - 4, y, 4).destroy_after_animation();
+            Crafty.e('Bullet, leaf_up').attr({damage: this.getDamage()}).at(x, y)
+                .animate_to(x, y - this.range, 4).destroy_after_animation();
+            Crafty.e('Bullet, leaf_right').attr({damage: this.getDamage()}).at(x, y)
+                .animate_to(x + this.range, y, 4).destroy_after_animation();
+            Crafty.e('Bullet, leaf_down').attr({damage: this.getDamage()}).at(x, y)
+                .animate_to(x, y + this.range, 4).destroy_after_animation();
+            Crafty.e('Bullet, leaf_left').attr({damage: this.getDamage()}).at(x, y)
+                .animate_to(x - this.range, y, 4).destroy_after_animation();
         }, 1000, -1);
     },
 
-    getUpgradeCost: function() {
-        return Math.floor(Game.towers['FlowerTower'] * 1.5 * Math.sqrt(this.level));
-    }
+    getDamage: function() {
+        if (this.level < 6) {
+            return this.level;
+        } else {
+            return Math.floor(Math.sqrt(this.level - 5) * this.level);
+        }
+    },
 
+    getUpgradeCost: function() {
+        if (this.level < this.maxLevel) {
+            return Math.floor(Game.towers['FlowerTower'] * 1.5 * Math.sqrt(this.level));
+        } else {
+            return "MAX";
+        }
+    }
 });
 
 Crafty.c('SniperTower', {
     init: function() {
-        this.requires('Actor, leaf_right, SpriteAnimation, Delay, Upgradable');
+        this.requires('Tower, leaf_right, SpriteAnimation');
         // This is the same animation definition, but using the alternative method
         this.attr({w: 32, h: 32});
         this.reel('LeafSpinning', 2000, [[0, 0], [0, 1], [1, 1], [1, 0]]);
         this.animate('LeafSpinning', -1);
+        this.maxLevel = 6;
+
+        // increase cost for next sniper tower (we don't want to make it tooo easy ;) )
+        this.delay(function() {
+            Game.towers['SniperTower'] = Math.floor(1.25 * Game.towers['SniperTower']);
+        }, 100, 0);
 
         this.delay(function() {
-            if (Game.enemyCount == 0) {
+            if (Game.enemyCount == 0 || this.disabled) {
                 return;
             }
 
             var firstEnemy = Crafty('Enemy').get(0), damage = this.level * 5;
-            var x = this.at().x, y = this.at().y, x2 = Math.floor(firstEnemy.at().x), y2 = Math.floor(firstEnemy.at().y);
-            Crafty.e('Bullet, leaf_right').attr({damage: damage}).at(x, y).animate_to(x2, y2, 35).destroy_after_animation();
+
+            // instant kill with 2% chance on max level
+            if (this.level == this.maxLevel && Math.floor(Math.random() * 50) == 0 && !firstEnemy.noInstantKill) {
+                console.log("INSTANT KILL!!");
+                firstEnemy.kill();
+            } else {
+                var x = this.at().x, y = this.at().y, x2 = Math.floor(firstEnemy.at().x), y2 = Math.floor(firstEnemy.at().y);
+                Crafty.e('Bullet, leaf_right').attr({damage: damage}).at(x, y).animate_to(x2, y2, 35).destroy_after_animation();
+            }
         }, 5000, -1);
     },
 
     getUpgradeCost: function() {
-        return Math.floor(Game.towers['SniperTower'] * 1.5 * Math.sqrt(this.level));
+        if (this.level < this.maxLevel) {
+            return Math.floor(Game.towers['SniperTowerUpgrade'] * 1.5 * Math.sqrt(this.level));
+        } else {
+            return "MAX";
+        }
     }
 });
 
@@ -366,6 +516,23 @@ Crafty.c('Witch', {
     }
 });
 
+Crafty.c('MightyWitch', {
+    init: function() {
+        this.requires('Enemy, witch_down, Delay');
+        this.attr({
+            health: 50,
+            reward: 25,
+            speed: 1.8
+        });
+
+        this.delay(function() {
+            // disable random tower for some time
+            var tower = Crafty('Tower').get(0);
+            tower.disable();
+        }, 5000, -1);
+    }
+});
+
 Crafty.c('Squid', {
     init: function() {
         this.requires('Enemy, Image');
@@ -384,7 +551,7 @@ Crafty.c('FastSquid', {
         this.image("assets/squid.png");
         this.attr({
             health: 23,
-            reward: 7,
+            reward: 15,
             speed: 2.5
         });
     }
@@ -395,8 +562,68 @@ Crafty.c('Knight', {
         this.requires('Enemy, knight_right');
         this.attr({
             health: 50,
-            reward: 20,
+            reward: 15,
             speed: 1.3
+        });
+    }
+});
+
+Crafty.c('FastKnight', {
+    init: function() {
+        this.requires('Enemy, knight_right');
+        this.attr({
+            health: 55,
+            reward: 50,
+            speed: 2.2
+        });
+    }
+});
+
+Crafty.c('Spider', {
+    init: function() {
+        this.requires('Enemy, spider');
+        this.attr({
+            health: 40,
+            reward: 15,
+            speed: 1.7
+        });
+    }
+});
+
+Crafty.c('Orc', {
+    init: function() {
+        this.requires('Enemy, orc');
+        this.attr({
+            health: 100,
+            reward: 50,
+            speed: 0.8,
+            livesTaken: 2
+        });
+    }
+});
+
+Crafty.c('GreenDragon', {
+    init: function() {
+        this.requires('Enemy, green_dragon');
+        this.attr({
+            health: 150,
+            reward: 150,
+            speed: 1.5,
+            livesTaken: 3,
+            noInstantKill: true
+        });
+    }
+});
+
+Crafty.c('SilverDragon', {
+    init: function() {
+        this.requires('Enemy, silver_dragon');
+        this.attr({
+            health: 500,
+            reward: 1000,
+            speed: 1.8,
+            livesTaken: 5,
+            noInstantKill: true
         });
     }
 });
