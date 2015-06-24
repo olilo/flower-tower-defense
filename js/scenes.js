@@ -240,7 +240,7 @@ Crafty.scene('Game', function() {
     });
 
     // Populate our playing field with trees, path tiles, towers and tower places
-    console.log(Game.towerMap);
+    //console.log(Game.towerMap);
     for (var x = 0; x < Game.map_grid.width; x++) {
         for (var y = 0; y < Game.map_grid.height; y++) {
             if (Game.path.isOnEdge(x, y)) {

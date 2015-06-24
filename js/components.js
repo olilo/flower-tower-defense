@@ -88,12 +88,7 @@ Crafty.c('Enemy', {
 
         this.checkHits('Bullet');
         this.bind('HitOn', function(hitData) {
-            this.attr({health: this.health - hitData[0].obj.damage});
-            if (this.health <= 0) {
-                Game.money += this.reward;
-                this.kill();
-            }
-            console.log("Health: " + this.health);
+            this.hitWithDamage(hitData[0].obj.damage);
         });
 
         var that = this;
@@ -106,6 +101,19 @@ Crafty.c('Enemy', {
                 this.kill();
             }
         })
+    },
+
+    hitWithDamage: function(damage) {
+        if (this.health <= 0) {
+            return;
+        }
+
+        this.attr({health: this.health - damage});
+        if (this.health <= 0) {
+            Game.money += this.reward;
+            this.kill();
+        }
+        console.log("Health: " + this.health);
     },
 
     kill: function() {
@@ -159,7 +167,15 @@ Crafty.c('Wave', {
 
         var i = 0, enemies = this.getEnemies();
         this.delay(function() {
-            Crafty.e(enemies[i]).at(Game.path.start.x, Game.path.start.y);
+            var enemy = Crafty.e(enemies[i]).at(Game.path.start.x, Game.path.start.y);
+
+            // special handling for all waves after standard waves: increase health
+            if (this.currentWave > Game.waves.length) {
+                var diff = this.currentWave - Game.waves.length;
+                enemy.attr({health: Math.floor((1 + diff * 0.05) * enemy.health + 5 * diff)});
+                console.log("new health: " + enemy.health);
+            }
+
             i++;
             if (i == enemies.length) {
                 this.spawnFinished = true;
@@ -178,9 +194,9 @@ Crafty.c('Wave', {
             var enemies = ['GreenDragon', 'Orc'];
             for (var i = 0; i < this.currentWave - Game.waves.length; i++) {
                 enemies.push(
-                    i % 20 == 0 ? 'SilverDragon' :
-                        (i % 6 == 0 ? 'GreenDragon' :
-                            (i % 2 == 0 ? 'MightyWitch' :
+                    i % 10 == 4 ? 'SilverDragon' :
+                        (i % 6 == 2 ? 'GreenDragon' :
+                            (i % 4 == 0 ? 'MightyWitch' :
                                 'FastSquid')));
             }
             enemies.push('GreenDragon');
@@ -348,9 +364,48 @@ Crafty.c('TowerPlace', {
 // Towers
 // ------
 
+Crafty.c('Enabled', {
+    init: function() {
+        this.requires('Color, Mouse');
+        this.color("#ffffff", 0.0);
+
+        this.bind('MouseOver', function() {
+            this.color("#6666b6", 0.2);
+            Game.towerCost = this.getUpgradeCost();
+            Game.towerLevel = this.level;
+        });
+        this.bind('MouseOut', function() {
+            this.color("#ffffff", 0.0);
+            Game.towerCost = 0;
+            Game.towerLevel = 0;
+        });
+    },
+
+    disable: function() {
+        this.removeComponent('Enabled');
+        this.addComponent('Disabled');
+    }
+});
+
+Crafty.c('Disabled', {
+    init: function() {
+        this.requires('Color, Mouse, Delay');
+        this.color('#ff0000', 0.5);
+
+        this.bind('MouseOut', function() {
+            this.color('#ff0000', 0.5);
+        });
+
+        this.delay(function() {
+            this.removeComponent('Disabled');
+            this.addComponent('Enabled');
+        }, 20000, 0);
+    }
+});
+
 Crafty.c('Tower', {
     init: function() {
-        this.requires('Actor, Mouse, Color, Delay');
+        this.requires('Actor, Mouse, Color, Delay, Enabled');
         this.attr({level: 1});
 
         this.bind('TowerUpgraded', function(actor) {
@@ -361,16 +416,6 @@ Crafty.c('Tower', {
             }
         });
 
-        this.bind('MouseOver', function () {
-            this.color("#6666b6", 0.2);
-            Game.towerCost = this.getUpgradeCost();
-            Game.towerLevel = this.level;
-        });
-        this.bind('MouseOut', function () {
-            this.color("#ffffff", 0.0);
-            Game.towerCost = 0;
-            Game.towerLevel = 0;
-        });
         this.bind('Click', function () {
             var upgradeCost = this.getUpgradeCost();
             if (Game.money >= upgradeCost) {
@@ -381,15 +426,6 @@ Crafty.c('Tower', {
                 Crafty.trigger('TowerUpgraded', this);
             }
         });
-    },
-
-    disable: function() {
-        this.disabled = true;
-        this.color("#990000", 0.5);
-        this.delay(function() {
-            this.disabled = false;
-            this.color("#ffffff", 0.0);
-        }, 20000, 0);
     },
 
     disableUpgrade: function() {
@@ -417,7 +453,7 @@ Crafty.c('FlowerTower', {
         });
 
         this.delay(function() {
-            if (this.disabled) {
+            if (this.has('Disabled')) {
                 return;
             }
 
@@ -446,7 +482,7 @@ Crafty.c('FlowerTower', {
 
     getUpgradeCost: function() {
         if (this.level < this.maxLevel) {
-            return Math.floor(Game.towers['FlowerTower'] * 1.5 * Math.sqrt(this.level));
+            return Math.floor(Game.towers['FlowerTower'] * 1.75 * Math.sqrt(this.level));
         } else {
             return "MAX";
         }
@@ -468,7 +504,7 @@ Crafty.c('SniperTower', {
         }, 100, 0);
 
         this.delay(function() {
-            if (Game.enemyCount == 0 || this.disabled) {
+            if (Game.enemyCount == 0 || this.has('Disabled')) {
                 return;
             }
 
@@ -479,8 +515,11 @@ Crafty.c('SniperTower', {
                 console.log("INSTANT KILL!!");
                 firstEnemy.kill();
             } else {
+                this.delay(function() {
+                    firstEnemy.hitWithDamage(damage);
+                }, 500, 0);
                 var x = this.at().x, y = this.at().y, x2 = Math.floor(firstEnemy.at().x), y2 = Math.floor(firstEnemy.at().y);
-                Crafty.e('Bullet, leaf_right').attr({damage: damage}).at(x, y).animate_to(x2, y2, 35).destroy_after_animation();
+                Crafty.e('Bullet, leaf_right').attr({damage: 0}).at(x, y).animate_to(x2, y2, 35).destroy_after_animation();
             }
         }, 5000, -1);
     },
@@ -527,8 +566,11 @@ Crafty.c('MightyWitch', {
 
         this.delay(function() {
             // disable random tower for some time
-            var tower = Crafty('Tower').get(0);
-            tower.disable();
+            var towers = Crafty('Tower Enabled');
+            if (towers.length > 0) {
+                var tower = towers.get(Math.floor(Math.random() * towers.length));
+                tower.disable();
+            }
         }, 5000, -1);
     }
 });
@@ -620,7 +662,7 @@ Crafty.c('SilverDragon', {
         this.requires('Enemy, silver_dragon');
         this.attr({
             health: 500,
-            reward: 1000,
+            reward: 500,
             speed: 1.8,
             livesTaken: 5,
             noInstantKill: true

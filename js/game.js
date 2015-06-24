@@ -1,3 +1,9 @@
+if (!console) {
+    console = {
+        log: function() {}
+    }
+}
+
 Game = {
     // This defines our grid's size and the size of each of its tiles
     map_grid: {
