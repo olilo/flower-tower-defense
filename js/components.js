@@ -126,20 +126,57 @@ Crafty.c('Enemy', {
 Crafty.c('Wave', {
     init: function() {
         this.requires('2D, DOM, Grid, Text, Delay, Mouse');
-        this.attr({w: 150});
+        this.attr({w: 150, clickEnabled: true});
         this.text('Next Wave');
         this.textFont(Game.waveFont);
         this.textColor(Game.textColor);
         this.css(Game.buttonCss);
-        this.bind('Click', this.startNextWave);
+        this.bind('Click', function() {
+            if (this.clickEnabled) {
+                this.clickEnabled = false;
+                this.textColor(Game.disabledColor);
+
+                if (this.currentWave > 0) {
+                    Game.money += Game.moneyAfterWave;
+                }
+                this.startNextWave();
+
+                this.delay(function() {
+                    this.clickEnabled = true;
+                    this.textColor(Game.textColor);
+                }, 5000, 0);
+            }
+        });
         this.currentWave = Game.currentWave;
         this.finishedEventTriggered = false;
+
+        var highlighted = false;
+        this.delay(function() {
+            if (this.currentWave > 0) {
+                return;
+            }
+
+            if (highlighted) {
+                this.textColor(Game.textColor);
+            } else {
+                this.textColor(Game.highlightColor);
+            }
+            highlighted = !highlighted;
+        }, 1000, -1);
 
         this.bind('EnterFrame', function() {
             if (this.isWaveFinished()) {
                 if (!this.finishedEventTriggered) {
                     Crafty.trigger("WaveFinished", this.currentWave);
                     this.finishedEventTriggered = true;
+
+                    var flowerTowers = Crafty('FlowerTower'), i = 0;
+                    if (flowerTowers.length > 0) {
+                        this.delay(function () {
+                            flowerTowers.get(i).shoot();
+                            i++;
+                        }, 500, flowerTowers.length - 1);
+                    }
                 }
 
                 if (this.isNextWavePossible()) {
@@ -454,23 +491,35 @@ Crafty.c('FlowerTower', {
         });
 
         this.delay(function() {
-            if (this.has('Disabled')) {
-                return;
+            if (this.has('Enabled') && this.isEnemyNear()) {
+                this.shoot();
             }
-
-            // TODO AI that only shoots when an enemy is near
-            // TODO consider playing field bounds for animation
-            var x = this.at().x, y = this.at().y;
-
-            Crafty.e('Bullet, leaf_up').attr({damage: this.getDamage()}).at(x, y)
-                .animate_to(x, y - this.range, 4).destroy_after_animation();
-            Crafty.e('Bullet, leaf_right').attr({damage: this.getDamage()}).at(x, y)
-                .animate_to(x + this.range, y, 4).destroy_after_animation();
-            Crafty.e('Bullet, leaf_down').attr({damage: this.getDamage()}).at(x, y)
-                .animate_to(x, y + this.range, 4).destroy_after_animation();
-            Crafty.e('Bullet, leaf_left').attr({damage: this.getDamage()}).at(x, y)
-                .animate_to(x - this.range, y, 4).destroy_after_animation();
         }, 1000, -1);
+    },
+
+    shoot: function() {
+        var x = this.at().x, y = this.at().y;
+
+        Crafty.e('Bullet, leaf_up').attr({damage: this.getDamage()}).at(x, y)
+            .animate_to(x, y - this.range, 4).destroy_after_animation();
+        Crafty.e('Bullet, leaf_right').attr({damage: this.getDamage()}).at(x, y)
+            .animate_to(x + this.range, y, 4).destroy_after_animation();
+        Crafty.e('Bullet, leaf_down').attr({damage: this.getDamage()}).at(x, y)
+            .animate_to(x, y + this.range, 4).destroy_after_animation();
+        Crafty.e('Bullet, leaf_left').attr({damage: this.getDamage()}).at(x, y)
+            .animate_to(x - this.range, y, 4).destroy_after_animation();
+    },
+
+    isEnemyNear: function() {
+        var x1 = this.at().x - this.range, x2 = this.at().x + this.range,
+            y1 = this.at().y - this.range, y2 = this.at().y + this.range, result = false;
+        Crafty('Enemy').each(function() {
+            //noinspection JSPotentiallyInvalidUsageOfThis
+            if (this.at().x >= x1 && this.at().x <= x2 && this.at().y >= y1 && this.at().y <= y2) {
+                result = true;
+            }
+        });
+        return result;
     },
 
     getDamage: function() {
@@ -505,24 +554,26 @@ Crafty.c('SniperTower', {
         }, 100, 0);
 
         this.delay(function() {
-            if (Game.enemyCount == 0 || this.has('Disabled')) {
-                return;
-            }
-
-            var firstEnemy = Crafty('Enemy').get(0), damage = this.level * 5;
-
-            // instant kill with 2% chance on max level
-            if (this.level == this.maxLevel && Math.floor(Math.random() * 50) == 0 && !firstEnemy.noInstantKill) {
-                console.log("INSTANT KILL!!");
-                firstEnemy.kill();
-            } else {
-                this.delay(function() {
-                    firstEnemy.hitWithDamage(damage);
-                }, 500, 0);
-                var x = this.at().x, y = this.at().y, x2 = Math.floor(firstEnemy.at().x), y2 = Math.floor(firstEnemy.at().y);
-                Crafty.e('Bullet, leaf_right').attr({damage: 0}).at(x, y).animate_to(x2, y2, 35).destroy_after_animation();
+            if (Game.enemyCount > 0 && this.has('Enabled')) {
+                this.shoot();
             }
         }, 5000, -1);
+    },
+
+    shoot: function() {
+        var firstEnemy = Crafty('Enemy').get(0), damage = this.level * 5;
+
+        // instant kill with 2% chance on max level
+        if (this.level == this.maxLevel && Math.floor(Math.random() * 50) == 0 && !firstEnemy.noInstantKill) {
+            console.log("INSTANT KILL!!");
+            firstEnemy.kill();
+        } else {
+            this.delay(function() {
+                firstEnemy.hitWithDamage(damage);
+            }, 500, 0);
+            var x = this.at().x, y = this.at().y, x2 = Math.floor(firstEnemy.at().x), y2 = Math.floor(firstEnemy.at().y);
+            Crafty.e('Bullet, leaf_right').attr({damage: 0}).at(x, y).animate_to(x2, y2, 35).destroy_after_animation();
+        }
     },
 
     getUpgradeCost: function() {

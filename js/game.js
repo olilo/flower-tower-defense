@@ -20,6 +20,7 @@ Game = {
     // text colors and fonts (maybe we get fancy later on)
     textColor: 'white',
     highlightColor: 'black',
+    disabledColor: 'grey',
     alertColor: 'red',
 
     centerCss: { 'text-align': 'center'},
@@ -129,6 +130,6 @@ Game = {
     start: function() {
         Crafty.init(Game.width(), Game.height());
         Crafty.background('rgb(169, 153, 145)');
-        Crafty.scene('Difficulty');
+        Crafty.scene('Loading');
     }
 };

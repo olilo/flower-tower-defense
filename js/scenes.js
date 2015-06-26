@@ -1,3 +1,36 @@
+// Loading scene
+// -------------
+// Handles the loading of binary assets such as images and audio files
+Crafty.scene('Loading', function() {
+    // Draw some text for the player to see in case the file
+    //  takes a noticeable amount of time to load
+    var loading = Crafty.e('2D, DOM, Text, Delay')
+        .text('Loading...')
+        .attr({ x: 0, y: Game.height()/2 - 24, w: Game.width() })
+        .textFont(Game.loadingFont)
+        .textColor(Game.textColor)
+        .css(Game.centerCss);
+
+    var x = 3;
+    loading.delay(function() {
+        if (x >= 22) {
+            Crafty('Actor Loading').destroy();
+            x = 3;
+        }
+        Crafty.e('Actor, Image, Loading').image('assets/flower.png').at(x, 10);
+
+        x += 2;
+    }, 500, -1);
+
+    // Load all our assets
+    Crafty.load(Game.assets, function() {
+        // Now that our sprites are ready to draw, start the game
+        Game.endless = false;
+        Crafty.scene('Difficulty');
+    });
+});
+
+
 // Difficulty selection scene
 // --------------------------
 // User can decide on his difficulty here
@@ -33,7 +66,7 @@ Crafty.scene('Difficulty', function() {
                 'SniperTower': 20,
                 'SniperTowerUpgrade': 20
             };
-            Crafty.scene('Loading');
+            Crafty.scene('InitializeNewGame');
         });
 
     Crafty.e('2D, DOM, Text, Mouse')
@@ -58,7 +91,7 @@ Crafty.scene('Difficulty', function() {
                 'SniperTower': 20,
                 'SniperTowerUpgrade': 20
             };
-            Crafty.scene('Loading');
+            Crafty.scene('InitializeNewGame');
         });
 
     Crafty.e('2D, DOM, Text, Mouse')
@@ -83,7 +116,7 @@ Crafty.scene('Difficulty', function() {
                 'SniperTower': 20,
                 'SniperTowerUpgrade': 25
             };
-            Crafty.scene('Loading');
+            Crafty.scene('InitializeNewGame');
         });
 
     Crafty.e('2D, DOM, Text, Mouse')
@@ -108,7 +141,7 @@ Crafty.scene('Difficulty', function() {
                 'SniperTower': 25,
                 'SniperTowerUpgrade': 25
             };
-            Crafty.scene('Loading');
+            Crafty.scene('InitializeNewGame');
         });
 });
 
@@ -127,12 +160,10 @@ Crafty.scene('Credits', function() {
 });
 
 
-// Loading scene
-// -------------
-// Handles the loading of binary assets such as images and audio files
-Crafty.scene('Loading', function() {
-    // Draw some text for the player to see in case the file
-    //  takes a noticeable amount of time to load
+// Initialize variables for new game
+// ---------------------------------
+Crafty.scene('InitializeNewGame', function() {
+    // show loading if initialization takes up some time ...
     Crafty.e('2D, DOM, Text')
         .text('Loading...')
         .attr({ x: 0, y: Game.height()/2 - 24, w: Game.width() })
@@ -140,22 +171,11 @@ Crafty.scene('Loading', function() {
         .textColor(Game.textColor)
         .css(Game.centerCss);
 
-    // Load all our assets
-    Crafty.load(Game.assets, function() {
-        // Now that our sprites are ready to draw, start the game
-        Game.endless = false;
-        Crafty.scene('InitializeNewGame');
-    });
-});
-
-
-// Initialize variables for new game
-// ---------------------------------
-Crafty.scene('InitializeNewGame', function() {
     Game.endless = false;
     Game.enemyCount = 0;
     Game.currentWave = 0;
     Game.selectedTower = 'FlowerTower';
+    Game.sniperTowerInitial = Game.towers['SniperTower'];
     Game.towerCost = 0;
     Game.towerLevel = 0;
     Game.towerMap = new Array(Game.map_grid.width);
@@ -244,6 +264,7 @@ Crafty.scene('Game', function() {
     });
 
     // Populate our playing field with trees, path tiles, towers and tower places
+    Game.towers['SniperTower'] = Game.sniperTowerInitial;
     //console.log(Game.towerMap);
     for (var x = 0; x < Game.map_grid.width; x++) {
         for (var y = 0; y < Game.map_grid.height; y++) {
