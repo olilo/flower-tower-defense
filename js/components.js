@@ -119,6 +119,7 @@ Crafty.c('Enemy', {
     kill: function() {
         Game.enemyCount--;
         this.destroy();
+        Crafty.trigger('EnemyKilled', this);
     }
 });
 

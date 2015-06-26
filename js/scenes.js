@@ -24,6 +24,7 @@ Crafty.scene('Difficulty', function() {
             this.textColor('green');
         })
         .bind('Click', function() {
+            Game.difficulty = "Easy";
             Game.money = 60;
             Game.lifes = 40;
             Game.moneyAfterWave = 20;
@@ -48,6 +49,7 @@ Crafty.scene('Difficulty', function() {
             this.textColor('yellow');
         })
         .bind('Click', function() {
+            Game.difficulty = "Normal";
             Game.money = 30;
             Game.lifes = 20;
             Game.moneyAfterWave = 10;
@@ -72,6 +74,7 @@ Crafty.scene('Difficulty', function() {
             this.textColor('red');
         })
         .bind('Click', function() {
+            Game.difficulty = "Hard";
             Game.money = 25;
             Game.lifes = 15;
             Game.moneyAfterWave = 8;
@@ -96,6 +99,7 @@ Crafty.scene('Difficulty', function() {
             this.textColor('black');
         })
         .bind('Click', function() {
+            Game.difficulty = "Impossible";
             Game.money = 20;
             Game.lifes = 10;
             Game.moneyAfterWave = 5;
