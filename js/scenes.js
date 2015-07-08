@@ -37,16 +37,20 @@ Crafty.scene('Loading', function() {
 Crafty.scene('Difficulty', function() {
     Crafty.background('rgb(169, 153, 145)');
 
+    Crafty.e('2D, DOM, Image')
+        .image('assets/ftd-logo.jpg')
+        .attr({ x: 80, y: Game.height()*1/12 - 24, w: Game.width(), h: 250 });
+
     Crafty.e('2D, DOM, Text')
-        .text('Welcome to Flower Tower Defense<br>choose your Difficulty:')
-        .attr({ x: 0, y: Game.height()*1/12 - 24, w: Game.width(), h: 50 })
+        .text('Choose your difficulty:')
+        .attr({ x: 0, y: Game.height()*3/6 - 24, w: Game.width(), h: 50 })
         .textFont(Game.difficultyFont)
         .textColor(Game.textColor)
         .css(Game.centerCss);
 
     Crafty.e('2D, DOM, Text, Mouse')
         .text('Easy')
-        .attr({ x: 0, y: Game.height()*2/6 - 24, w: Game.width(), h: 50 })
+        .attr({ x: 0, y: Game.height()*4/6 - 24, w: Game.width() / 2, h: 50 })
         .textFont(Game.difficultyFont)
         .textColor('green')
         .css(Game.buttonCss)
@@ -59,7 +63,7 @@ Crafty.scene('Difficulty', function() {
         .bind('Click', function() {
             Game.difficulty = "Easy";
             Game.money = 60;
-            Game.lifes = 40;
+            Game.lifes = 100;
             Game.moneyAfterWave = 20;
             Game.towers = {
                 'FlowerTower': 10,
@@ -71,7 +75,7 @@ Crafty.scene('Difficulty', function() {
 
     Crafty.e('2D, DOM, Text, Mouse')
         .text('Normal')
-        .attr({ x: 0, y: Game.height()*3/6 - 24, w: Game.width(), h: 50 })
+        .attr({ x: Game.width() / 2, y: Game.height()*4/6 - 24, w: Game.width() / 2, h: 50 })
         .textFont(Game.difficultyFont)
         .textColor('yellow')
         .css(Game.buttonCss)
@@ -84,7 +88,7 @@ Crafty.scene('Difficulty', function() {
         .bind('Click', function() {
             Game.difficulty = "Normal";
             Game.money = 30;
-            Game.lifes = 20;
+            Game.lifes = 40;
             Game.moneyAfterWave = 10;
             Game.towers = {
                 'FlowerTower': 10,
@@ -96,7 +100,7 @@ Crafty.scene('Difficulty', function() {
 
     Crafty.e('2D, DOM, Text, Mouse')
         .text('Hard')
-        .attr({ x: 0, y: Game.height()*4/6 - 24, w: Game.width(), h: 50 })
+        .attr({ x: 0, y: Game.height()*5/6 - 24, w: Game.width() / 2, h: 50 })
         .textFont(Game.difficultyFont)
         .textColor('red')
         .css(Game.buttonCss)
@@ -121,7 +125,7 @@ Crafty.scene('Difficulty', function() {
 
     Crafty.e('2D, DOM, Text, Mouse')
         .text('Impossible')
-        .attr({ x: 0, y: Game.height()*5/6 - 24, w: Game.width(), h: 50 })
+        .attr({ x: Game.width() / 2, y: Game.height()*5/6 - 24, w: Game.width() / 2, h: 50 })
         .textFont(Game.difficultyFont)
         .textColor('black')
         .css(Game.buttonCss)
@@ -135,7 +139,7 @@ Crafty.scene('Difficulty', function() {
             Game.difficulty = "Impossible";
             Game.money = 20;
             Game.lifes = 10;
-            Game.moneyAfterWave = 5;
+            Game.moneyAfterWave = 0;
             Game.towers = {
                 'FlowerTower': 15,
                 'SniperTower': 25,
@@ -174,7 +178,7 @@ Crafty.scene('InitializeNewGame', function() {
     Game.endless = false;
     Game.enemyCount = 0;
     Game.currentWave = 0;
-    Game.selectedTower = 'FlowerTower';
+    Game.selectedTower = 'SniperTower';
     Game.sniperTowerInitial = Game.towers['SniperTower'];
     Game.towerCost = 0;
     Game.towerLevel = 0;
@@ -291,9 +295,14 @@ Crafty.scene('Game', function() {
 Crafty.scene('GameOver', function() {
     // show GameOver screen, with "start again" button
     Crafty.background('rgb(169, 153, 145)');
+
+    Crafty.e('2D, DOM, Image')
+        .image('assets/ftd-logo.jpg')
+        .attr({ x: 80, y: Game.height()*1/12 - 24, w: Game.width(), h: 250 });
+
     Crafty.e('2D, DOM, Text')
         .text('Game over')
-        .attr({ x: 0, y: Game.height()/2 - 24, w: Game.width() })
+        .attr({ x: 0, y: Game.height()*3/5 - 24, w: Game.width() })
         .textFont(Game.gameOverFont)
         .textColor(Game.gameOverColor)
         .css(Game.centerCss);
@@ -304,29 +313,35 @@ Crafty.scene('GameOver', function() {
 Crafty.scene('Won', function() {
     // show Won screen, with "start again" button
     Crafty.background(Game.wonColor);
+
+    Crafty.e('2D, DOM, Image')
+        .image('assets/ftd-logo.jpg')
+        .attr({ x: 80, y: Game.height()*1/12 - 24, w: Game.width(), h: 250 });
+
     Crafty.e('2D, DOM, Text')
         .text('You Won :)')
-        .attr({ x: 0, y: Game.height()*2/5 - 24, w: Game.width(), h: 50 })
+        .attr({ x: 0, y: Game.height()*7/12 - 24, w: Game.width(), h: 50 })
         .textFont(Game.wonFont)
         .textColor(Game.textColor)
         .css(Game.centerCss);
 
     Crafty.e('2D, DOM, Text, Mouse')
         .text('Continue in endless mode?')
-        .attr({x: 0, y: Game.height()*3/5 - 24, w: Game.width(), h: 50 })
-        .textFont(Game.wonFont)
-        .textColor(Game.textColor)
+        .attr({x: 0, y: Game.height()*9/12 - 24, w: Game.width(), h: 50 })
+        .textFont(Game.continueFont)
+        .textColor(Game.continueColor)
         .css(Game.buttonCss)
         .bind('MouseOver', function() {
             this.textColor(Game.highlightColor);
         })
         .bind('MouseOut', function() {
-            this.textColor(Game.textColor);
+            this.textColor(Game.continueColor);
         })
         .bind('Click', function() {
             Game.endless = true;
             Crafty.scene('Game');
         });
 
-    Crafty.e('RestartButton');
+    Crafty.e('RestartButton')
+        .attr({x: 0, y: Game.height()*11/12 - 24, w: Game.width(), h: 50 });
 });

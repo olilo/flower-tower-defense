@@ -37,6 +37,8 @@ Game = {
     gameOverColor: 'red',
     wonFont: { 'size': '48px', 'family': 'Arial' },
     wonColor: 'rgb(109, 203, 105)',
+    continueFont: { 'size': '36px', 'family': 'Arial' },
+    continueColor: 'brown',
     restartFont: { 'size': '36px', 'family': 'Arial' },
     restartColor: 'brown',
 

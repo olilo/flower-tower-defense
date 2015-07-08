@@ -286,7 +286,6 @@
                     if (this.clickEnabled) {
                         this.clickEnabled = false;
                         this.textColor(Game.disabledColor);
-                        this.startNextWave();
 
                         if (this.currentWave > 0) {
                             Game.money += Game.moneyAfterWave;
@@ -402,7 +401,7 @@
 
         Crafty.c('HudElement', {
             init: function() {
-                this.requires('2D, DOM, Text');
+                this.requires('2D, DOM, Text, Delay');
                 this.attr({ x: 0, y: 0, w: 133 });
                 this.textFont(Game.hudFont);
                 this.textColor(Game.textColor);
@@ -886,7 +885,7 @@
                 this.attr({
                     targets: [],
                     lastExecuted: new Date().getTime(),
-                    fps: 25,
+                    stepsPerGrid: 25,
                     speedup: 1
                 });
 
@@ -906,7 +905,7 @@
 
             tween_handler: function() {
                 var newLastExecuted = new Date().getTime();
-                var delay = this.fps * this.speedup * (newLastExecuted - this.lastExecuted) / 1000.0;
+                var delay = this.stepsPerGrid * this.speedup * (newLastExecuted - this.lastExecuted) / 1000.0;
                 Tweening.lastExecuted = newLastExecuted;
 
                 if (Crafty.isPaused()) {
@@ -915,8 +914,8 @@
 
                 for (var i = 0; i < this.targets.length; i++) {
                     var current = this.targets[i],
-                            distanceX = current.speed * delay * Game.map_grid.tile.width / this.fps,
-                            distanceY = current.speed * delay * Game.map_grid.tile.height / this.fps;
+                            distanceX = current.speed * delay * Game.map_grid.tile.width / this.stepsPerGrid,
+                            distanceY = current.speed * delay * Game.map_grid.tile.height / this.stepsPerGrid;
                     if (current.actor.x != current.steps[0].x ||
                             current.actor.y != current.steps[0].y) {
                         var newX = current.actor.x,
@@ -967,10 +966,10 @@
             var x = 3;
             loading.delay(function() {
                 if (x >= 22) {
-                    Crafty('Actor Loading').destroy();
+                    Crafty('Image Loading').destroy();
                     x = 3;
                 }
-                Crafty.e('Actor, Image, Loading').image('assets/flower.png').at(x, 10);
+                Crafty.e('2D, DOM, Grid, Image, Loading').image('http://olilo.github.io/flower-tower-defense/assets/flower.png').at(x, 10);
 
                 x += 2;
             }, 500, -1);
@@ -1204,8 +1203,8 @@
 
             // Populate our playing field with trees, path tiles, towers and tower places
             Game.towers['SniperTower'] = Game.sniperTowerInitial;
-            //console.log(Game.towerMap);
-            for (var x = 0; x < Game.map_grid.width; x++) {
+            var x = 0;
+            Crafty.e('Delay').delay(function() {
                 for (var y = 0; y < Game.map_grid.height; y++) {
                     if (Game.path.isOnEdge(x, y)) {
                         Crafty.e('Tree').at(x, y);
@@ -1218,7 +1217,9 @@
                         Crafty.e('TowerPlace').at(x, y);
                     }
                 }
-            }
+
+                x++;
+            }, 50, Game.map_grid.width - 1);
 
             // initialize wave
             Crafty.e('Wave').at(Game.map_grid.width - 5, Game.map_grid.height - 1);

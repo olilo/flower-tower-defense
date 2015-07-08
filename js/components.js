@@ -127,13 +127,14 @@ Crafty.c('Wave', {
     init: function() {
         this.requires('2D, DOM, Grid, Text, Delay, Mouse');
         this.attr({w: 150, clickEnabled: true});
-        this.text('Next Wave');
+        this.text('Start');
         this.textFont(Game.waveFont);
         this.textColor(Game.textColor);
         this.css(Game.buttonCss);
         this.bind('Click', function() {
             if (this.clickEnabled) {
                 this.clickEnabled = false;
+                this.text('Next Wave');
                 this.textColor(Game.disabledColor);
 
                 if (this.currentWave > 0) {
@@ -494,7 +495,7 @@ Crafty.c('FlowerTower', {
             if (this.has('Enabled') && this.isEnemyNear()) {
                 this.shoot();
             }
-        }, 1000, -1);
+        }, 700, -1);
     },
 
     shoot: function() {
@@ -557,7 +558,7 @@ Crafty.c('SniperTower', {
             if (Game.enemyCount > 0 && this.has('Enabled')) {
                 this.shoot();
             }
-        }, 5000, -1);
+        }, 4000, -1);
     },
 
     shoot: function() {
@@ -733,38 +734,21 @@ Crafty.c('Tweening', {
         this.requires('Keyboard');
         this.attr({
             targets: [],
-            lastExecuted: new Date().getTime(),
-            fps: 25,
-            speedup: 1
-        });
-
-        // bind speedup key 's'
-        this.bind('KeyDown', function() {
-            if (this.isDown('S')) {
-                if (this.speedup == 1) {
-                    this.speedup = 4;
-                } else {
-                    this.speedup = 1;
-                }
-            }
+            stepsPerGrid: 25
         });
 
         this.bind('EnterFrame', this.tween_handler)
     },
 
     tween_handler: function() {
-        var newLastExecuted = new Date().getTime();
-        var delay = this.fps * this.speedup * (newLastExecuted - this.lastExecuted) / 1000.0;
-        Tweening.lastExecuted = newLastExecuted;
-
         if (Crafty.isPaused()) {
             return;
         }
 
         for (var i = 0; i < this.targets.length; i++) {
             var current = this.targets[i],
-                distanceX = current.speed * delay * Game.map_grid.tile.width / this.fps,
-                distanceY = current.speed * delay * Game.map_grid.tile.height / this.fps;
+                distanceX = current.speed * Game.map_grid.tile.width / this.stepsPerGrid,
+                distanceY = current.speed * Game.map_grid.tile.height / this.stepsPerGrid;
             if (current.actor.x != current.steps[0].x ||
                 current.actor.y != current.steps[0].y) {
                 var newX = current.actor.x,
