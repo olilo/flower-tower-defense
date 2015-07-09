@@ -25,6 +25,20 @@ function Path(config) {
     }
 }
 
+Path.prototype.copy = function(path) {
+    this.start = path.start;
+    this.finish = path.finish;
+    this.width = path.width;
+    this.height = path.height;
+
+    this.pathMinLength = path.pathMinLength;
+    this.pathMaxLength = path.pathMaxLength;
+
+    // FIXME better make a copy of the arrays
+    this.path = path.path;
+    this.occupied = path.occupied;
+};
+
 Path.prototype.addToPath = function(point) {
     if (point.x < 0 || point.x > this.width - 1) {
         console.log("Illegal point!! at x=" + point.x + ";y=" + point.y);
@@ -155,10 +169,12 @@ Path.prototype.generateNextPart = function(current, lastDir, preLastDir) {
         return;
     }
 
+    //noinspection PointlessArithmeticExpressionJS
     var needToFindNext = true,
         startTime = new Date().getTime(),
         curPathIter = this.pathLength - 0,
         startCopy = {x: current.x, y: current.y};
+
     while(needToFindNext) {
         // timeout handling
         if (new Date().getTime() - startTime > 5000) {

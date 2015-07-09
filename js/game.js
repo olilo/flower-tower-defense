@@ -42,6 +42,8 @@ Game = {
     restartFont: { 'size': '36px', 'family': 'Arial' },
     restartColor: 'brown',
 
+    generalButtonFont: { 'size': '36px', 'family': 'Arial' },
+
     // handy overview which wave spawns which enemies
     waves: [
         ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch'],

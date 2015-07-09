@@ -26,7 +26,15 @@ Crafty.scene('Loading', function() {
     Crafty.load(Game.assets, function() {
         // Now that our sprites are ready to draw, start the game
         Game.endless = false;
-        Crafty.scene('Difficulty');
+
+        var savegame = Crafty.storage('ftd_save1');
+        if(savegame){
+            // we have a savegame, continue from savegame
+            Crafty.scene('LoadSaveGame');
+        } else {
+            // no savegame, start new game
+            Crafty.scene('Difficulty');
+        }
     });
 });
 
@@ -164,6 +172,67 @@ Crafty.scene('Credits', function() {
 });
 
 
+// Load variables from savegame
+// ----------------------------
+Crafty.scene('LoadSaveGame', function() {
+    Crafty.background('rgb(169, 153, 145)');
+
+    Crafty.e('2D, DOM, Image')
+        .image('assets/ftd-logo.jpg')
+        .attr({ x: 80, y: Game.height()*1/12 - 24, w: Game.width(), h: 250 });
+
+    Crafty.e('2D, DOM, Text, Mouse')
+        .text('Load Saved game')
+        .attr({ x: 0, y: Game.height()*4/6 - 24, w: Game.width(), h: 50 })
+        .textFont(Game.generalButtonFont)
+        .textColor(Game.textColor)
+        .css(Game.buttonCss)
+        .bind('MouseOver', function() {
+            this.textColor(Game.highlightColor);
+        })
+        .bind('MouseOut', function() {
+            this.textColor(Game.textColor);
+        })
+        .bind('Click', function() {
+            var savegame = Crafty.storage('ftd_save1');
+
+            Game.difficulty = savegame.difficulty;
+            Game.money = savegame.money;
+            Game.lifes = savegame.lifes;
+            Game.moneyAfterWave = savegame.moneyAfterWave;
+            Game.towers = savegame.towers;
+
+            Game.endless = savegame.endless;
+            Game.enemyCount = savegame.enemyCount;
+            Game.currentWave = savegame.currentWave;
+            Game.selectedTower = savegame.selectedTower;
+            Game.sniperTowerInitial = savegame.sniperTowerInitial;
+            Game.towerCost = 0;
+            Game.towerLevel = 0;
+            Game.towerMap = savegame.towerMap;
+            Game.path = new Path(Game.map_grid);
+            Game.path.copy(savegame.path);
+
+            Crafty.scene('Game');
+        });
+
+    Crafty.e('2D, DOM, Text, Mouse')
+        .text('Start new game')
+        .attr({ x: 0, y: Game.height()*5/6 - 24, w: Game.width(), h: 50 })
+        .textFont(Game.generalButtonFont)
+        .textColor(Game.textColor)
+        .css(Game.buttonCss)
+        .bind('MouseOver', function() {
+            this.textColor(Game.highlightColor);
+        })
+        .bind('MouseOut', function() {
+            this.textColor(Game.textColor);
+        })
+        .bind('Click', function() {
+            Crafty.scene('Difficulty');
+        });
+});
+
 // Initialize variables for new game
 // ---------------------------------
 Crafty.scene('InitializeNewGame', function() {
@@ -192,29 +261,6 @@ Crafty.scene('InitializeNewGame', function() {
             };
         }
     }
-
-    Crafty.bind('TowerCreated', function(tower) {
-        // insert in tower map
-        var towerNames = ['FlowerTower', 'SniperTower'];
-        for (var i = 0; i < towerNames.length; i++) {
-            if (tower.has(towerNames[i])) {
-                Game.towerMap[tower.at().x][tower.at().y].name = towerNames[i];
-                Game.towerMap[tower.at().x][tower.at().y].level = 1;
-                return;
-            }
-        }
-    });
-    Crafty.bind('TowerUpgraded', function(tower) {
-        // update tower map
-        Game.towerMap[tower.at().x][tower.at().y].level = tower.level;
-    });
-
-    // bind pause/unpause key 'p'
-    Crafty.e('Keyboard').bind('KeyDown', function() {
-        if (this.isDown('P')) {
-            Crafty.pause();
-        }
-    });
 
     // generate path
     Game.path = new Path(Game.map_grid);
@@ -261,13 +307,40 @@ Crafty.scene('Game', function() {
         }
     });
     Crafty.bind('WaveFinished', function(waveNumber) {
+        Crafty.storage('ftd_save1', Game);
+
         if (Game.lifes > 0 && waveNumber == Game.waves.length) {
             Crafty.unbind('EnterFrame');
             Crafty.scene('Won');
         }
     });
 
+    // necessary event handling
+    Crafty.bind('TowerCreated', function(tower) {
+        // insert in tower map
+        var towerNames = ['FlowerTower', 'SniperTower'];
+        for (var i = 0; i < towerNames.length; i++) {
+            if (tower.has(towerNames[i])) {
+                Game.towerMap[tower.at().x][tower.at().y].name = towerNames[i];
+                Game.towerMap[tower.at().x][tower.at().y].level = 1;
+                return;
+            }
+        }
+    });
+    Crafty.bind('TowerUpgraded', function(tower) {
+        // update tower map
+        Game.towerMap[tower.at().x][tower.at().y].level = tower.level;
+    });
+
+    // bind pause/unpause key 'p'
+    Crafty.e('Keyboard').bind('KeyDown', function() {
+        if (this.isDown('P')) {
+            Crafty.pause();
+        }
+    });
+
     // Populate our playing field with trees, path tiles, towers and tower places
+    // we need to reset sniper tower cost, because when placing them in the loop the cost goes up again
     Game.towers['SniperTower'] = Game.sniperTowerInitial;
     //console.log(Game.towerMap);
     for (var x = 0; x < Game.map_grid.width; x++) {
