@@ -11,16 +11,18 @@ Crafty.scene('Loading', function() {
         .textColor(Game.textColor)
         .css(Game.centerCss);
 
-    var x = 3;
-    loading.delay(function() {
-        if (x >= 22) {
-            Crafty('Actor Loading').destroy();
-            x = 3;
-        }
-        Crafty.e('Actor, Image, Loading').image('assets/flower.png').at(x, 10);
+    Crafty.load({"images":['assets/flower.png']}, function() {
+        var x = 3;
+        loading.delay(function() {
+            if (x >= 22) {
+                Crafty('Actor Loading').destroy();
+                x = 3;
+            }
+            Crafty.e('Actor, Image, Loading').image('assets/flower.png').at(x, 10);
 
-        x += 2;
-    }, 500, -1);
+            x += 2;
+        }, 500, -1)
+    });
 
     // Load all our assets
     Crafty.load(Game.assets, function() {
@@ -44,6 +46,8 @@ Crafty.scene('Loading', function() {
 // User can decide on his difficulty here
 Crafty.scene('Difficulty', function() {
     Crafty.background('rgb(169, 153, 145)');
+    Crafty.audio.stop();
+    Crafty.audio.play('Menu', -1);
 
     Crafty.e('2D, DOM, Image')
         .image('assets/ftd-logo.jpg')
@@ -155,6 +159,17 @@ Crafty.scene('Difficulty', function() {
             };
             Crafty.scene('InitializeNewGame');
         });
+
+    Crafty.e('2D, DOM, Text, Mouse')
+        .text('Audio')
+        .attr({ x: 30, y: Game.height() - 50, w: 100, h: 50 })
+        .bind('Click', function() {
+            if (Crafty.audio.muted) {
+                Crafty.audio.unmute();
+            } else {
+                Crafty.audio.mute();
+            }
+        });
 });
 
 
@@ -176,6 +191,8 @@ Crafty.scene('Credits', function() {
 // ----------------------------
 Crafty.scene('LoadSaveGame', function() {
     Crafty.background('rgb(169, 153, 145)');
+    Crafty.audio.stop();
+    Crafty.audio.play('Menu', -1);
 
     Crafty.e('2D, DOM, Image')
         .image('assets/ftd-logo.jpg')
@@ -231,6 +248,22 @@ Crafty.scene('LoadSaveGame', function() {
         .bind('Click', function() {
             Crafty.scene('Difficulty');
         });
+
+    Crafty.e('2D, DOM, Text, Mouse')
+        .text('Sound On')
+        .attr({ x: 30, y: Game.height() - 50, w: 200, h: 50 })
+        .textFont(Game.generalButtonFont)
+        .textColor(Game.textColor)
+        .css(Game.buttonCss)
+        .bind('Click', function() {
+            if (Crafty.audio.muted) {
+                Crafty.audio.unmute();
+                this.text('Sound On');
+            } else {
+                Crafty.audio.mute();
+                this.text('Sound Off');
+            }
+        });
 });
 
 // Initialize variables for new game
@@ -275,6 +308,8 @@ Crafty.scene('InitializeNewGame', function() {
 Crafty.scene('Game', function() {
     // background
     Crafty.e('2D, Canvas, Image').image('assets/background.jpg');
+    Crafty.audio.stop();
+    Crafty.audio.play('Background', -1);
 
     // HUD
     Crafty.e('HudElement').observe('Money', 'money').at(0);
@@ -368,6 +403,8 @@ Crafty.scene('Game', function() {
 Crafty.scene('GameOver', function() {
     // show GameOver screen, with "start again" button
     Crafty.background('rgb(169, 153, 145)');
+    Crafty.audio.stop();
+    Crafty.audio.play('Menu', -1);
 
     Crafty.e('2D, DOM, Image')
         .image('assets/ftd-logo.jpg')
@@ -386,6 +423,8 @@ Crafty.scene('GameOver', function() {
 Crafty.scene('Won', function() {
     // show Won screen, with "start again" button
     Crafty.background(Game.wonColor);
+    Crafty.audio.stop();
+    Crafty.audio.play('Won', -1);
 
     Crafty.e('2D, DOM, Image')
         .image('assets/ftd-logo.jpg')

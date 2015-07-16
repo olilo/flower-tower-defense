@@ -99,6 +99,7 @@ Crafty.c('Enemy', {
             if (that == actor) {
                 Game.lifes -= this.livesTaken || 1;
                 this.kill();
+                Crafty.audio.play('LifeLost', 1);
             }
         })
     },
@@ -116,10 +117,22 @@ Crafty.c('Enemy', {
         console.log("Health: " + this.health);
     },
 
-    kill: function() {
+    kill: function(playAudio) {
+        if (playAudio === undefined) {
+            playAudio = true;
+        }
+        if (this.dead) {
+            return;
+        }
+
+        this.dead = true;
         Game.enemyCount--;
         this.destroy();
         Crafty.trigger('EnemyKilled', this);
+
+        if (playAudio) {
+            Crafty.audio.play("EnemyDead", 1);
+        }
     }
 });
 
@@ -220,6 +233,11 @@ Crafty.c('Wave', {
                 this.spawnFinished = true;
             }
         }, 3000, enemies.length - 1);
+
+        if (this.currentWave == Game.waves.length) {
+            Crafty.audio.stop();
+            Crafty.audio.play('Boss', -1);
+        }
 
         this.currentWave++;
         Game.currentWave = this.currentWave;

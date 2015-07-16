@@ -66,13 +66,15 @@ Game = {
     // sounds, images, spritesheets, all handy at one place
     assets: {
         "audio": {
-            /*
-             "beep": ["beep.wav", "beep.mp3", "beep.ogg"],
-             "boop": "boop.wav",
-             "slash": "slash.wav"
-             */
+            "Background": ["assets/sounds/background.wav", "assets/sounds/background.mp3", "assets/sounds/background.ogg"],
+            "Boss": ["assets/sounds/boss.wav", "assets/sounds/boss.mp3", "assets/sounds/boss.ogg"],
+            "Menu": ["assets/sounds/Menu.mp3", "assets/sounds/Menu.ogg", "assets/sounds/Menu.wav"],
+            "Won": ["assets/sounds/Won.mp3", "assets/sounds/Won.ogg", "assets/sounds/Won.wav"],
+            "EnemyDead": ["assets/sounds/Shot.mp3", "assets/sounds/Shot.ogg", "assets/sounds/Shot.wav"],
+            "LifeLost": ["assets/sounds/LifeLost.mp3", "assets/sounds/LifeLost.ogg", "assets/sounds/LifeLost.wav"]
         },
-        "images": ["assets/transparent.png", "assets/background.jpg", "assets/flower.png", "assets/squid.png"],
+        "images": ["assets/ftd-logo.jpg", "assets/transparent.png", "assets/background.jpg",
+            "assets/flower.png", "assets/squid.png"],
         "sprites": {
             "assets/witch.png": {
                 "tile": 29,
