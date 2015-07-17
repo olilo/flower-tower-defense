@@ -49,7 +49,7 @@ Crafty.scene('Difficulty', function() {
 
     Crafty.e('2D, DOM, Image')
         .image('assets/ftd-logo.jpg')
-        .attr({ x: 80, y: Game.height()*1/12 - 24, w: Game.width(), h: 250 });
+        .attr({ x: 80, y: Game.height()*1/12 - 24, w: Game.width(), h: 200 });
 
     Crafty.e('2D, DOM, Text')
         .text('Choose your difficulty:')
@@ -58,18 +58,12 @@ Crafty.scene('Difficulty', function() {
         .textColor(Game.textColor)
         .css(Game.centerCss);
 
-    Crafty.e('2D, DOM, Text, Mouse')
+    Crafty.e('DOMButton')
         .text('Easy')
-        .attr({ x: 0, y: Game.height()*4/6 - 24, w: Game.width() / 2, h: 50 })
+        .tooltip('normal prices, 100 lifes, lots of money')
+        .attr({ x: 0, y: Game.height()*7/12 - 24, w: Game.width() / 2, h: 50 })
         .textFont(Game.difficultyFont)
         .textColor('green')
-        .css(Game.buttonCss)
-        .bind('MouseOver', function() {
-            this.textColor(Game.highlightColor);
-        })
-        .bind('MouseOut', function() {
-            this.textColor('green');
-        })
         .bind('Click', function() {
             Game.difficulty = "Easy";
             Game.money = 60;
@@ -83,18 +77,12 @@ Crafty.scene('Difficulty', function() {
             Crafty.scene('InitializeNewGame');
         });
 
-    Crafty.e('2D, DOM, Text, Mouse')
+    Crafty.e('DOMButton')
         .text('Normal')
-        .attr({ x: Game.width() / 2, y: Game.height()*4/6 - 24, w: Game.width() / 2, h: 50 })
+        .tooltip('normal prices, 40 lifes, normal amount of money')
+        .attr({ x: Game.width() / 2, y: Game.height()*7/12 - 24, w: Game.width() / 2, h: 50 })
         .textFont(Game.difficultyFont)
         .textColor('yellow')
-        .css(Game.buttonCss)
-        .bind('MouseOver', function() {
-            this.textColor(Game.highlightColor);
-        })
-        .bind('MouseOut', function() {
-            this.textColor('yellow');
-        })
         .bind('Click', function() {
             Game.difficulty = "Normal";
             Game.money = 30;
@@ -108,23 +96,17 @@ Crafty.scene('Difficulty', function() {
             Crafty.scene('InitializeNewGame');
         });
 
-    Crafty.e('2D, DOM, Text, Mouse')
+    Crafty.e('DOMButton')
         .text('Hard')
-        .attr({ x: 0, y: Game.height()*5/6 - 24, w: Game.width() / 2, h: 50 })
+        .tooltip('normal prices, 15 lifes, less money after waves')
+        .attr({ x: 0, y: Game.height()*9/12 - 24, w: Game.width() / 2, h: 50 })
         .textFont(Game.difficultyFont)
         .textColor('red')
-        .css(Game.buttonCss)
-        .bind('MouseOver', function() {
-            this.textColor(Game.highlightColor);
-        })
-        .bind('MouseOut', function() {
-            this.textColor('red');
-        })
         .bind('Click', function() {
             Game.difficulty = "Hard";
             Game.money = 25;
             Game.lifes = 15;
-            Game.moneyAfterWave = 8;
+            Game.moneyAfterWave = 5;
             Game.towers = {
                 'FlowerTower': 12,
                 'SniperTower': 20,
@@ -133,18 +115,13 @@ Crafty.scene('Difficulty', function() {
             Crafty.scene('InitializeNewGame');
         });
 
-    Crafty.e('2D, DOM, Text, Mouse')
+    Crafty.e('DOMButton')
         .text('Impossible')
-        .attr({ x: Game.width() / 2, y: Game.height()*5/6 - 24, w: Game.width() / 2, h: 50 })
+        .tooltip('higher prices, 10 lifes, no money after waves')
+        .attr({ x: Game.width() / 2, y: Game.height()*9/12 - 24, w: Game.width() / 2, h: 50 })
         .textFont(Game.difficultyFont)
         .textColor('black')
-        .css(Game.buttonCss)
-        .bind('MouseOver', function() {
-            this.textColor('#880000');
-        })
-        .bind('MouseOut', function() {
-            this.textColor('black');
-        })
+        .highlightColor('#880000')
         .bind('Click', function() {
             Game.difficulty = "Impossible";
             Game.money = 20;
@@ -153,7 +130,7 @@ Crafty.scene('Difficulty', function() {
             Game.towers = {
                 'FlowerTower': 15,
                 'SniperTower': 25,
-                'SniperTowerUpgrade': 25
+                'SniperTowerUpgrade': 50
             };
             Crafty.scene('InitializeNewGame');
         });
@@ -263,7 +240,7 @@ Crafty.scene('LoadSaveGame', function() {
 
     Crafty.e('2D, DOM, Image')
         .image('assets/ftd-logo.jpg')
-        .attr({ x: 80, y: Game.height()*1/12 - 24, w: Game.width(), h: 250 });
+        .attr({ x: 80, y: Game.height()*1/12 - 24, w: Game.width(), h: 200 });
 
     Crafty.e('DOMButton')
         .text('Load Saved game')
@@ -473,7 +450,7 @@ Crafty.scene('GameOver', function() {
 
     Crafty.e('2D, DOM, Image')
         .image('assets/ftd-logo.jpg')
-        .attr({ x: 80, y: Game.height()*1/12 - 24, w: Game.width(), h: 250 });
+        .attr({ x: 80, y: Game.height()*1/12 - 24, w: Game.width(), h: 200 });
 
     Crafty.e('2D, DOM, Text')
         .text('Game over')
@@ -493,7 +470,7 @@ Crafty.scene('Won', function() {
 
     Crafty.e('2D, DOM, Image')
         .image('assets/ftd-logo.jpg')
-        .attr({ x: 80, y: Game.height()*1/12 - 24, w: Game.width(), h: 250 });
+        .attr({ x: 80, y: Game.height()*1/12 - 24, w: Game.width(), h: 200 });
 
     Crafty.e('2D, DOM, Text')
         .text('You Won :)')

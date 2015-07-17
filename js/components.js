@@ -115,15 +115,31 @@ Crafty.c('Button', {
 
         this.textColor(Game.textColor);
         this.textFont(Game.generalButtonFont);
-        this.highlightColor = Game.highlightColor;
+        this._highlightColor = Game.highlightColor;
 
         // highlight on mouse over, but don't save the highlight color as "used text color"
         this.bind('MouseOver', function() {
-            previousTextColor.call(this, this.highlightColor);
+            previousTextColor.call(this, this._highlightColor);
         });
         this.bind('MouseOut', function() {
             this.textColor(this.previousColors[0]);
+            this.previousMouseUp = false;
         });
+
+        if (Crafty.mobile) {
+            this.bind('MouseUp', function(e) {
+                if (this.previousMouseUp) {
+                    this.trigger('Click', e);
+                } else {
+                    this.previousMouseUp = true;
+                }
+            });
+        }
+    },
+
+    highlightColor: function(color) {
+        this._highlightColor = color;
+        return this;
     },
 
     withImage: function(imageUrl) {
@@ -326,7 +342,7 @@ Crafty.c('Wave', {
             }
         }, 3000, enemies.length - 1);
 
-        if (this.currentWave == Game.waves.length) {
+        if (this.currentWave == Game.waves.length - 1) {
             Crafty.audio.stop();
             Crafty.audio.play('Boss', -1);
         }
@@ -524,7 +540,19 @@ Crafty.c('TowerPlace', {
         this.bind('MouseOut', function() {
             this.color("#ffffff", 0.0);
             Game.towerCost = 0;
+            this.previousMouseUp = false;
         });
+
+        if (Crafty.mobile) {
+            this.bind('MouseUp', function(e) {
+                if (this.previousMouseUp) {
+                    this.trigger('Click', e);
+                } else {
+                    this.previousMouseUp = true;
+                }
+            });
+        }
+
         this.bind('Click', function() {
             if (Game.money >= Game.towers[Game.selectedTower]) {
                 var tower = Crafty.e(Game.selectedTower).at(this.at().x, this.at().y);
@@ -594,6 +622,16 @@ Crafty.c('Tower', {
             }
         });
 
+        if (Crafty.mobile) {
+            this.bind('MouseUp', function(e) {
+                if (this.previousMouseUp) {
+                    this.trigger('Click', e);
+                } else {
+                    this.previousMouseUp = true;
+                }
+            });
+        }
+
         this.bind('Click', function () {
             var upgradeCost = this.getUpgradeCost();
             if (Game.money >= upgradeCost) {
@@ -634,7 +672,7 @@ Crafty.c('FlowerTower', {
             if (this.has('Enabled') && this.isEnemyNear()) {
                 this.shoot();
             }
-        }, 700, -1);
+        }, 400, -1);
     },
 
     shoot: function() {
