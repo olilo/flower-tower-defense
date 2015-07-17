@@ -63,6 +63,84 @@ Crafty.c('PathWalker', {
     }
 });
 
+Crafty.c('Tooltip', {
+    init: function() {
+        this.requires('Mouse');
+        this.tooltipText = "Tooltip-Text here";
+        this._tooltip = null;
+        this.tooltipWidth = 300;
+        this.tooltipHeight = 50;
+
+        this.bind('MouseOver', function() {
+            var x = Math.min(Game.width() - this.tooltipWidth - 10, Math.max(0, this.x + (this.w - this.tooltipWidth) / 2)),
+                y = Math.max(0, this.y - this.tooltipHeight - 10);
+            this._tooltip = Crafty.e('2D, Text, DOM')
+                .attr({x: x, y: y, w: this.tooltipWidth, h: this.tooltipHeight, z: 5})
+                .text(this.tooltipText)
+                .textFont(Game.generalTooltipFont)
+                .textColor(Game.textColor)
+                .css(Game.generalTooltipCss);
+            this.attach(this._tooltip);
+        });
+        this.bind('MouseOut', function() {
+            this._tooltip.destroy();
+        });
+    },
+
+    tooltip: function(text) {
+        this.tooltipText = text;
+        if (this._tooltip) {
+            this._tooltip.text(text);
+        }
+        return this;
+    }
+});
+
+// The button component styles a (text) component as a button
+Crafty.c('Button', {
+    init: function() {
+        this.requires('2D, Text, Mouse, Tooltip');
+
+        // override textColor method to save used text colors
+        this.previousColors = [];
+        var previousTextColor = this.textColor;
+        this.textColor = function(newColor) {
+            previousTextColor.call(this, newColor);
+            this.previousColors.unshift(newColor);
+            if (this.previousColors.length > 5) {
+                this.previousColors.pop();
+            }
+            return this;
+        };
+
+        this.textColor(Game.textColor);
+        this.textFont(Game.generalButtonFont);
+        this.highlightColor = Game.highlightColor;
+
+        // highlight on mouse over, but don't save the highlight color as "used text color"
+        this.bind('MouseOver', function() {
+            previousTextColor.call(this, this.highlightColor);
+        });
+        this.bind('MouseOut', function() {
+            this.textColor(this.previousColors[0]);
+        });
+    },
+
+    withImage: function(imageUrl) {
+        var image = Crafty.e('2D, Image, ' + (this.has('Canvas') ? 'Canvas' : 'DOM'));
+        image.image(imageUrl).attr({x: this.x, y: this.y});
+        this.attach(image);
+        return this;
+    }
+});
+
+Crafty.c('DOMButton', {
+    init: function() {
+        this.requires('DOM, Button');
+        this.css(Game.buttonCss);
+    }
+});
+
 Crafty.c('Actor', {
     init: function() {
         this.requires('2D, Canvas, Grid');
@@ -82,7 +160,8 @@ Crafty.c('Bullet', {
 
 Crafty.c('Enemy', {
     init: function() {
-        this.requires('Actor, Collision, PathWalker, Delay');
+        this.requires('Actor, Collision, PathWalker, Delay, Tooltip');
+        this.attr({tooltipWidth: 150, tooltipHeight: 30});
 
         Game.enemyCount++;
 
@@ -95,10 +174,13 @@ Crafty.c('Enemy', {
         this.delay(function() {
             that.animate_along(Game.path.getPath(), that.speed);
         }, 500, 0);
+        this.delay(function() {
+            that.tooltip((that.tooltipTextBase ? that.tooltipTextBase + " with " : "") + this.health + " HP");
+        }, 100, -1);
         this.bind('TweenEnded', function(actor) {
             if (that == actor) {
                 Game.lifes -= this.livesTaken || 1;
-                this.kill();
+                this.kill(false);
                 Crafty.audio.play('LifeLost', 1);
             }
         })
@@ -138,46 +220,32 @@ Crafty.c('Enemy', {
 
 Crafty.c('Wave', {
     init: function() {
-        this.requires('2D, DOM, Grid, Text, Delay, Mouse');
-        this.attr({w: 150, clickEnabled: true});
+        this.requires('DOMButton, Grid, Delay');
+        this.attr({w: 150, tooltipWidth: 350, clickEnabled: true});
         this.text('Start');
+        this.tooltip("Starts the next wave of enemies. Click here once you placed your towers.");
         this.textFont(Game.waveFont);
-        this.textColor(Game.textColor);
-        this.css(Game.buttonCss);
-        this.bind('Click', function() {
-            if (this.clickEnabled) {
-                this.clickEnabled = false;
-                this.text('Next Wave');
-                this.textColor(Game.disabledColor);
-
-                if (this.currentWave > 0) {
-                    Game.money += Game.moneyAfterWave;
-                }
-                this.startNextWave();
-
-                this.delay(function() {
-                    this.clickEnabled = true;
-                    this.textColor(Game.textColor);
-                }, 5000, 0);
-            }
-        });
         this.currentWave = Game.currentWave;
-        this.finishedEventTriggered = false;
+        this.blinkBeforeStart();
+        this.automaticallyStartNextWave();
+        this.startNextWaveOnClick();
+    },
 
+    blinkBeforeStart: function() {
         var highlighted = false;
         this.delay(function() {
-            if (this.currentWave > 0) {
-                return;
+            if (!this.waveStarted) {
+                if (highlighted) {
+                    this.textColor(Game.textColor);
+                } else {
+                    this.textColor(Game.highlightColor);
+                }
+                highlighted = !highlighted;
             }
-
-            if (highlighted) {
-                this.textColor(Game.textColor);
-            } else {
-                this.textColor(Game.highlightColor);
-            }
-            highlighted = !highlighted;
         }, 1000, -1);
+    },
 
+    automaticallyStartNextWave: function() {
         this.bind('EnterFrame', function() {
             if (this.isWaveFinished()) {
                 if (!this.finishedEventTriggered) {
@@ -203,6 +271,28 @@ Crafty.c('Wave', {
         });
     },
 
+    startNextWaveOnClick: function() {
+        this.bind('Click', function() {
+            if (this.clickEnabled) {
+                this.clickEnabled = false;
+                this.text('Next Wave');
+                this.textColor(Game.disabledColor);
+                this.tooltip("Button currently disabled.");
+
+                if (this.currentWave > 0) {
+                    Game.money += Game.moneyAfterWave;
+                }
+                this.startNextWave();
+
+                this.delay(function() {
+                    this.clickEnabled = true;
+                    this.textColor(Game.textColor);
+                    this.tooltip("Start next wave early to get wave finished bonus gold.");
+                }, 10000, 0);
+            }
+        });
+    },
+
     isWaveFinished: function() {
         return Game.enemyCount == 0 && this.spawnFinished;
     },
@@ -216,6 +306,7 @@ Crafty.c('Wave', {
 
     startNextWave: function() {
         this.spawnFinished = false;
+        this.waveStarted = true;
 
         var i = 0, enemies = this.getEnemies();
         this.delay(function() {
@@ -231,6 +322,7 @@ Crafty.c('Wave', {
             i++;
             if (i == enemies.length) {
                 this.spawnFinished = true;
+                console.log("spawn finished");
             }
         }, 3000, enemies.length - 1);
 
@@ -269,8 +361,8 @@ Crafty.c('Wave', {
 
 Crafty.c('HudElement', {
     init: function() {
-        this.requires('2D, DOM, Text');
-        this.attr({ x: 0, y: 0, w: 133 });
+        this.requires('2D, DOM, Grid, Text');
+        this.attr({ x: 0, y: 0, w: Game.width() });
         this.textFont(Game.hudFont);
         this.textColor(Game.textColor);
     },
@@ -278,14 +370,20 @@ Crafty.c('HudElement', {
     observe: function(prefix, observable) {
         this.observable = observable;
         this.bind('EnterFrame', function() {
-            this.text(prefix + ": " + Game[this.observable])
+            if (this.oldValue != Game[this.observable]) {
+                this.trigger('ValueChanged', Game[this.observable]);
+                this.oldValue = Game[this.observable];
+            }
+        });
+        this.bind('ValueChanged', function(data) {
+            this.text(prefix + ": " + data);
         });
         return this;
     },
 
     alertIfBelow: function(threshold) {
-        this.bind('EnterFrame', function() {
-            if (Game[this.observable] < threshold) {
+        this.bind('ValueChanged', function(data) {
+            if (data < threshold) {
                 this.textColor(Game.alertColor);
             } else {
                 this.textColor(Game.textColor);
@@ -295,36 +393,41 @@ Crafty.c('HudElement', {
     },
 
     highlight: function() {
-        this.bind('EnterFrame', function() {
-            if (Game[this.observable] > 0) {
+        this.bind('ValueChanged', function(data) {
+            if (data > 0) {
                 this.textColor(Game.highlightColor);
             } else {
                 this.textColor(Game.textColor);
             }
         });
         return this;
-    },
-
-    at: function(x) {
-        this.attr({ x: Game.map_grid.tile.width +  x * 133});
-        return this;
     }
 });
 
 Crafty.c('TowerSelector', {
     init: function() {
-        this.requires('2D, DOM, Grid, Text, Image, Mouse, Keyboard');
-        this.x = 0;
-        this.y = Game.height() - Game.map_grid.tile.height;
+        this.requires('DOMButton, Grid, Keyboard');
+        this.attr({x: 0, y: Game.height() - Game.map_grid.tile.height, z: 100});
         this.textFont(Game.towerSelectorFont);
-        this.textColor(Game.textColor);
-        this.css(Game.buttonCss);
     },
 
     forTower: function(towerName) {
         this.targetTower = towerName;
         this.bind('EnterFrame', function() {
+            if (this.oldValue != Game.towers[towerName]) {
+                this.text(Game.towers[towerName]);
+            }
+        });
+        this.bind('TowerCreated', function() {
             this.text(Game.towers[towerName]);
+        });
+
+        if (Game.selectedTower == this.targetTower) {
+            this.textColor(Game.highlightColor);
+        } else {
+            this.textColor(Game.textColor);
+        }
+        this.bind('TowerChanged', function() {
             if (Game.selectedTower == this.targetTower) {
                 this.textColor(Game.highlightColor);
             } else {
@@ -333,12 +436,8 @@ Crafty.c('TowerSelector', {
         });
         this.bind('Click', function() {
             Game.selectedTower = towerName;
+            Crafty.trigger('TowerChanged');
         });
-        return this;
-    },
-
-    withImage: function(imageUrl) {
-        this.image(imageUrl);
         return this;
     },
 
@@ -346,6 +445,7 @@ Crafty.c('TowerSelector', {
         this.bind('KeyDown', function() {
             if (this.isDown(hotkey)) {
                 Game.selectedTower = this.targetTower;
+                Crafty.trigger('TowerChanged');
             }
         });
         return this;
@@ -354,18 +454,11 @@ Crafty.c('TowerSelector', {
 
 Crafty.c('RestartButton', {
     init: function() {
-        this.requires('2D, DOM, Text, Mouse');
+        this.requires('DOMButton');
         this.text('Start again?');
         this.attr({ x: 0, y: Game.height() - 100, w: Game.width(), h: 50});
         this.textFont(Game.restartFont);
         this.textColor(Game.restartColor);
-        this.css(Game.buttonCss);
-        this.bind('MouseOver', function() {
-            this.textColor('white');
-        });
-        this.bind('MouseOut', function() {
-            this.textColor(Game.restartColor);
-        });
         this.bind('Click', function() {
             console.log('Restaaaaaart');
             if (Crafty.isPaused()) {
@@ -376,6 +469,34 @@ Crafty.c('RestartButton', {
     }
 });
 
+Crafty.c('SoundButton', {
+    init: function() {
+        this.requires('DOMButton');
+
+        if (Crafty.storage('muted')) {
+            Crafty.audio.mute();
+            this.text('Sound: Off');
+            this.tooltip('Sound is off. Click to turn it on.');
+        } else {
+            this.text('Sound: On');
+            this.tooltip('Sound is on. Click to turn it off.');
+        }
+
+        this.bind('Click', function() {
+            if (Crafty.audio.muted) {
+                Crafty.audio.unmute();
+                this.text('Sound: On');
+                this.tooltip('Sound is on. Click to turn it off.');
+                Crafty.storage('muted', false);
+            } else {
+                Crafty.audio.mute();
+                this.text('Sound: Off');
+                this.tooltip('Sound is off. Click to turn it on.');
+                Crafty.storage('muted', true);
+            }
+        });
+    }
+});
 
 Crafty.c('Tree', {
     init: function() {
@@ -621,7 +742,8 @@ Crafty.c('Witch', {
         this.attr({
             health: 5,
             reward: 1,
-            speed: 1.8
+            speed: 1.8,
+            tooltipTextBase: "Witch"
         });
     }
 });
@@ -631,8 +753,11 @@ Crafty.c('MightyWitch', {
         this.requires('Enemy, witch_down, Delay');
         this.attr({
             health: 50,
-            reward: 25,
-            speed: 1.8
+            reward: 20,
+            speed: 1.8,
+            tooltipWidth: 200,
+            tooltipHeight: 60,
+            tooltipTextBase: "Mighty Witch (disables towers)"
         });
 
         this.delay(function() {
@@ -653,7 +778,8 @@ Crafty.c('Squid', {
         this.attr({
             health: 30,
             reward: 5,
-            speed: 1.0
+            speed: 1.0,
+            tooltipTextBase: "Squid"
         });
     }
 });
@@ -665,7 +791,9 @@ Crafty.c('FastSquid', {
         this.attr({
             health: 23,
             reward: 15,
-            speed: 2.5
+            speed: 2.5,
+            tooltipWidth: 200,
+            tooltipTextBase: "Fast Squid"
         });
     }
 });
@@ -676,7 +804,9 @@ Crafty.c('Knight', {
         this.attr({
             health: 50,
             reward: 15,
-            speed: 1.3
+            speed: 1.3,
+            tooltipWidth: 200,
+            tooltipTextBase: "Knight"
         });
     }
 });
@@ -686,8 +816,10 @@ Crafty.c('FastKnight', {
         this.requires('Enemy, knight_right');
         this.attr({
             health: 55,
-            reward: 50,
-            speed: 2.2
+            reward: 30,
+            speed: 2.2,
+            tooltipWidth: 200,
+            tooltipTextBase: "Fast Knight"
         });
     }
 });
@@ -698,7 +830,8 @@ Crafty.c('Spider', {
         this.attr({
             health: 40,
             reward: 15,
-            speed: 1.7
+            speed: 1.7,
+            tooltipTextBase: "Spider"
         });
     }
 });
@@ -710,7 +843,8 @@ Crafty.c('Orc', {
             health: 100,
             reward: 50,
             speed: 0.8,
-            livesTaken: 2
+            livesTaken: 2,
+            tooltipTextBase: "Orc"
         });
     }
 });
@@ -720,10 +854,12 @@ Crafty.c('GreenDragon', {
         this.requires('Enemy, green_dragon');
         this.attr({
             health: 150,
-            reward: 150,
+            reward: 100,
             speed: 1.5,
             livesTaken: 3,
-            noInstantKill: true
+            noInstantKill: true,
+            tooltipHeight: 60,
+            tooltipTextBase: "Green Dragon"
         });
     }
 });
@@ -736,7 +872,9 @@ Crafty.c('SilverDragon', {
             reward: 500,
             speed: 1.8,
             livesTaken: 5,
-            noInstantKill: true
+            noInstantKill: true,
+            tooltipHeight: 60,
+            tooltipTextBase: "Silver Dragon"
         });
     }
 });

@@ -25,24 +25,28 @@ Game = {
 
     centerCss: { 'text-align': 'center'},
     buttonCss: { 'text-align': 'center', 'cursor': 'pointer'},
+    generalTooltipCss: { 'padding': '5px', 'border': '1px solid black', 'background-color': 'grey'},
 
     loadingFont: { 'size': '48px', 'family': 'Arial' },
-    hudFont: { 'size': '20px', 'family': 'Arial' },
-    towerSelectorFont: { 'size': '18px', 'family': 'Arial' },
+    hudFont: { 'size': '20px', 'family': 'Comic Sans MS' },
+    towerSelectorFont: { 'size': '16px', 'family': 'Arial' },
     explanationFont: { 'size': '12px', 'family': 'Arial' },
-    difficultyFont: { 'size': '36px', 'family': 'Arial' },
-    waveFont: { 'size': '20px', 'family': 'Arial', 'weight': 'bold' },
+    difficultyFont: { 'size': '36px', 'family': 'Comic Sans MS' },
+    waveFont: { 'size': '25px', 'family': 'sans-serif', 'weight': 'bold' },
 
-    gameOverFont: { 'size': '48px', 'family': 'Arial' },
+    creditsFont: { 'size': '28px', 'family': 'sans-serif', weight: 'bold' },
+    creditsTextFont: { 'size': '20px', 'family': 'sans-serif', variant: 'italic' },
+    gameOverFont: { 'size': '48px', 'family': 'sans-serif' },
     gameOverColor: 'red',
-    wonFont: { 'size': '48px', 'family': 'Arial' },
+    wonFont: { 'size': '48px', 'family': 'Comic Sans MS' },
     wonColor: 'rgb(109, 203, 105)',
-    continueFont: { 'size': '36px', 'family': 'Arial' },
+    continueFont: { 'size': '36px', 'family': 'Comic Sans MS' },
     continueColor: 'brown',
-    restartFont: { 'size': '36px', 'family': 'Arial' },
+    restartFont: { 'size': '36px', 'family': 'sans-serif' },
     restartColor: 'brown',
 
-    generalButtonFont: { 'size': '36px', 'family': 'Arial' },
+    generalButtonFont: { 'size': '36px', 'family': 'sans-serif' },
+    generalTooltipFont: { 'size': '20px', 'family': 'sans-serif' },
 
     // handy overview which wave spawns which enemies
     waves: [
