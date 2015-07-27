@@ -13,8 +13,8 @@ Game = {
             width:  32,
             height: 32
         },
-        pathMinLength: 80,
-        pathMaxLength: 90
+        pathMinLength: 70,
+        pathMaxLength: 80
     },
 
     // text colors and fonts (maybe we get fancy later on)
@@ -30,8 +30,9 @@ Game = {
     loadingFont: { 'size': '48px', 'family': 'Arial' },
     hudFont: { 'size': '20px', 'family': 'Comic Sans MS' },
     towerSelectorFont: { 'size': '16px', 'family': 'Arial' },
-    explanationFont: { 'size': '12px', 'family': 'Arial' },
+    explanationFont: { 'size': '16px', 'family': 'Arial' },
     difficultyFont: { 'size': '36px', 'family': 'Comic Sans MS' },
+    mapSelectionFont: { 'size': '30px', 'family': 'Comic Sans MS' },
     waveFont: { 'size': '25px', 'family': 'sans-serif', 'weight': 'bold' },
 
     creditsFont: { 'size': '28px', 'family': 'sans-serif', weight: 'bold' },
@@ -49,37 +50,115 @@ Game = {
     generalTooltipFont: { 'size': '20px', 'family': 'sans-serif' },
 
     // handy overview which wave spawns which enemies
-    waves: [
-        ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch'],
-        ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Squid'],
-        ['Witch', 'Witch', 'Witch', 'Witch', 'Squid', 'Witch', 'Witch', 'Squid'],
-        ['Squid', 'Squid', 'Squid', 'FastSquid'],
-        ['Squid', 'FastSquid', 'Knight', 'Squid', 'FastSquid', 'Witch', 'Witch', 'Witch', 'Knight'],
-        ['FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight'],
-        ['FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid'],
-        ['FastSquid', 'Spider', 'FastSquid', 'Spider', 'Witch', 'Witch', 'Knight', 'Knight', 'MightyWitch'],
-        ['Spider', 'Witch', 'MightyWitch', 'FastSquid', 'Witch', 'MightyWitch', 'Orc'],
-        ['Orc', 'Orc', 'Orc', 'Orc', 'Orc', 'FastSquid', 'FastSquid', 'Witch', 'FastKnight'],
-        ['FastKnight', 'FastKnight', 'FastKnight', 'MightyWitch', 'MightyWitch', 'MightyWitch'],
-        ['Spider', 'FastSquid', 'Spider', 'FastSquid', 'Orc', 'Orc', 'Squid', 'GreenDragon'],
-        ['Spider', 'Spider', 'Orc', 'Orc', 'GreenDragon', 'FastSquid', 'FastSquid', 'Orc', 'GreenDragon'],
-        ['Witch', 'Squid', 'FastSquid', 'Knight', 'Spider', 'MightyWitch', 'Orc', 'FastKnight', 'GreenDragon'],
-        ['SilverDragon']
-    ],
+    waves: {
+        current: [],
+        level1: [
+            ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch'],
+            ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Squid'],
+            ['Witch', 'Witch', 'Witch', 'Witch', 'Squid', 'Witch', 'Witch', 'Squid'],
+            ['Squid', 'Squid', 'Squid', 'FastSquid'],
+            ['Squid', 'FastSquid', 'Knight', 'Squid', 'FastSquid', 'Witch', 'Witch', 'Witch', 'Knight'],
+            ['FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight'],
+            ['FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid'],
+            ['FastSquid', 'Spider', 'FastSquid', 'Spider', 'Witch', 'Witch', 'Knight', 'Knight', 'MightyWitch'],
+            ['Spider', 'Witch', 'MightyWitch', 'FastSquid', 'Witch', 'MightyWitch', 'Orc'],
+            ['Orc', 'Orc', 'Orc', 'Orc', 'Orc', 'FastSquid', 'FastSquid', 'Witch', 'FastKnight'],
+            ['FastKnight', 'FastKnight', 'FastKnight', 'MightyWitch', 'MightyWitch', 'MightyWitch'],
+            ['Spider', 'FastSquid', 'Spider', 'FastSquid', 'Orc', 'Orc', 'Squid', 'GreenDragon'],
+            ['Spider', 'Spider', 'Orc', 'Orc', 'GreenDragon', 'FastSquid', 'FastSquid', 'Orc', 'GreenDragon'],
+            ['Witch', 'Squid', 'FastSquid', 'Knight', 'Spider', 'MightyWitch', 'Orc', 'FastKnight', 'GreenDragon'],
+            ['SilverDragon']
+        ],
+        level2: [
+            ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch'],
+            ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Squid'],
+            ['Witch', 'Witch', 'Witch', 'Witch', 'Squid', 'Witch', 'Witch', 'Squid'],
+            ['Squid', 'Squid', 'Squid', 'FastSquid'],
+            ['Squid', 'FastSquid', 'Knight', 'Squid', 'FastSquid', 'Witch', 'Witch', 'Witch', 'Knight'],
+            ['FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight'],
+            ['FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid'],
+            ['FastSquid', 'Spider', 'FastSquid', 'Spider', 'Witch', 'Witch', 'Knight', 'Knight', 'MightyWitch'],
+            ['Spider', 'Witch', 'MightyWitch', 'FastSquid', 'Witch', 'MightyWitch', 'Orc'],
+            ['Orc', 'Orc', 'Orc', 'Orc', 'Orc', 'FastSquid', 'FastSquid', 'Witch', 'FastKnight'],
+            ['FastKnight', 'FastKnight', 'FastKnight', 'MightyWitch', 'MightyWitch', 'MightyWitch'],
+            ['Spider', 'FastSquid', 'Spider', 'FastSquid', 'Orc', 'Orc', 'Squid', 'GreenDragon'],
+            ['Spider', 'Spider', 'Orc', 'Orc', 'GreenDragon', 'FastSquid', 'FastSquid', 'Orc', 'GreenDragon'],
+            ['Witch', 'Squid', 'FastSquid', 'Knight', 'Spider', 'MightyWitch', 'Orc', 'FastKnight', 'GreenDragon'],
+            ['SilverDragon']
+        ],
+        level3: [
+            ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch'],
+            ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Squid'],
+            ['Witch', 'Witch', 'Witch', 'Witch', 'Squid', 'Witch', 'Witch', 'Squid'],
+            ['Squid', 'Squid', 'Squid', 'FastSquid'],
+            ['Squid', 'FastSquid', 'Knight', 'Squid', 'FastSquid', 'Witch', 'Witch', 'Witch', 'Knight'],
+            ['FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight'],
+            ['FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid'],
+            ['FastSquid', 'Spider', 'FastSquid', 'Spider', 'Witch', 'Witch', 'Knight', 'Knight', 'MightyWitch'],
+            ['Spider', 'Witch', 'MightyWitch', 'FastSquid', 'Witch', 'MightyWitch', 'Orc'],
+            ['Orc', 'Orc', 'Orc', 'Orc', 'Orc', 'FastSquid', 'FastSquid', 'Witch', 'FastKnight'],
+            ['FastKnight', 'FastKnight', 'FastKnight', 'MightyWitch', 'MightyWitch', 'MightyWitch'],
+            ['Spider', 'FastSquid', 'Spider', 'FastSquid', 'Orc', 'Orc', 'Squid', 'GreenDragon'],
+            ['Spider', 'Spider', 'Orc', 'Orc', 'GreenDragon', 'FastSquid', 'FastSquid', 'Orc', 'GreenDragon'],
+            ['Witch', 'Squid', 'FastSquid', 'Knight', 'Spider', 'MightyWitch', 'Orc', 'FastKnight', 'GreenDragon'],
+            ['SilverDragon']
+        ],
+        level4: [
+            ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch'],
+            ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Squid'],
+            ['Witch', 'Witch', 'Witch', 'Witch', 'Squid', 'Witch', 'Witch', 'Squid'],
+            ['Squid', 'Squid', 'Squid', 'FastSquid'],
+            ['Squid', 'FastSquid', 'Knight', 'Squid', 'FastSquid', 'Witch', 'Witch', 'Witch', 'Knight'],
+            ['FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight'],
+            ['FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid'],
+            ['FastSquid', 'Spider', 'FastSquid', 'Spider', 'Witch', 'Witch', 'Knight', 'Knight', 'MightyWitch'],
+            ['Spider', 'Witch', 'MightyWitch', 'FastSquid', 'Witch', 'MightyWitch', 'Orc'],
+            ['Orc', 'Orc', 'Orc', 'Orc', 'Orc', 'FastSquid', 'FastSquid', 'Witch', 'FastKnight'],
+            ['FastKnight', 'FastKnight', 'FastKnight', 'MightyWitch', 'MightyWitch', 'MightyWitch'],
+            ['Spider', 'FastSquid', 'Spider', 'FastSquid', 'Orc', 'Orc', 'Squid', 'GreenDragon'],
+            ['Spider', 'Spider', 'Orc', 'Orc', 'GreenDragon', 'FastSquid', 'FastSquid', 'Orc', 'GreenDragon'],
+            ['Witch', 'Squid', 'FastSquid', 'Knight', 'Spider', 'MightyWitch', 'Orc', 'FastKnight', 'GreenDragon'],
+            ['SilverDragon']
+        ]
+    },
 
     // sounds, images, spritesheets, all handy at one place
     assets: {
         "audio": {
             "Background": ["assets/sounds/background.wav", "assets/sounds/background.mp3", "assets/sounds/background.ogg"],
             "Boss": ["assets/sounds/boss.wav", "assets/sounds/boss.mp3", "assets/sounds/boss.ogg"],
-            "Menu": ["assets/sounds/Menu.mp3", "assets/sounds/Menu.ogg", "assets/sounds/Menu.wav"],
+            "Menu": ["assets/sounds/Menu.mp3", "assets/sounds/Menu.ogg"],
             "Won": ["assets/sounds/Won.mp3", "assets/sounds/Won.ogg", "assets/sounds/Won.wav"],
             "EnemyDead": ["assets/sounds/Shot.mp3", "assets/sounds/Shot.ogg", "assets/sounds/Shot.wav"],
             "LifeLost": ["assets/sounds/LifeLost.mp3", "assets/sounds/LifeLost.ogg", "assets/sounds/LifeLost.wav"]
         },
-        "images": ["assets/ftd-logo.jpg", "assets/transparent.png", "assets/background.jpg",
-            "assets/flower.png", "assets/squid.png"],
+        "images": ["assets/ftd-logo.jpg", "assets/transparent.png", "assets/flower.png", "assets/squid.png",
+                "assets/preview-level1.jpg", "assets/preview-level2.jpg", "assets/preview-level3.jpg"],
         "sprites": {
+            "assets/background.jpg": {
+                "tile": 800,
+                "tileh": 480,
+                "map": {
+                    background1: [0, 0]
+                }
+            },
+            "assets/background2.jpg": {
+                "tile": 800,
+                "tileh": 600,
+                "map": {
+                    background2: [0, 0],
+                    background3: [1, 0],
+                    background4: [0, 1],
+                    background5: [1, 1]
+                }
+            },
+            "assets/background3.jpg": {
+                "tile": 800,
+                "tileh": 600,
+                "map": {
+                    background6: [0, 0]
+                }
+            },
             "assets/witch.png": {
                 "tile": 29,
                 "tileh": 30,

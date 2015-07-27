@@ -188,9 +188,6 @@ Crafty.c('Enemy', {
 
         var that = this;
         this.delay(function() {
-            that.animate_along(Game.path.getPath(), that.speed);
-        }, 500, 0);
-        this.delay(function() {
             that.tooltip((that.tooltipTextBase ? that.tooltipTextBase + " with " : "") + this.health + " HP");
         }, 100, -1);
         this.bind('TweenEnded', function(actor) {
@@ -317,20 +314,28 @@ Crafty.c('Wave', {
         if (Game.lifes == 0) {
             return false;
         }
-        return Game.endless || this.currentWave < Game.waves.length;
+        return Game.endless || this.currentWave < Game.waves.current.length;
     },
 
     startNextWave: function() {
         this.spawnFinished = false;
         this.waveStarted = true;
 
-        var i = 0, enemies = this.getEnemies();
+        var i = 0, enemies = this.getEnemies(), interval = 3000;
+
+        if (this.currentWave > Game.waves.current.length) {
+            interval = Math.max(200, 3000 - (this.currentWave - Game.waves.current.length) * 50);
+        }
+
         this.delay(function() {
             var enemy = Crafty.e(enemies[i]).at(Game.path.start.x, Game.path.start.y);
+            this.delay(function() {
+                enemy.animate_along(Game.path.getPath(), enemy.speed);
+            }, 500, 0);
 
             // special handling for all waves after standard waves: increase health
-            if (this.currentWave > Game.waves.length) {
-                var diff = this.currentWave - Game.waves.length;
+            if (this.currentWave > Game.waves.current.length) {
+                var diff = this.currentWave - Game.waves.current.length;
                 enemy.attr({health: Math.floor((1 + diff * 0.05) * enemy.health + 5 * diff)});
                 console.log("new health: " + enemy.health);
             }
@@ -340,9 +345,9 @@ Crafty.c('Wave', {
                 this.spawnFinished = true;
                 console.log("spawn finished");
             }
-        }, 3000, enemies.length - 1);
+        }, interval, enemies.length - 1);
 
-        if (this.currentWave == Game.waves.length - 1) {
+        if (this.currentWave == Game.waves.current.length - 1) {
             Crafty.audio.stop();
             Crafty.audio.play('Boss', -1);
         }
@@ -352,12 +357,12 @@ Crafty.c('Wave', {
     },
 
     getEnemies: function() {
-        if (this.currentWave < Game.waves.length) {
-            return Game.waves[this.currentWave];
+        if (this.currentWave < Game.waves.current.length) {
+            return Game.waves.current[this.currentWave];
         } else {
             // TODO auto generate waves randomly, based on reward
             var enemies = ['GreenDragon', 'Orc'];
-            for (var i = 0; i < this.currentWave - Game.waves.length; i++) {
+            for (var i = 0; i < this.currentWave - Game.waves.current.length; i++) {
                 enemies.push(
                     i % 10 == 4 ? 'SilverDragon' :
                         (i % 6 == 2 ? 'GreenDragon' :
@@ -472,6 +477,7 @@ Crafty.c('RestartButton', {
     init: function() {
         this.requires('DOMButton');
         this.text('Start again?');
+        this.tooltip('Clicking this button starts another game');
         this.attr({ x: 0, y: Game.height() - 100, w: Game.width(), h: 50});
         this.textFont(Game.restartFont);
         this.textColor(Game.restartColor);
@@ -524,7 +530,7 @@ Crafty.c('Tree', {
 Crafty.c('Path', {
     init: function() {
         this.requires('Actor, Image, Color');
-        this.image("assets/transparent.png").color("#969600", 0.15);
+        this.image("assets/transparent.png").color("#969600", 0.25);
     }
 });
 
@@ -651,10 +657,13 @@ Crafty.c('Tower', {
 
 Crafty.c('FlowerTower', {
     init: function() {
-        this.requires('Tower, Image');
+        this.requires('Tower, Image, Tooltip');
         this.image("assets/flower.png");
+        this.attr({ tooltipWidth: 250, tooltipHeight: 80});
         this.range = 4;
         this.maxLevel = 10;
+        this.shootingSpeed = 0.4;
+        this.updateTooltip();
 
         // max level and range increase
         this.bind('TowerUpgraded', function(actor) {
@@ -665,6 +674,8 @@ Crafty.c('FlowerTower', {
                     this.range = 6;
                     this.disableUpgrade();
                 }
+
+                this.updateTooltip();
             }
         });
 
@@ -672,7 +683,14 @@ Crafty.c('FlowerTower', {
             if (this.has('Enabled') && this.isEnemyNear()) {
                 this.shoot();
             }
-        }, 400, -1);
+        }, this.shootingSpeed * 1000, -1);
+    },
+
+    updateTooltip: function() {
+        this.tooltip(
+            "Flower Tower at level " + this.level + ", <br>" +
+            this.getDamage() + " damage per petal, <br>" +
+            (this.getDamage() / this.shootingSpeed) + " dps in a square of " + this.range + " tiles");
     },
 
     shoot: function() {
@@ -710,7 +728,7 @@ Crafty.c('FlowerTower', {
 
     getUpgradeCost: function() {
         if (this.level < this.maxLevel) {
-            return Math.floor(Game.towers['FlowerTower'] * 1.75 * Math.sqrt(this.level));
+            return Math.floor(Game.towers['FlowerTower'] * Math.pow(1.4, this.level));
         } else {
             return "MAX";
         }
@@ -719,12 +737,19 @@ Crafty.c('FlowerTower', {
 
 Crafty.c('SniperTower', {
     init: function() {
-        this.requires('Tower, leaf_right, SpriteAnimation');
-        // This is the same animation definition, but using the alternative method
-        this.attr({w: 32, h: 32});
+        this.requires('Tower, Tooltip, leaf_right, SpriteAnimation');
+        this.attr({w: 32, h: 32, tooltipWidth: 250, tooltipHeight: 80});
         this.reel('LeafSpinning', 2000, [[0, 0], [0, 1], [1, 1], [1, 0]]);
         this.animate('LeafSpinning', -1);
         this.maxLevel = 6;
+        this.updateTooltip();
+
+        // max level and range increase
+        this.bind('TowerUpgraded', function(actor) {
+            if (actor == this) {
+                this.updateTooltip();
+            }
+        });
 
         // increase cost for next sniper tower (we don't want to make it tooo easy ;) )
         this.delay(function() {
@@ -738,8 +763,15 @@ Crafty.c('SniperTower', {
         }, 4000, -1);
     },
 
+    updateTooltip: function() {
+        this.tooltip(
+            "Sniper Tower at level " + this.level + ", <br>" +
+            this.getDamage() + " damage per petal, <br>" +
+            (this.getDamage() / 4) + " dps on the whole map");
+    },
+
     shoot: function() {
-        var firstEnemy = Crafty('Enemy').get(0), damage = this.level * 5;
+        var firstEnemy = Crafty('Enemy').get(0);
 
         // instant kill with 2% chance on max level
         if (this.level == this.maxLevel && Math.floor(Math.random() * 50) == 0 && !firstEnemy.noInstantKill) {
@@ -747,11 +779,15 @@ Crafty.c('SniperTower', {
             firstEnemy.kill();
         } else {
             this.delay(function() {
-                firstEnemy.hitWithDamage(damage);
+                firstEnemy.hitWithDamage(this.getDamage());
             }, 500, 0);
             var x = this.at().x, y = this.at().y, x2 = Math.floor(firstEnemy.at().x), y2 = Math.floor(firstEnemy.at().y);
             Crafty.e('Bullet, leaf_right').attr({damage: 0}).at(x, y).animate_to(x2, y2, 35).destroy_after_animation();
         }
+    },
+
+    getDamage: function() {
+        return this.level * 5;
     },
 
     getUpgradeCost: function() {
@@ -790,7 +826,7 @@ Crafty.c('MightyWitch', {
     init: function() {
         this.requires('Enemy, witch_down, Delay');
         this.attr({
-            health: 50,
+            health: 100,
             reward: 20,
             speed: 1.8,
             tooltipWidth: 200,
@@ -815,7 +851,7 @@ Crafty.c('Squid', {
         this.image("assets/squid.png");
         this.attr({
             health: 30,
-            reward: 5,
+            reward: 3,
             speed: 1.0,
             tooltipTextBase: "Squid"
         });
@@ -828,7 +864,7 @@ Crafty.c('FastSquid', {
         this.image("assets/squid.png");
         this.attr({
             health: 23,
-            reward: 15,
+            reward: 5,
             speed: 2.5,
             tooltipWidth: 200,
             tooltipTextBase: "Fast Squid"
@@ -841,7 +877,7 @@ Crafty.c('Knight', {
         this.requires('Enemy, knight_right');
         this.attr({
             health: 50,
-            reward: 15,
+            reward: 10,
             speed: 1.3,
             tooltipWidth: 200,
             tooltipTextBase: "Knight"
@@ -853,9 +889,9 @@ Crafty.c('FastKnight', {
     init: function() {
         this.requires('Enemy, knight_right');
         this.attr({
-            health: 55,
-            reward: 30,
-            speed: 2.2,
+            health: 65,
+            reward: 15,
+            speed: 2.7,
             tooltipWidth: 200,
             tooltipTextBase: "Fast Knight"
         });
@@ -866,8 +902,8 @@ Crafty.c('Spider', {
     init: function() {
         this.requires('Enemy, spider');
         this.attr({
-            health: 40,
-            reward: 15,
+            health: 60,
+            reward: 5,
             speed: 1.7,
             tooltipTextBase: "Spider"
         });
@@ -878,8 +914,8 @@ Crafty.c('Orc', {
     init: function() {
         this.requires('Enemy, orc');
         this.attr({
-            health: 100,
-            reward: 50,
+            health: 150,
+            reward: 30,
             speed: 0.8,
             livesTaken: 2,
             tooltipTextBase: "Orc"
@@ -891,8 +927,8 @@ Crafty.c('GreenDragon', {
     init: function() {
         this.requires('Enemy, green_dragon');
         this.attr({
-            health: 150,
-            reward: 100,
+            health: 200,
+            reward: 50,
             speed: 1.5,
             livesTaken: 3,
             noInstantKill: true,
@@ -906,10 +942,10 @@ Crafty.c('SilverDragon', {
     init: function() {
         this.requires('Enemy, silver_dragon');
         this.attr({
-            health: 500,
-            reward: 500,
+            health: 800,
+            reward: 150,
             speed: 1.8,
-            livesTaken: 5,
+            livesTaken: 10,
             noInstantKill: true,
             tooltipHeight: 60,
             tooltipTextBase: "Silver Dragon"
