@@ -365,9 +365,10 @@ Crafty.c('Wave', {
             for (var i = 0; i < this.currentWave - Game.waves.current.length; i++) {
                 enemies.push(
                     i % 10 == 4 ? 'SilverDragon' :
-                        (i % 6 == 2 ? 'GreenDragon' :
-                            (i % 4 == 0 ? 'MightyWitch' :
-                                'FastSquid')));
+                    (i % 6 == 2 ? 'GreenDragon' :
+                    (i % 4 == 0 ? 'MightyWitch' :
+                    (i % 4 == 2 ? 'FastKnight' :
+                    'FastSquid'))));
             }
             enemies.push('GreenDragon');
             return enemies;
@@ -530,22 +531,19 @@ Crafty.c('Tree', {
 Crafty.c('Path', {
     init: function() {
         this.requires('Actor, Image, Color');
-        this.image("assets/transparent.png").color("#969600", 0.25);
+        this.image("assets/transparent.png").color("#969600", 0.42);
     }
 });
 
 Crafty.c('TowerPlace', {
     init: function() {
-        this.requires('Actor, Mouse, Image, Color');
+        this.requires('Actor, Delay, Mouse, Image, Color, Tooltip');
         this.image("assets/transparent.png").color("#ffffff", 0.0);
         this.bind('MouseOver', function() {
             this.color("#b66666", 0.2);
-            Game.towerCost = Game.towers[Game.selectedTower];
-            Game.towerLevel = 0;
         });
         this.bind('MouseOut', function() {
             this.color("#ffffff", 0.0);
-            Game.towerCost = 0;
             this.previousMouseUp = false;
         });
 
@@ -559,6 +557,15 @@ Crafty.c('TowerPlace', {
             });
         }
 
+        this.tooltip('Build a new ' + Game.selectedTower + ' here for ' + Game.towers[Game.selectedTower] + ' gold');
+        this.bind('TowerCreated', function() {
+            this.delay(function() {
+                this.tooltip('Build a new ' + Game.selectedTower + ' here for ' + Game.towers[Game.selectedTower] + ' gold');
+            }, 500, 0);
+        });
+        this.bind('TowerChanged', function() {
+            this.tooltip('Build a new ' + Game.selectedTower + ' here for ' + Game.towers[Game.selectedTower] + ' gold');
+        });
         this.bind('Click', function() {
             if (Game.money >= Game.towers[Game.selectedTower]) {
                 var tower = Crafty.e(Game.selectedTower).at(this.at().x, this.at().y);
@@ -583,13 +590,9 @@ Crafty.c('Enabled', {
 
         this.bind('MouseOver', function() {
             this.color("#6666b6", 0.2);
-            Game.towerCost = this.getUpgradeCost();
-            Game.towerLevel = this.level;
         });
         this.bind('MouseOut', function() {
             this.color("#ffffff", 0.0);
-            Game.towerCost = 0;
-            Game.towerLevel = 0;
         });
     },
 
@@ -659,7 +662,7 @@ Crafty.c('FlowerTower', {
     init: function() {
         this.requires('Tower, Image, Tooltip');
         this.image("assets/flower.png");
-        this.attr({ tooltipWidth: 250, tooltipHeight: 80});
+        this.attr({ tooltipWidth: 250, tooltipHeight: 110});
         this.range = 4;
         this.maxLevel = 10;
         this.shootingSpeed = 0.4;
@@ -690,7 +693,8 @@ Crafty.c('FlowerTower', {
         this.tooltip(
             "Flower Tower at level " + this.level + ", <br>" +
             this.getDamage() + " damage per petal, <br>" +
-            (this.getDamage() / this.shootingSpeed) + " dps in a square of " + this.range + " tiles");
+            (this.getDamage() / this.shootingSpeed) + " dps in a square of " + this.range + " tiles <br>" +
+            (this.maxLevel == this.level ? "(maximum level reached)" : "(Upgrade cost: " + this.getUpgradeCost() + " gold)"));
     },
 
     shoot: function() {
@@ -738,7 +742,7 @@ Crafty.c('FlowerTower', {
 Crafty.c('SniperTower', {
     init: function() {
         this.requires('Tower, Tooltip, leaf_right, SpriteAnimation');
-        this.attr({w: 32, h: 32, tooltipWidth: 250, tooltipHeight: 80});
+        this.attr({w: 32, h: 32, tooltipWidth: 250, tooltipHeight: 110});
         this.reel('LeafSpinning', 2000, [[0, 0], [0, 1], [1, 1], [1, 0]]);
         this.animate('LeafSpinning', -1);
         this.maxLevel = 6;
@@ -767,7 +771,8 @@ Crafty.c('SniperTower', {
         this.tooltip(
             "Sniper Tower at level " + this.level + ", <br>" +
             this.getDamage() + " damage per petal, <br>" +
-            (this.getDamage() / 4) + " dps on the whole map");
+            (this.getDamage() / 4) + " dps on the whole map <br> " +
+            (this.maxLevel == this.level ? "(maximum level reached)" : "(Upgrade cost: " + this.getUpgradeCost() + " gold)"));
     },
 
     shoot: function() {
@@ -914,7 +919,7 @@ Crafty.c('Orc', {
     init: function() {
         this.requires('Enemy, orc');
         this.attr({
-            health: 150,
+            health: 200,
             reward: 30,
             speed: 0.8,
             livesTaken: 2,
@@ -955,9 +960,9 @@ Crafty.c('SilverDragon', {
 
 
 
-// ---------------------
-// custom Tween handling
-// ---------------------
+// -------------------------------------
+// custom Tween handling (only movement)
+// -------------------------------------
 
 Crafty.c('Tweening', {
     init: function() {
@@ -967,10 +972,43 @@ Crafty.c('Tweening', {
             stepsPerGrid: 25
         });
 
-        this.bind('EnterFrame', this.tween_handler)
+        this.bind('EnterFrame', this.tweenHandler)
     },
 
-    tween_handler: function() {
+    moveActor: function (current, distanceX, distanceY) {
+        var newX = current.actor.x, newY = current.actor.y;
+
+        if (current.actor.x < current.steps[0].x) {
+            newX = Math.min(current.actor.x + distanceX, current.steps[0].x);
+        } else if (current.actor.x > current.steps[0].x) {
+            newX = Math.max(current.actor.x - distanceX, current.steps[0].x);
+        }
+
+        if (current.actor.y < current.steps[0].y) {
+            newY = Math.min(current.actor.y + distanceY, current.steps[0].y);
+        } else if (current.actor.y > current.steps[0].y) {
+            newY = Math.max(current.actor.y - distanceY, current.steps[0].y);
+        }
+        current.actor.attr({x: newX, y: newY});
+    },
+
+    triggerDirectionChanged: function (current) {
+        if (current.steps.length == 0) {
+            return;
+        }
+
+        if (current.steps[0].x < current.actor.x) {
+            Crafty.trigger('TweenDirectionChanged', current.actor, 'left');
+        } else if (current.steps[0].x > current.actor.x) {
+            Crafty.trigger('TweenDirectionChanged', current.actor, 'right');
+        } else if (current.steps[0].y < current.actor.y) {
+            Crafty.trigger('TweenDirectionChanged', current.actor, 'up');
+        } else if (current.steps[0].y > current.actor.y) {
+            Crafty.trigger('TweenDirectionChanged', current.actor, 'down');
+        }
+    },
+
+    tweenHandler: function() {
         if (Crafty.isPaused()) {
             return;
         }
@@ -979,25 +1017,14 @@ Crafty.c('Tweening', {
             var current = this.targets[i],
                 distanceX = current.speed * Game.map_grid.tile.width / this.stepsPerGrid,
                 distanceY = current.speed * Game.map_grid.tile.height / this.stepsPerGrid;
-            if (current.actor.x != current.steps[0].x ||
-                current.actor.y != current.steps[0].y) {
-                var newX = current.actor.x,
-                    newY = current.actor.y;
-                if (current.actor.x < current.steps[0].x) {
-                    newX = Math.min(current.actor.x + distanceX, current.steps[0].x);
-                } else if (current.actor.x > current.steps[0].x) {
-                    newX = Math.max(current.actor.x - distanceX, current.steps[0].x);
-                }
-                if (current.actor.y < current.steps[0].y) {
-                    newY = Math.min(current.actor.y + distanceY, current.steps[0].y);
-                } else if (current.actor.y > current.steps[0].y) {
-                    newY = Math.max(current.actor.y - distanceY, current.steps[0].y);
-                }
-                current.actor.attr({x: newX, y: newY});
+
+            if (current.actor.x != current.steps[0].x || current.actor.y != current.steps[0].y) {
+                this.moveActor(current, distanceX, distanceY);
             } else {
-                //console.log("Arrived at x=" + current.actor.x + ", y=" + current.actor.y);
+                // remove this step from steps, so we can continue with next step
                 current.steps.shift();
-                // TODO emit event that tells the actor in which direction we move next (down, up, right, left)
+
+                this.triggerDirectionChanged(current);
             }
 
             // no more steps to take for current target: remove it from tween_targets array

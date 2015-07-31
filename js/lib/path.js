@@ -1,8 +1,15 @@
+const BOTTOM = 0, RIGHT = 1, TOP = 2, LEFT = 3;
+
 function Path(config) {
     this.width = config.width;
     this.height = config.height;
     this.generateStartInColumn(0);
     this.generateFinishInColumn(config.width - 1);
+
+    this.top = 1;
+    this.left = 1;
+    this.bottom = this.height - 2;
+    this.right = this.width - 2;
 
     // min and max length are not fix values, rather a guideline (actual min and max can vary by 10%)
     this.pathMinLength = config.pathMinLength || 0;
@@ -116,279 +123,245 @@ Path.prototype.isOnPath = function(x, y) {
     }
 };
 
-Path.prototype.generatePath = function() {
-    var startCopy = {x: this.start.x, y: this.start.y};
-    this.generateNextPart(startCopy, 1, undefined, this.start.x == 0);
+Path.prototype.createPathElement = function(direction, ignoreBorders) {
+    if (direction == BOTTOM && (this.current.y < this.bottom || ignoreBorders)) {
+        this.current.y++;
+        this.addToPath(this.current);
+        this.pathLength++;
+        return true;
+    } else if (direction == RIGHT && (this.current.x < this.right || ignoreBorders)) {
+        this.current.x++;
+        this.addToPath(this.current);
+        this.pathLength++;
+        return true;
+    } else if (direction == TOP && (this.current.y > this.top || ignoreBorders)) {
+        this.current.y--;
+        this.addToPath(this.current);
+        this.pathLength++;
+        return true;
+    } else if (direction == LEFT && (this.current.x > this.left || ignoreBorders)) {
+        this.current.x--;
+        this.addToPath(this.current);
+        this.pathLength++;
+        return true;
+    } else {
+        return false;
+    }
+};
+
+Path.prototype.createPathElementIgnoreBorders = function(direction) {
+    this.createPathElement(direction, true);
 };
 
 Path.prototype.generateSpiral = function() {
     this.start = { x: 0, y: 1 };
     this.finish = { x: this.width - 1, y: this.height - 2 };
+    this.current = {x: this.start.x, y: this.start.y};
+    this.top = 1 - 2;
+    this.right = this.width - 2 + 2;
 
-    var current = {x: this.start.x, y: this.start.y}, direction = 0, startTime = new Date().getTime(),
-        top = 1 - 2, left = 1, bottom = this.height - 2, right = this.width - 2 + 2;
+    var direction = 0, startTime = new Date().getTime();
 
-    this.addToPath(current);
-    current.x += 1;
-    this.addToPath(current);
-    this.pathLength = 2;
-
-    // inward spiral
-    while (top < bottom - 1 && left < right - 1) {
-        // timeout handling
-        if (new Date().getTime() - startTime > 5000) {
-            console.log("Timeout after 5 seconds!! total=" + this.pathLength);
-            console.log("current.x=" + current.x + "; current.y=" + current.y);
-            console.log("start.x=" + this.start.x + "; start.y=" + this.start.y);
-            console.log("finish.x=" + this.finish.x + "; finish.y=" + this.finish.y);
-            break;
-        }
-
-        if (direction == 0 && current.y < bottom) {
-            current.y++;
-            this.addToPath(current);
-            this.pathLength++;
-        } else if (direction == 1 && current.x < right) {
-            current.x++;
-            this.addToPath(current);
-            this.pathLength++;
-        } else if (direction == 2 && current.y > top) {
-            current.y--;
-            this.addToPath(current);
-            this.pathLength++;
-        } else if (direction == 3 && current.x > left) {
-            current.x--;
-            this.addToPath(current);
-            this.pathLength++;
-        } else {
-            direction = (direction + 1) % 4;
-            switch (direction) {
-                case 0:
-                    bottom -= 4;
-                    break;
-                case 1:
-                    right -= 4;
-                    break;
-                case 2:
-                    top += 4;
-                    break;
-                case 3:
-                    left += 4;
-                    break;
+    function inwardSpiral() {
+        while (this.top < this.bottom - 1 && this.left < this.right - 1) {
+            // timeout handling
+            if (new Date().getTime() - startTime > 5000) {
+                console.log("Timeout after 5 seconds!! total=" + this.pathLength);
+                console.log("current.x=" + this.current.x + "; current.y=" + this.current.y);
+                console.log("start.x=" + this.start.x + "; start.y=" + this.start.y);
+                console.log("finish.x=" + this.finish.x + "; finish.y=" + this.finish.y);
+                break;
+            }
+            if (!this.createPathElement(direction)) {
+                direction = (direction + 1) % 4;
+                switch (direction) {
+                    case BOTTOM:
+                        this.bottom -= 4;
+                        break;
+                    case RIGHT:
+                        this.right -= 4;
+                        break;
+                    case TOP:
+                        this.top += 4;
+                        break;
+                    case LEFT:
+                        this.left += 4;
+                        break;
+                }
             }
         }
     }
 
-    // intersection
-    switch (direction) {
-        case 0:
-            top += 2;
-            bottom += 2;
-            left -= 2;
-            right -= 2;
-            break;
-        case 1:
-            right += 2;
-            top += 2;
-            bottom += 2;
-            left += 2;
-            break;
-        case 2:
-            top -= 2;
-            bottom -= 2;
-            left += 2;
-            right += 2;
-            break;
-        case 3:
-            top -= 2;
-            bottom -= 2;
-            left -= 2;
-            right -= 2;
-            break;
-    }
-    direction = (direction + 3) % 4;
-    if (direction == 0) {
-        current.y++;
-        this.addToPath(current);
-        this.pathLength++;
-        current.y++;
-        this.addToPath(current);
-        this.pathLength++;
-    } else if (direction == 1) {
-        current.x++;
-        this.addToPath(current);
-        this.pathLength++;
-        current.x++;
-        this.addToPath(current);
-        this.pathLength++;
-    } else if (direction == 2) {
-        current.y--;
-        this.addToPath(current);
-        this.pathLength++;
-        current.y--;
-        this.addToPath(current);
-        this.pathLength++;
-    } else if (direction == 3) {
-        current.x--;
-        this.addToPath(current);
-        this.pathLength++;
-        current.x--;
-        this.addToPath(current);
-        this.pathLength++;
-    }
-
-    // outward spiral
-    startTime = new Date().getTime();
-    while (current.x < this.finish.x - 1 || current.y < this.finish.y) {
-        // timeout handling
-        if (new Date().getTime() - startTime > 5000) {
-            console.log("Timeout after 5 seconds!! total=" + this.pathLength);
-            console.log("current.x=" + current.x + "; current.y=" + current.y);
-            console.log("start.x=" + this.start.x + "; start.y=" + this.start.y);
-            console.log("finish.x=" + this.finish.x + "; finish.y=" + this.finish.y);
-            break;
+    function intersection() {
+        switch (direction) {
+            case BOTTOM:
+                this.top += 2;
+                this.bottom += 2;
+                this.left -= 2;
+                this.right -= 2;
+                break;
+            case RIGHT:
+                this.top += 2;
+                this.bottom += 2;
+                this.left += 2;
+                this.right += 2;
+                break;
+            case TOP:
+                this.top -= 2;
+                this.bottom -= 2;
+                this.left += 2;
+                this.right += 2;
+                break;
+            case LEFT:
+                this.top -= 2;
+                this.bottom -= 2;
+                this.left -= 2;
+                this.right -= 2;
+                break;
         }
+        direction = (direction + 3) % 4;
+        this.createPathElementIgnoreBorders(direction);
+        this.createPathElementIgnoreBorders(direction);
+    }
 
-        if (direction == 0 && current.y < bottom) {
-            current.y++;
-            this.addToPath(current);
-            this.pathLength++;
-        } else if (direction == 1 && current.x < right) {
-            current.x++;
-            this.addToPath(current);
-            this.pathLength++;
-        } else if (direction == 2 && current.y > top) {
-            current.y--;
-            this.addToPath(current);
-            this.pathLength++;
-        } else if (direction == 3 && current.x > left) {
-            current.x--;
-            this.addToPath(current);
-            this.pathLength++;
-        } else {
-            direction = (direction + 3) % 4;
-            switch (direction) {
-                case 0:
-                    bottom += 4;
-                    break;
-                case 1:
-                    right += 4;
-                    break;
-                case 2:
-                    top -= 4;
-                    break;
-                case 3:
-                    left -= 4;
-                    break;
+    function outwardSpiral() {
+        startTime = new Date().getTime();
+        while (this.current.x < this.finish.x - 1 || this.current.y < this.finish.y) {
+            // timeout handling
+            if (new Date().getTime() - startTime > 5000) {
+                console.log("Timeout after 5 seconds!! total=" + this.pathLength);
+                console.log("current.x=" + this.current.x + "; current.y=" + this.current.y);
+                console.log("start.x=" + this.start.x + "; start.y=" + this.start.y);
+                console.log("finish.x=" + this.finish.x + "; finish.y=" + this.finish.y);
+                break;
+            }
+            if (!this.createPathElement(direction)) {
+                direction = (direction + 3) % 4;
+                switch (direction) {
+                    case BOTTOM:
+                        this.bottom += 4;
+                        break;
+                    case RIGHT:
+                        this.right += 4;
+                        break;
+                    case TOP:
+                        this.top -= 4;
+                        break;
+                    case LEFT:
+                        this.left -= 4;
+                        break;
+                }
             }
         }
     }
 
-    current.x++;
-    this.addToPath(current);
-    this.pathLength++;
+    // after all this method declaration: actually generate the spiral
+    this.addToPath(this.current);
+    this.pathLength = 1;
+    this.createPathElementIgnoreBorders(RIGHT);
 
+    console.log("Generating inward spiral");
+    inwardSpiral.call(this);
+    console.log("Generating spiral intersection");
+    intersection.call(this);
+    console.log("Generating outward spiral");
+    outwardSpiral.call(this);
+
+    this.createPathElementIgnoreBorders(RIGHT);
+
+    console.log("Finished creating spiral, path length is: " + this.pathLength);
 };
 
-Path.prototype.decideNextPartDirection = function (current, lastDir, preLastDir, horizontal) {
-    if (horizontal === undefined) {
-        horizontal = true;
-    }
 
+Path.prototype.generatePath = function() {
+    this.current = {x: this.start.x, y: this.start.y};
+    this.horizontal = this.start.x == 0;
+    this.generateNextPart();
+};
+
+Path.prototype.generatePartInRandomDirection = function (lastDir, preLastDir) {
     // go up? or right? or down?
     // but we never go back (been down one time, been down two times, never going back agaaain ^^)
     var direction = Math.floor(Math.random() * 3),
-        needToFindNext = true,
-        toFinishAttr = horizontal ? 'x' : 'y',
-        varAttr = horizontal ? 'y' : 'x',
-        boundary1 = horizontal ? 'width' : 'height',
-        boundary2 = horizontal ? 'height' : 'width';
+        toFinishAttr = this.horizontal ? 'x' : 'y',
+        varAttr = this.horizontal ? 'y' : 'x',
+        boundary1 = this.horizontal ? 'width' : 'height';
+
+    // TODO transform this switch statement into using a state machine
     switch (direction) {
         case 0:
-            if (current[toFinishAttr] > 1 && current[varAttr] > 1 &&
-                (lastDir === null || lastDir == 0 || lastDir == 1) &&
+            if ((lastDir === null || lastDir == 0 || lastDir == 1) &&
                 (preLastDir === null || preLastDir == 0 || preLastDir == 1) &&
-                (current[toFinishAttr] < this[boundary1] - 3 || this.finish[varAttr] < current[varAttr]) &&
-                (this.pathLength <= this.pathMaxLength || this.finish[varAttr] < current[varAttr])) {
+                (this.current[toFinishAttr] < this[boundary1] - 3 || this.finish[varAttr] < this.current[varAttr]) &&
+                (this.pathLength <= this.pathMaxLength || this.finish[varAttr] < this.current[varAttr])) {
 
-                current[varAttr] -= 1;
-
-                this.addToPath(current);
-                needToFindNext = false;
-                this.generateNextPart(current, direction, lastDir, horizontal);
+                if (this.createPathElement(this.horizontal ? TOP : LEFT)) {
+                    this.generateNextPart(direction, lastDir);
+                    return false;
+                }
             }
             break;
         case 1:
-            if (current[toFinishAttr] < this[boundary1] - 2 &&
-                (current[toFinishAttr] < this[boundary1] / 3 || this.pathLength >= this.pathMinLength || Math.random() < 0.05)) {
+            if (this.current[toFinishAttr] < this[boundary1] / 3 || this.pathLength >= this.pathMinLength || Math.random() < 0.05) {
 
-                current[toFinishAttr] += 1;
-                this.addToPath(current);
-                needToFindNext = false;
-                this.generateNextPart(current, direction, lastDir, horizontal);
+                if (this.createPathElement(this.horizontal ? RIGHT : BOTTOM)) {
+                    this.generateNextPart(direction, lastDir);
+                    return false;
+                }
             }
             break;
         case 2:
-            if (current[toFinishAttr] > 1 && current[varAttr] < this[boundary2] - 2 &&
-                (lastDir === null || lastDir == 2 || lastDir == 1) &&
+            if ((lastDir === null || lastDir == 2 || lastDir == 1) &&
                 (preLastDir === null || preLastDir == 2 || preLastDir == 1) &&
-                (current[toFinishAttr] < this[boundary1] - 3 || this.finish[varAttr] > current[varAttr]) &&
-                (this.pathLength <= this.pathMaxLength || this.finish[varAttr] > current[varAttr])) {
+                (this.current[toFinishAttr] < this[boundary1] - 3 || this.finish[varAttr] > this.current[varAttr]) &&
+                (this.pathLength <= this.pathMaxLength || this.finish[varAttr] > this.current[varAttr])) {
 
-                current[varAttr] += 1;
-
-                this.addToPath(current);
-                needToFindNext = false;
-                this.generateNextPart(current, direction, lastDir, horizontal);
+                if (this.createPathElement(this.horizontal ? BOTTOM : RIGHT)) {
+                    this.generateNextPart(direction, lastDir);
+                    return false;
+                }
             }
             break;
     }
-    return needToFindNext;
+
+    return true;
 };
 
-Path.prototype.generateNextPart = function(current, lastDir, preLastDir, horizontal) {
-    if (horizontal === undefined) {
-        horizontal = true;
-    }
-
-    //noinspection PointlessArithmeticExpressionJS
+Path.prototype.generateNextPart = function(lastDir, preLastDir) {
     var needToFindNext = true,
         startTime = new Date().getTime(),
-        curPathIter = this.pathLength - 0,
-        startCopy = {x: current.x, y: current.y},
-        toFinishAttr = horizontal ? 'x' : 'y',
-        varAttr = horizontal ? 'y' : 'x';
+        toFinishAttr = this.horizontal ? 'x' : 'y',
+        varAttr = this.horizontal ? 'y' : 'x';
 
     // start: go right
-    if (current[toFinishAttr] == 0) {
-        console.log('Started generating path ' + (horizontal ? 'horizontally' : 'vertically'));
-        this.addToPath(current);
-        current[toFinishAttr] += 1;
-        this.addToPath(current);
-        this.pathLength = 2;
-        setTimeout(this.generateNextPart(current, 1, undefined, horizontal), 50);
+    if (this.current.x == this.start.x && this.current.y == this.start.y) {
+        console.log('Started generating path ' + (this.horizontal ? 'horizontally' : 'vertically'));
+        this.addToPath(this.current);
+        this.pathLength = 1;
+        this.createPathElement(this.horizontal ? RIGHT : BOTTOM);
+        setTimeout(this.generateNextPart(RIGHT), 50);
         return;
-    } else {
-        this.pathLength++;
     }
 
     // Finish recursive path generation
-    if (current[toFinishAttr] == this.finish[toFinishAttr] - 1 && current[varAttr] == this.finish[varAttr]) {
-        current[toFinishAttr] += 1;
-        this.addToPath(current);
-        console.log("Finished creating path \\o/ (length=" + this.pathLength + ")");
+    if (this.current[toFinishAttr] == this.finish[toFinishAttr] - 1 && this.current[varAttr] == this.finish[varAttr]) {
+        this.current[toFinishAttr] += 1;
+        this.addToPath(this.current);
+        console.log("Finished creating random path \\o/ (length=" + this.pathLength + ")");
         return;
     }
 
+    // go in a random direction (we repeat this step until we found a direction we can really go to)
     while(needToFindNext) {
         // timeout handling
         if (new Date().getTime() - startTime > 5000) {
-            console.log("Timeout after 5 seconds!! current=" + curPathIter + " of total=" + this.pathLength);
-            console.log("start.x=" + startCopy.x + "; start.y=" + startCopy.y);
+            console.log("Timeout after 5 seconds!! total=" + this.pathLength);
+            console.log("current.x=" + this.current.x + "; current.y=" + this.current.y);
+            console.log("start.x=" + this.start.x + "; start.y=" + this.start.y);
             console.log("finish.x=" + this.finish.x + "; finish.y=" + this.finish.y);
             break;
         }
 
-        needToFindNext = this.decideNextPartDirection(current, lastDir, preLastDir, horizontal);
+        needToFindNext = this.generatePartInRandomDirection(lastDir, preLastDir);
     }
 };

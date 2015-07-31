@@ -44,6 +44,8 @@ Crafty.scene('Loading', function() {
 // User can decide on his difficulty here
 Crafty.scene('Difficulty', function() {
     Crafty.background('rgb(169, 153, 145)');
+    Crafty.audio.stop();
+    Crafty.audio.play('Menu', -1);
 
     Crafty.e('2D, DOM, Image')
         .image('assets/ftd-logo.jpg')
@@ -173,6 +175,7 @@ Crafty.scene('MapSelection', function() {
 
     Crafty.e('DOMButton, Image')
         .text('Level 1')
+        .tooltip('15 Waves of enemies who travel from left to right.')
         .image('assets/preview-level1.jpg')
         .attr({ x: Game.width() * 1 / 24, y: Game.height() * 8/12 - 24, w: Game.width() / 6, h: 100 })
         .bind('Click', function() {
@@ -181,6 +184,7 @@ Crafty.scene('MapSelection', function() {
 
     Crafty.e('DOMButton, Image')
         .text('Level 2')
+        .tooltip('15 Waves of enemies who go from top to bottom.')
         .image('assets/preview-level2.jpg')
         .attr({ x: Game.width() * 7 / 24, y: Game.height() * 8/12 - 24, w: Game.width() / 6, h: 100 })
         .bind('Click', function() {
@@ -189,6 +193,7 @@ Crafty.scene('MapSelection', function() {
 
     Crafty.e('DOMButton, Image')
         .text('Level 3')
+        .tooltip('10 Waves of enemies who travel through a large spiral.')
         .image('assets/preview-level3.jpg')
         .attr({ x: Game.width() * 13 / 24, y: Game.height() * 8/12 - 24, w: Game.width() / 6, h: 100 })
         .bind('Click', function() {
@@ -197,6 +202,7 @@ Crafty.scene('MapSelection', function() {
 
     Crafty.e('DOMButton, Image')
         .text('Level 4')
+        .tooltip('25 Waves in a fast-paced short path.')
         .image('assets/preview-level4.jpg')
         .attr({ x: Game.width() * 19 / 24, y: Game.height() * 8/12 - 24, w: Game.width() / 6, h: 100 })
         .bind('Click', function() {
@@ -209,7 +215,7 @@ Crafty.scene('MapSelection', function() {
         .attr({ x: 70, y: Game.height() - 50, w: 200, h: 50 })
         .tooltip('Click here for some instructions')
         .bind('Click', function() {
-            Crafty.scene('Help', 'Difficulty');
+            Crafty.scene('Help', 'MapSelection');
         });
 
     Crafty.e('DOMButton')
@@ -217,7 +223,7 @@ Crafty.scene('MapSelection', function() {
         .attr({ x: 280, y: Game.height() - 50, w: 200, h: 50 })
         .tooltip('View the credits for this game ^^')
         .bind('Click', function() {
-            Crafty.scene('Credits', 'Difficulty');
+            Crafty.scene('Credits', 'MapSelection');
         });
 
     Crafty.e('SoundButton')
@@ -388,8 +394,6 @@ Crafty.scene('LoadSaveGame', function() {
             Game.currentWave = savegame.currentWave;
             Game.selectedTower = savegame.selectedTower;
             Game.sniperTowerInitial = savegame.sniperTowerInitial;
-            Game.towerCost = 0;
-            Game.towerLevel = 0;
             Game.towerMap = savegame.towerMap;
             Game.path = new Path(Game.map_grid);
             Game.path.copy(savegame.path);
@@ -445,8 +449,6 @@ Crafty.scene('InitializeLevel1', function() {
     Game.waves.current = Game.waves.level1;
     Game.selectedTower = 'SniperTower';
     Game.sniperTowerInitial = Game.towers['SniperTower'];
-    Game.towerCost = 0;
-    Game.towerLevel = 0;
     Game.towerMap = new Array(Game.map_grid.width);
     for (var x = 0; x < Game.map_grid.width; x++) {
         Game.towerMap[x] = new Array(Game.map_grid.height);
@@ -482,8 +484,6 @@ Crafty.scene('InitializeLevel2', function() {
     Game.waves.current = Game.waves.level2;
     Game.selectedTower = 'SniperTower';
     Game.sniperTowerInitial = Game.towers['SniperTower'];
-    Game.towerCost = 0;
-    Game.towerLevel = 0;
     Game.towerMap = new Array(Game.map_grid.width);
     for (var x = 0; x < Game.map_grid.width; x++) {
         Game.towerMap[x] = new Array(Game.map_grid.height);
@@ -521,8 +521,6 @@ Crafty.scene('InitializeLevel3', function() {
     Game.waves.current = Game.waves.level3;
     Game.selectedTower = 'SniperTower';
     Game.sniperTowerInitial = Game.towers['SniperTower'];
-    Game.towerCost = 0;
-    Game.towerLevel = 0;
     Game.towerMap = new Array(Game.map_grid.width);
     for (var x = 0; x < Game.map_grid.width; x++) {
         Game.towerMap[x] = new Array(Game.map_grid.height);
@@ -534,8 +532,7 @@ Crafty.scene('InitializeLevel3', function() {
         }
     }
 
-    // generate path
-    // TODO build something like this:
+    // generate path like this:
     // -  /-----------\
     // |  |           |
     // |  |  /-----\  |
@@ -569,8 +566,6 @@ Crafty.scene('InitializeLevel4', function() {
     Game.waves.current = Game.waves.level4;
     Game.selectedTower = 'SniperTower';
     Game.sniperTowerInitial = Game.towers['SniperTower'];
-    Game.towerCost = 0;
-    Game.towerLevel = 0;
     Game.towerMap = new Array(Game.map_grid.width);
     for (var x = 0; x < Game.map_grid.width; x++) {
         Game.towerMap[x] = new Array(Game.map_grid.height);
@@ -587,10 +582,12 @@ Crafty.scene('InitializeLevel4', function() {
         width: Game.map_grid.width,
         height: Game.map_grid.height,
         tile: Game.map_grid.tile,
-        pathMinLength: 10,
-        pathMaxLength: 25
+        pathMinLength: 5,
+        pathMaxLength: 20
     };
     Game.path = new Path(map_config);
+    Game.path.start = { x: 9, y: 0 };
+    Game.path.finish = { x: 14, y: Game.map_grid.height - 1 };
     Game.path.generatePath();
 
     Crafty.scene('Game');
@@ -610,7 +607,6 @@ Crafty.scene('Game', function() {
     Crafty.e('HudElement').observe('Lifes', 'lifes').at(6).alertIfBelow(3);
     Crafty.e('HudElement').observe('Enemies', 'enemyCount').at(10);
     Crafty.e('HudElement').observe('Wave', 'currentWave').at(14);
-    Crafty.e('HudElement').observe('Cost', 'towerCost').at(17).highlight();
 
     // tower selectors
     Crafty.e('TowerSelector').forTower('FlowerTower')
