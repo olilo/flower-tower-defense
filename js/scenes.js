@@ -202,7 +202,7 @@ Crafty.scene('MapSelection', function() {
 
     Crafty.e('DOMButton, Image')
         .text('Level 4')
-        .tooltip('25 Waves in a fast-paced short path.')
+        .tooltip('20 Waves in a fast-paced short path.')
         .image('assets/preview-level4.jpg')
         .attr({ x: Game.width() * 19 / 24, y: Game.height() * 8/12 - 24, w: Game.width() / 6, h: 100 })
         .bind('Click', function() {

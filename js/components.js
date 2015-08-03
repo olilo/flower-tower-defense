@@ -71,26 +71,71 @@ Crafty.c('Tooltip', {
         this.tooltipWidth = 300;
         this.tooltipHeight = 50;
 
-        this.bind('MouseOver', function() {
-            var x = Math.min(Game.width() - this.tooltipWidth - 10, Math.max(0, this.x + (this.w - this.tooltipWidth) / 2)),
-                y = Math.max(0, this.y - this.tooltipHeight - 10);
-            this._tooltip = Crafty.e('2D, Text, DOM')
-                .attr({x: x, y: y, w: this.tooltipWidth, h: this.tooltipHeight, z: 5})
-                .text(this.tooltipText)
-                .textFont(Game.generalTooltipFont)
-                .textColor(Game.textColor)
-                .css(Game.generalTooltipCss);
-            this.attach(this._tooltip);
+        this.bind('MouseOver', this.createTooltip);
+        this.bind('MouseOut', this.destroyTooltip);
+    },
+
+    unbindTooltips: function() {
+        var tooltip = this;
+
+        Crafty('Tooltip').each(function() {
+            this.permanentTooltipOpen = true;
         });
-        this.bind('MouseOut', function() {
-            this._tooltip.destroy();
+        this.unbind('Click', this.unbindTooltips);
+        this._tooltip.bind('Click', function(e) {
+            tooltip.bindTooltips();
         });
+    },
+
+    bindTooltips: function() {
+        Crafty('Tooltip').each(function() {
+            this.permanentTooltipOpen = false;
+        });
+        this.permanentTooltipOpen = false;
+        this.destroyTooltip();
+        this.unbind('Click', this.bindTooltips);
+        this.bind('Click', this.unbindTooltips);
+    },
+
+    permanentTooltip: function() {
+        this.bind('Click', this.unbindTooltips);
+    },
+
+    createTooltip: function() {
+        if (this.permanentTooltipOpen) {
+            return;
+        }
+
+        var x = Math.min(Game.width() - this.tooltipWidth - 10, Math.max(0, this.x + (this.w - this.tooltipWidth) / 2)),
+            y = Math.max(0, this.y - this.tooltipHeight - 10);
+
+        this._tooltip = Crafty.e('2D, DOM, Mouse')
+            .attr({x: x, y: y, w: this.tooltipWidth, h: this.tooltipHeight, z: 5})
+            .css(Game.generalTooltipCss);
+
+        var tooltipText = Crafty.e('2D, DOM, Text')
+            .attr({x: x + 2, y: y + 2, w: this.tooltipWidth, h: this.tooltipHeight, z: 6})
+            .text(this.tooltipText)
+            .textFont(Game.generalTooltipFont)
+            .textColor(Game.textColor)
+            .css(Game.centerCss);
+
+        this._tooltip.attach(tooltipText);
+        this.attach(this._tooltip);
+    },
+
+    destroyTooltip: function() {
+        if (this.permanentTooltipOpen) {
+            return;
+        }
+
+        this._tooltip.destroy();
     },
 
     tooltip: function(text) {
         this.tooltipText = text;
-        if (this._tooltip) {
-            this._tooltip.text(text);
+        if (this._tooltip && this._tooltip._children.length > 0) {
+            this._tooltip._children[0].text(text);
         }
         return this;
     }
@@ -178,6 +223,7 @@ Crafty.c('Enemy', {
     init: function() {
         this.requires('Actor, Collision, PathWalker, Delay, Tooltip');
         this.attr({tooltipWidth: 150, tooltipHeight: 30});
+        this.permanentTooltip();
 
         Game.enemyCount++;
 
@@ -620,8 +666,8 @@ Crafty.c('Disabled', {
 
 Crafty.c('Tower', {
     init: function() {
-        this.requires('Actor, Mouse, Color, Delay, Enabled');
-        this.attr({level: 1});
+        this.requires('Actor, Mouse, Tooltip, Color, Delay, Enabled');
+        this.attr({level: 1, tooltipWidth: 250, tooltipHeight: 110});
 
         this.bind('TowerUpgraded', function(actor) {
             if (actor == this) {
@@ -632,37 +678,68 @@ Crafty.c('Tower', {
         });
 
         if (Crafty.mobile) {
-            this.bind('MouseUp', function(e) {
+            this.bind('MouseUp', function() {
                 if (this.previousMouseUp) {
-                    this.trigger('Click', e);
+                    this.upgrade();
                 } else {
                     this.previousMouseUp = true;
                 }
             });
-        }
+        } else {
+            var tower = this;
+            this.permanentTooltip();
+            this.bind('Click', function() {
+                this._tooltip.attr({h: 160});
+                var upgradeButton = Crafty.e('DOMButton')
+                    .text('Upgrade for ' + this.getUpgradeCost() + '$').textFont(Game.waveFont)
+                    .attr({x: this._tooltip.x, y: this._tooltip.y + 100, w: this._tooltip.w, h: 25, z: 9, permanentTooltipOpen: true})
+                    .bind('Click', function() {tower.upgrade(); });
+                var sellButton = Crafty.e('DOMButton')
+                    .text('Sell for ' + this.getSellValue() + '$').textFont(Game.waveFont)
+                    .attr({x: this._tooltip.x, y: this._tooltip.y + 130, w: this._tooltip.w, h: 25, z: 10, permanentTooltipOpen: true})
+                    .bind('Click', function() {tower.sell(); });
 
-        this.bind('Click', function () {
-            var upgradeCost = this.getUpgradeCost();
-            if (Game.money >= upgradeCost) {
-                this.level++;
-                Game.money -= upgradeCost;
-                Game.towerCost = this.getUpgradeCost();
-                Game.towerLevel = this.level;
-                Crafty.trigger('TowerUpgraded', this);
-            }
-        });
+                this._tooltip.attach(upgradeButton);
+                this._tooltip.attach(sellButton);
+            });
+        }
     },
 
     disableUpgrade: function() {
         this.unbind('Click');
+    },
+
+    upgrade: function() {
+        var upgradeCost = this.getUpgradeCost();
+        if (Game.money >= upgradeCost) {
+            this.level++;
+            Game.money -= upgradeCost;
+            Game.towerCost = this.getUpgradeCost();
+            Game.towerLevel = this.level;
+            Crafty.trigger('TowerUpgraded', this);
+        }
+        console.log('Upgraded tower for ' + upgradeCost);
+    },
+
+    sell: function() {
+        Game.money += this.getSellValue();
+        this.destroy();
+        console.log('Sold tower for ' + this.getSellValue() + "$");
+    },
+
+    getSellValue: function() {
+        var totalCost = 0;
+        for (var level = 1; level <= this.level; level++) {
+            totalCost += this.getUpgradeCost(level);
+        }
+        return Math.floor(totalCost * 0.5);
     }
 });
 
 Crafty.c('FlowerTower', {
     init: function() {
-        this.requires('Tower, Image, Tooltip');
+        this.requires('Tower, Image');
         this.image("assets/flower.png");
-        this.attr({ tooltipWidth: 250, tooltipHeight: 110});
         this.range = 4;
         this.maxLevel = 10;
         this.shootingSpeed = 0.4;
@@ -730,9 +807,12 @@ Crafty.c('FlowerTower', {
         }
     },
 
-    getUpgradeCost: function() {
-        if (this.level < this.maxLevel) {
-            return Math.floor(Game.towers['FlowerTower'] * Math.pow(1.4, this.level));
+    getUpgradeCost: function(level) {
+        if (level === undefined) {
+            level = this.level;
+        }
+        if (level < this.maxLevel) {
+            return Math.floor(Game.towers['FlowerTower'] * Math.pow(1.4, level));
         } else {
             return "MAX";
         }
@@ -741,8 +821,8 @@ Crafty.c('FlowerTower', {
 
 Crafty.c('SniperTower', {
     init: function() {
-        this.requires('Tower, Tooltip, leaf_right, SpriteAnimation');
-        this.attr({w: 32, h: 32, tooltipWidth: 250, tooltipHeight: 110});
+        this.requires('Tower, leaf_right, SpriteAnimation');
+        this.attr({w: 32, h: 32});
         this.reel('LeafSpinning', 2000, [[0, 0], [0, 1], [1, 1], [1, 0]]);
         this.animate('LeafSpinning', -1);
         this.maxLevel = 6;
@@ -795,9 +875,12 @@ Crafty.c('SniperTower', {
         return this.level * 5;
     },
 
-    getUpgradeCost: function() {
-        if (this.level < this.maxLevel) {
-            return Math.floor(Game.towers['SniperTowerUpgrade'] * 1.5 * Math.sqrt(this.level));
+    getUpgradeCost: function(level) {
+        if (level === undefined) {
+            level = this.level;
+        }
+        if (level < this.maxLevel) {
+            return Math.floor(Game.towers['SniperTowerUpgrade'] * 1.5 * Math.sqrt(level));
         } else {
             return "MAX";
         }

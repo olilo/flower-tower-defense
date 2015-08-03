@@ -153,123 +153,182 @@ Path.prototype.createPathElementIgnoreBorders = function(direction) {
     this.createPathElement(direction, true);
 };
 
+Path.prototype.continuePathTo = function(x, y) {
+    var directionX, directionY;
+    if (x < this.current.x) {
+        directionX = LEFT;
+    } else {
+        directionX = RIGHT;
+    }
+
+    if (y < this.current.y) {
+        directionY = TOP;
+    } else {
+        directionY = BOTTOM;
+    }
+
+    while (x != this.current.x && y != this.current.y) {
+        if (x != this.current.x) {
+            this.createPathElement(directionX);
+        }
+        if (y != this.current.y) {
+            this.createPathElement(directionY);
+        }
+    }
+};
+
 Path.prototype.generateSpiral = function() {
     this.start = { x: 0, y: 1 };
     this.finish = { x: this.width - 1, y: this.height - 2 };
     this.current = {x: this.start.x, y: this.start.y};
-    this.top = 1 - 2;
-    this.right = this.width - 2 + 2;
 
-    var direction = 0, startTime = new Date().getTime();
+    var direction = 0;
 
-    function inwardSpiral() {
-        while (this.top < this.bottom - 1 && this.left < this.right - 1) {
-            // timeout handling
-            if (new Date().getTime() - startTime > 5000) {
-                console.log("Timeout after 5 seconds!! total=" + this.pathLength);
-                console.log("current.x=" + this.current.x + "; current.y=" + this.current.y);
-                console.log("start.x=" + this.start.x + "; start.y=" + this.start.y);
-                console.log("finish.x=" + this.finish.x + "; finish.y=" + this.finish.y);
-                break;
-            }
-            if (!this.createPathElement(direction)) {
-                direction = (direction + 1) % 4;
-                switch (direction) {
-                    case BOTTOM:
-                        this.bottom -= 4;
-                        break;
-                    case RIGHT:
-                        this.right -= 4;
-                        break;
-                    case TOP:
-                        this.top += 4;
-                        break;
-                    case LEFT:
-                        this.left += 4;
-                        break;
-                }
-            }
-        }
-    }
-
-    function intersection() {
-        switch (direction) {
-            case BOTTOM:
-                this.top += 2;
-                this.bottom += 2;
-                this.left -= 2;
-                this.right -= 2;
-                break;
-            case RIGHT:
-                this.top += 2;
-                this.bottom += 2;
-                this.left += 2;
-                this.right += 2;
-                break;
-            case TOP:
-                this.top -= 2;
-                this.bottom -= 2;
-                this.left += 2;
-                this.right += 2;
-                break;
-            case LEFT:
-                this.top -= 2;
-                this.bottom -= 2;
-                this.left -= 2;
-                this.right -= 2;
-                break;
-        }
-        direction = (direction + 3) % 4;
-        this.createPathElementIgnoreBorders(direction);
-        this.createPathElementIgnoreBorders(direction);
-    }
-
-    function outwardSpiral() {
-        startTime = new Date().getTime();
-        while (this.current.x < this.finish.x - 1 || this.current.y < this.finish.y) {
-            // timeout handling
-            if (new Date().getTime() - startTime > 5000) {
-                console.log("Timeout after 5 seconds!! total=" + this.pathLength);
-                console.log("current.x=" + this.current.x + "; current.y=" + this.current.y);
-                console.log("start.x=" + this.start.x + "; start.y=" + this.start.y);
-                console.log("finish.x=" + this.finish.x + "; finish.y=" + this.finish.y);
-                break;
-            }
-            if (!this.createPathElement(direction)) {
-                direction = (direction + 3) % 4;
-                switch (direction) {
-                    case BOTTOM:
-                        this.bottom += 4;
-                        break;
-                    case RIGHT:
-                        this.right += 4;
-                        break;
-                    case TOP:
-                        this.top -= 4;
-                        break;
-                    case LEFT:
-                        this.left -= 4;
-                        break;
-                }
-            }
-        }
-    }
-
-    // after all this method declaration: actually generate the spiral
+    // start off at the top left
     this.addToPath(this.current);
     this.pathLength = 1;
     this.createPathElementIgnoreBorders(RIGHT);
 
+    // actually generate the spiral
     console.log("Generating inward spiral");
-    inwardSpiral.call(this);
+    direction = this.inwardSpiral(direction);
     console.log("Generating spiral intersection");
-    intersection.call(this);
+    direction = this.spiralIntersection(direction);
     console.log("Generating outward spiral");
-    outwardSpiral.call(this);
+    this.outwardSpiral(direction);
 
+    // finish it all off
     this.createPathElementIgnoreBorders(RIGHT);
 
     console.log("Finished creating spiral, path length is: " + this.pathLength);
+};
+
+Path.prototype.inwardSpiral = function(direction) {
+    var startTime = new Date().getTime();
+
+    // adjust top and right to be a bit out of bounds, because we reduce them in the first round
+    this.top = 1 - 2;
+    this.right = this.width - 2 + 2;
+
+    // create spiral by continuously reducing the borders of the bounding rectangle
+    // this goes on until our borders collapse, leaving an empty bounding rectangle behind
+    while (this.top < this.bottom - 1 && this.left < this.right - 1) {
+        // timeout handling
+        if (new Date().getTime() - startTime > 5000) {
+            console.log("Timeout after 5 seconds!! total=" + this.pathLength);
+            console.log("current.x=" + this.current.x + "; current.y=" + this.current.y);
+            console.log("start.x=" + this.start.x + "; start.y=" + this.start.y);
+            console.log("finish.x=" + this.finish.x + "; finish.y=" + this.finish.y);
+            break;
+        }
+
+        // create path element; if that fails, rotate direction by 90° and
+        // reduce border in that direction to continue spiral
+        if (!this.createPathElement(direction)) {
+            // rotate direction counter clockwise (e.g. BOTTOM to RIGHT)
+            direction = (direction + 1) % 4;
+
+            // reduce border into which we will go next
+            switch (direction) {
+                case BOTTOM:
+                    this.bottom -= 4;
+                    break;
+                case RIGHT:
+                    this.right -= 4;
+                    break;
+                case TOP:
+                    this.top += 4;
+                    break;
+                case LEFT:
+                    this.left += 4;
+                    break;
+            }
+        }
+    }
+
+    return direction;
+};
+
+Path.prototype.spiralIntersection = function(direction) {
+    // shift borders so that the path in outwardSpiral spirals
+    // into the gaps that inwardSpiral created (or rather left behind)
+    switch (direction) {
+        case BOTTOM:
+            this.top += 2;
+            this.bottom += 2;
+            this.left -= 2;
+            this.right -= 2;
+            break;
+        case RIGHT:
+            this.top += 2;
+            this.bottom += 2;
+            this.left += 2;
+            this.right += 2;
+            break;
+        case TOP:
+            this.top -= 2;
+            this.bottom -= 2;
+            this.left += 2;
+            this.right += 2;
+            break;
+        case LEFT:
+            this.top -= 2;
+            this.bottom -= 2;
+            this.left -= 2;
+            this.right -= 2;
+            break;
+    }
+
+    // rotate direction clockwise (e.g. BOTTOM to LEFT)
+    direction = (direction + 3) % 4;
+
+    // continue path for 2 more steps to fill the gap
+    this.createPathElementIgnoreBorders(direction);
+    this.createPathElementIgnoreBorders(direction);
+
+    return direction;
+};
+
+Path.prototype.outwardSpiral = function(direction) {
+    var startTime = new Date().getTime();
+
+    // create spiral by continuously expanding the borders of the bounding rectangle
+    // this goes on until we reach the finish point
+    while (this.current.x < this.finish.x - 1 || this.current.y < this.finish.y) {
+        // timeout handling
+        if (new Date().getTime() - startTime > 5000) {
+            console.log("Timeout after 5 seconds!! total=" + this.pathLength);
+            console.log("current.x=" + this.current.x + "; current.y=" + this.current.y);
+            console.log("start.x=" + this.start.x + "; start.y=" + this.start.y);
+            console.log("finish.x=" + this.finish.x + "; finish.y=" + this.finish.y);
+            break;
+        }
+
+        // create path element; if that fails, rotate direction by 90° and
+        // expand border in that direction to continue spiral
+        if (!this.createPathElement(direction)) {
+            // rotate direction clockwise (e.g. BOTTOM to LEFT)
+            direction = (direction + 3) % 4;
+
+            // expand border into which we will go next
+            switch (direction) {
+                case BOTTOM:
+                    this.bottom += 4;
+                    break;
+                case RIGHT:
+                    this.right += 4;
+                    break;
+                case TOP:
+                    this.top -= 4;
+                    break;
+                case LEFT:
+                    this.left -= 4;
+                    break;
+            }
+        }
+    }
+
+    return direction;
 };
 
 
