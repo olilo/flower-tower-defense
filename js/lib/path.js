@@ -331,6 +331,10 @@ Path.prototype.outwardSpiral = function(direction) {
     return direction;
 };
 
+Path.prototype.generateLabyrinth = function() {
+    // TODO generate Labyrinth for real!
+};
+
 
 Path.prototype.generatePath = function() {
     this.current = {x: this.start.x, y: this.start.y};

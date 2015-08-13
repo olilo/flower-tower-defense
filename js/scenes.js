@@ -442,11 +442,12 @@ Crafty.scene('InitializeLevel1', function() {
         .textColor(Game.textColor)
         .css(Game.centerCss);
 
+    Game.level = '1';
     Game.backgroundAsset = 'background1';
+    Game.waves.current = Game.waves.level1;
     Game.endless = false;
     Game.enemyCount = 0;
     Game.currentWave = 0;
-    Game.waves.current = Game.waves.level1;
     Game.selectedTower = 'SniperTower';
     Game.sniperTowerInitial = Game.towers['SniperTower'];
     Game.towerMap = new Array(Game.map_grid.width);
@@ -477,11 +478,12 @@ Crafty.scene('InitializeLevel2', function() {
         .textColor(Game.textColor)
         .css(Game.centerCss);
 
+    Game.level = '2';
     Game.backgroundAsset = 'background2';
+    Game.waves.current = Game.waves.level2;
     Game.endless = false;
     Game.enemyCount = 0;
     Game.currentWave = 0;
-    Game.waves.current = Game.waves.level2;
     Game.selectedTower = 'SniperTower';
     Game.sniperTowerInitial = Game.towers['SniperTower'];
     Game.towerMap = new Array(Game.map_grid.width);
@@ -498,8 +500,9 @@ Crafty.scene('InitializeLevel2', function() {
     // generate path
     Game.path = new Path(Game.map_grid);
     Game.path.generateStartOnRow(0);
-    Game.path.finish = { x: 14, y: Game.map_grid.height - 1 };
-    Game.path.generatePath();
+    Game.path.generateFinishInColumn(0);
+    Game.path.addObstacle({x: 5, y: 10});
+    Game.path.generateLabyrinth();
 
     Crafty.scene('Game');
 });
@@ -514,11 +517,12 @@ Crafty.scene('InitializeLevel3', function() {
         .textColor(Game.textColor)
         .css(Game.centerCss);
 
+    Game.level = '3';
     Game.backgroundAsset = 'background6';
     Game.endless = false;
+    Game.waves.current = Game.waves.level3;
     Game.enemyCount = 0;
     Game.currentWave = 0;
-    Game.waves.current = Game.waves.level3;
     Game.selectedTower = 'SniperTower';
     Game.sniperTowerInitial = Game.towers['SniperTower'];
     Game.towerMap = new Array(Game.map_grid.width);
@@ -559,6 +563,7 @@ Crafty.scene('InitializeLevel4', function() {
         .textColor(Game.textColor)
         .css(Game.centerCss);
 
+    Game.level = '4';
     Game.backgroundAsset = 'background5';
     Game.endless = false;
     Game.enemyCount = 0;
@@ -607,6 +612,15 @@ Crafty.scene('Game', function() {
     Crafty.e('HudElement').observe('Lifes', 'lifes').at(6).alertIfBelow(3);
     Crafty.e('HudElement').observe('Enemies', 'enemyCount').at(10);
     Crafty.e('HudElement').observe('Wave', 'currentWave').at(14);
+
+    Crafty.e('RestartButton, Grid')
+        .textFont(Game.hudFont)
+        .unbind('Click')
+        .bind('Click', function() {
+            Crafty.scene('InitializeLevel' + Game.level);
+        })
+        .at(18, 0)
+        .attr({w: 200});
 
     // tower selectors
     Crafty.e('TowerSelector').forTower('FlowerTower')

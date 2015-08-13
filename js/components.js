@@ -109,6 +109,10 @@ Crafty.c('Tooltip', {
         var x = Math.min(Game.width() - this.tooltipWidth - 10, Math.max(0, this.x + (this.w - this.tooltipWidth) / 2)),
             y = Math.max(0, this.y - this.tooltipHeight - 10);
 
+        if (this.y < this.h + this.tooltipHeight) {
+            y = this.y + this.h;
+        }
+
         this._tooltip = Crafty.e('2D, DOM, Mouse')
             .attr({x: x, y: y, w: this.tooltipWidth, h: this.tooltipHeight, z: 5})
             .css(Game.generalTooltipCss);
