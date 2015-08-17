@@ -32,6 +32,10 @@ function Path(config) {
     }
 }
 
+Path.prototype.setFinish = function(x, y) {
+    this.start = {x: x, y: y};
+};
+
 Path.prototype.generateStartInColumn = function(column) {
     this.start = {x: column, y: 1 + Math.floor(Math.random() * (this.height - 2))};
 };
@@ -333,6 +337,9 @@ Path.prototype.outwardSpiral = function(direction) {
 
 Path.prototype.generateLabyrinth = function() {
     // TODO generate Labyrinth for real!
+    var stateMachine = new StateMachine();
+
+
 };
 
 

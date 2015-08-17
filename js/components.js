@@ -63,6 +63,26 @@ Crafty.c('PathWalker', {
     }
 });
 
+Crafty.c('TweenXY', {
+    init: function() {
+        this.requires('2D');
+    },
+
+    moveTo: function(x, y, ms) {
+        var timePerFrame = 1000 / Crafty.timer.FPS();
+        var speed = Math.max(Math.abs(x - this.x), Math.abs(y - this.y)) * timePerFrame / ms;
+
+        var animation = {
+            actor: this,
+            speed: speed,
+            steps: [{x: x, y: y}]
+        };
+
+        Tweening.targets.push(animation);
+        return this;
+    }
+});
+
 Crafty.c('Tooltip', {
     init: function() {
         this.requires('Mouse');
@@ -82,9 +102,9 @@ Crafty.c('Tooltip', {
             this.permanentTooltipOpen = true;
         });
         this.unbind('Click', this.unbindTooltips);
-        this._tooltip.bind('Click', function(e) {
-            tooltip.bindTooltips();
-        });
+        Crafty('Path').bind('Click', tooltip.bindTooltips);
+        Crafty('Tree').bind('Click', tooltip.bindTooltips);
+        this._tooltip.bind('Click', tooltip.bindTooltips);
     },
 
     bindTooltips: function() {
@@ -151,39 +171,57 @@ Crafty.c('Button', {
         this.requires('2D, Text, Mouse, Tooltip');
 
         // override textColor method to save used text colors
-        this.previousColors = [];
-        var previousTextColor = this.textColor;
+        this._previousColors = [];
+        this._previousTextColor = this.textColor;
         this.textColor = function(newColor) {
-            previousTextColor.call(this, newColor);
-            this.previousColors.unshift(newColor);
-            if (this.previousColors.length > 5) {
-                this.previousColors.pop();
+            this._previousTextColor.call(this, newColor);
+            this._previousColors.unshift(newColor);
+            if (this._previousColors.length > 5) {
+                this._previousColors.pop();
             }
             return this;
         };
 
-        this.textColor(Game.textColor);
-        this.textFont(Game.generalButtonFont);
         this._highlightColor = Game.highlightColor;
 
-        // highlight on mouse over, but don't save the highlight color as "used text color"
-        this.bind('MouseOver', function() {
-            previousTextColor.call(this, this._highlightColor);
-        });
-        this.bind('MouseOut', function() {
-            this.textColor(this.previousColors[0]);
-            this.previousMouseUp = false;
-        });
+        this.textFont(Game.generalButtonFont);
+        this.enable();
 
         if (Crafty.mobile) {
             this.bind('MouseUp', function(e) {
-                if (this.previousMouseUp) {
+                if (this._previousMouseUp) {
                     this.trigger('Click', e);
                 } else {
-                    this.previousMouseUp = true;
+                    this._previousMouseUp = true;
                 }
             });
         }
+    },
+
+    mouseOverHandler: function() {
+        this._previousTextColor.call(this, this._highlightColor);
+    },
+
+    mouseOutHandler: function() {
+        this.textColor(this._previousColors[0]);
+        this._previousMouseUp = false;
+    },
+
+    enable: function() {
+        // highlight on mouse over, but don't save the highlight color as "used text color"
+        this.textColor(Game.textColor);
+        this.bind('MouseOver', this.mouseOverHandler);
+        this.bind('MouseOut', this.mouseOutHandler);
+        this.attr({buttonEnabled: true});
+        return this;
+    },
+
+    disable: function() {
+        this.unbind('MouseOver', this.mouseOverHandler);
+        this.unbind('MouseOut', this.mouseOutHandler);
+        this.textColor(Game.disabledColor);
+        this.attr({buttonEnabled: false});
+        return this;
     },
 
     highlightColor: function(color) {
@@ -203,6 +241,21 @@ Crafty.c('DOMButton', {
     init: function() {
         this.requires('DOM, Button');
         this.css(Game.buttonCss);
+    }
+});
+
+Crafty.c('LevelSelector', {
+    init: function() {
+        this.requires('DOMButton, Image, TweenXY');
+    },
+
+    level: function(level) {
+        this.text('Level ' + level);
+        this.image('assets/preview-level' + level + '.jpg');
+        this.bind('Click', function() {
+            Crafty.scene('InitializeLevel' + level);
+        });
+        return this;
     }
 });
 
@@ -1051,7 +1104,7 @@ Crafty.c('SilverDragon', {
 // custom Tween handling (only movement)
 // -------------------------------------
 
-Crafty.c('Tweening', {
+Crafty.c('TweeningHandler', {
     init: function() {
         this.requires('Keyboard');
         this.attr({
@@ -1124,4 +1177,4 @@ Crafty.c('Tweening', {
     }
 });
 
-Tweening = Crafty.e('Tweening');
+Tweening = Crafty.e('TweeningHandler');
