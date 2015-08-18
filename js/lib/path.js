@@ -30,6 +30,8 @@ function Path(config) {
             this.occupied[i][y] = false;
         }
     }
+
+    this.pointPath = [];
 }
 
 Path.prototype.setFinish = function(x, y) {
@@ -64,6 +66,7 @@ Path.prototype.copy = function(path) {
     // FIXME better make a copy of the arrays
     this.path = path.path;
     this.occupied = path.occupied;
+    this.pointPath = path.pointPath;
 };
 
 Path.prototype.addToPath = function(point) {
@@ -73,40 +76,11 @@ Path.prototype.addToPath = function(point) {
     }
     this.path[point.x][point.y] = true;
     this.occupied[point.x][point.y] = true;
+    this.pointPath.push({x: point.x, y: point.y});
 };
 
 Path.prototype.getPath = function() {
-    var returnPath = [this.start];
-    var x = this.start.x,
-        y = this.start.y,
-        prevDirection = 1,
-        startTime = new Date().getTime();
-
-    while (x != this.finish.x || y != this.finish.y) {
-        if (new Date().getTime() - startTime > 5000) {
-            console.log("Timeout!!!");
-            break;
-        }
-        //console.log("Currently at: x=" + x + ", y=" + y);
-        if (x < this.width - 1 && this.path[x + 1][y] && prevDirection != 3) {
-            x++;
-            prevDirection = 1;
-        } else if (y > 0 && this.path[x][y - 1] && prevDirection != 2) {
-            y--;
-            prevDirection = 0;
-        } else if (y < this.height - 1 && this.path[x][y + 1] && prevDirection != 0) {
-            y++;
-            prevDirection = 2;
-        } else if (x > 0 && this.path[x - 1][y] && prevDirection != 1) {
-            x--;
-            prevDirection = 3;
-        } else {
-            console.log("Help, invalid state at: x=" + x + ", y=" + y);
-        }
-        returnPath.push({x: x, y: y});
-    }
-
-    return returnPath;
+    return this.pointPath;
 };
 
 Path.prototype.isOnEdge = function(x, y) {
@@ -180,8 +154,9 @@ Path.prototype.createPathElementIgnoreBorders = function(direction) {
     this.createPathElement(direction, true);
 };
 
-Path.prototype.continuePathTo = function(x, y) {
-    var directionX, directionY;
+Path.prototype.continuePathTo = function(x, y, ignoreBorders) {
+    var directionX, directionY, startTime = new Date().getTime();
+
     if (x < this.current.x) {
         directionX = LEFT;
     } else {
@@ -194,17 +169,28 @@ Path.prototype.continuePathTo = function(x, y) {
         directionY = BOTTOM;
     }
 
-    while (x != this.current.x && y != this.current.y) {
-        if (x != this.current.x) {
-            this.createPathElement(directionX);
+    while (x != this.current.x || y != this.current.y) {
+        // timeout handling
+        if (new Date().getTime() - startTime > 5000) {
+            console.log("Timeout after 5 seconds!! total=" + this.pathLength);
+            console.log("current.x=" + this.current.x + "; current.y=" + this.current.y);
+            console.log("start.x=" + this.start.x + "; start.y=" + this.start.y);
+            console.log("finish.x=" + this.finish.x + "; finish.y=" + this.finish.y);
+            break;
         }
+
+        if (x != this.current.x) {
+            this.createPathElement(directionX, ignoreBorders);
+        }
+
         if (y != this.current.y) {
-            this.createPathElement(directionY);
+            this.createPathElement(directionY, ignoreBorders);
         }
     }
 };
 
 Path.prototype.generateSpiral = function() {
+    /// FIXME start and finish should be flexible and set outside of this method
     this.start = { x: 0, y: 1 };
     this.finish = { x: this.width - 1, y: this.height - 2 };
     this.current = {x: this.start.x, y: this.start.y};
@@ -360,42 +346,39 @@ Path.prototype.outwardSpiral = function(direction) {
 
 Path.prototype.generateLabyrinth = function() {
     this.current = {x: this.start.x, y: this.start.y};
+    this.addToPath(this.current);
+    this.pathLength = 1;
+
+    this.left = 3;
+    this.top = 3;
+    this.right = this.width - 4;
+    this.bottom = this.height - 4;
 
     var stateMachine = new StateMachine(), startTime = new Date().getTime();
     stateMachine.setStart('start');
 
     if (this.current.x == 0) {
-        stateMachine.put('start', undefined, 'goright1', 1);
+        stateMachine.put('start', undefined, 'goright', 1);
     } else if (this.current.y == 0) {
-        stateMachine.put('start', undefined, 'godown1', 0);
+        stateMachine.put('start', undefined, 'godown', 0);
     } else if (this.current.y == this.height - 1) {
-        stateMachine.put('start', undefined, 'goup1', 2);
+        stateMachine.put('start', undefined, 'goup', 2);
     } else if (this.current.x == this.width - 1) {
-        stateMachine.put('start', undefined, 'goleft1', 3);
+        stateMachine.put('start', undefined, 'goleft', 3);
     }
 
-    stateMachine.put('goright', 0, 'godown2');
+    stateMachine.put('goright', 0, 'godown');
     stateMachine.put('goright', 1, 'goright');
-    stateMachine.put('goright', 2, 'goup2');
+    stateMachine.put('goright', 2, 'goup');
     stateMachine.put('godown', 0, 'godown');
-    stateMachine.put('godown', 1, 'goright2');
-    stateMachine.put('godown', 3, 'goleft2');
-    stateMachine.put('goup', 1, 'goright2');
+    stateMachine.put('godown', 1, 'goright');
+    stateMachine.put('godown', 3, 'goleft');
+    stateMachine.put('goup', 1, 'goright');
     stateMachine.put('goup', 2, 'goup');
-    stateMachine.put('goup', 3, 'goleft2');
-    stateMachine.put('goleft', 0, 'godown2');
-    stateMachine.put('goleft', 2, 'goup2');
+    stateMachine.put('goup', 3, 'goleft');
+    stateMachine.put('goleft', 0, 'godown');
+    stateMachine.put('goleft', 2, 'goup');
     stateMachine.put('goleft', 3, 'goleft');
-
-    stateMachine.put('goright2', undefined, 'goright1', 1);
-    stateMachine.put('godown2', undefined, 'godown1', 0);
-    stateMachine.put('goup2', undefined, 'goup1', 2);
-    stateMachine.put('goleft2', undefined, 'goleft1', 3);
-
-    stateMachine.put('goright1', undefined, 'goright', 1);
-    stateMachine.put('godown1', undefined, 'godown', 0);
-    stateMachine.put('goup1', undefined, 'goup', 2);
-    stateMachine.put('goleft1', undefined, 'goleft', 3);
 
     while (this.pathLength < this.pathMinLength) {
         // timeout handling
@@ -409,24 +392,39 @@ Path.prototype.generateLabyrinth = function() {
 
         var direction = Math.floor(Math.random() * 4),
             point1 = this.getInDirection(this.current, direction),
-            point2 = this.getInDirection(point1, direction);
+            point2 = this.getInDirection(point1, direction),
+            point3 = this.getInDirection(point1, (direction + 1) % 4),
+            point4 = this.getInDirection(point1, (direction + 3) % 4);
 
         // FIXME backtracking
 
-        if (this.isOnPath(point1) || this.isOnPath(point2)) {
+        if (this.isOnPath(point1.x, point1.y) || this.isOnPath(point2.x, point2.y) ||
+            this.isOnPath(point3.x, point3.y) || this.isOnPath(point4.x, point4.y)) {
+
             continue;
         }
 
-        var result = stateMachine.transition(direction);
+        var result = stateMachine.transition(direction),
+            created;
         if (result !== undefined && result.output !== undefined) {
-            this.createPathElement(result.output);
+            created = this.createPathElement(result.output);
         } else if (result !== undefined) {
             this.createPathElement(direction);
         }
     }
 
     // continue to finish
-    this.continuePathTo(this.finish.x, this.finish.y);
+
+    this.left = 1;
+    this.top = 1;
+    this.right = this.width - 2;
+    this.bottom = this.height - 2;
+
+    var finishX = Math.max(this.left, Math.min(this.finish.x, this.right)),
+        finishY = Math.max(this.top, Math.min(this.finish.y, this.bottom));
+
+    this.continuePathTo(finishX, finishY);
+    this.continuePathTo(this.finish.x, this.finish.y, true);
 };
 
 
