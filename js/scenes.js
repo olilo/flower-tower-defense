@@ -190,9 +190,9 @@ Crafty.scene('MapSelection', function() {
                         this.enable();
                     }
                     Crafty('DOMButton Next').enable();
-                }, 3000);
+                }, 1000);
                 Crafty('LevelSelector').each(function() {
-                    this.moveTo(this.x + Game.width(), this.y, 2200);
+                    this.moveTo(this.x + Game.width(), this.y, 800);
                 });
             }
         });
@@ -209,10 +209,10 @@ Crafty.scene('MapSelection', function() {
                         this.enable();
                     }
                     Crafty('DOMButton Previous').enable();
-                }, 3000);
+                }, 1000);
 
                 Crafty('LevelSelector').each(function() {
-                    this.moveTo(this.x - Game.width(), this.y, 2200);
+                    this.moveTo(this.x - Game.width(), this.y, 800);
                 });
             }
         });
