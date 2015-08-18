@@ -127,6 +127,29 @@ Path.prototype.isOnPath = function(x, y) {
     }
 };
 
+Path.prototype.getInDirection = function(point, direction) {
+    if (point.x < 0 || point.x > this.width - 1) {
+        console.log("Illegal point!! at x=" + point.x + ";y=" + point.y);
+        return;
+    }
+
+    // copy point so we don't change the input
+    point = {x: point.x, y: point.y};
+    if (direction == BOTTOM) {
+        point.y++;
+    } else if (direction == RIGHT) {
+        point.x++;
+    } else if (direction == TOP) {
+        point.y--;
+    } else if (direction == LEFT) {
+        point.x--;
+    } else {
+        throw 'unknown direction';
+    }
+
+    return point;
+};
+
 Path.prototype.createPathElement = function(direction, ignoreBorders) {
     if (direction == BOTTOM && (this.current.y < this.bottom || ignoreBorders)) {
         this.current.y++;
@@ -336,10 +359,74 @@ Path.prototype.outwardSpiral = function(direction) {
 };
 
 Path.prototype.generateLabyrinth = function() {
-    // TODO generate Labyrinth for real!
-    var stateMachine = new StateMachine();
+    this.current = {x: this.start.x, y: this.start.y};
 
+    var stateMachine = new StateMachine(), startTime = new Date().getTime();
+    stateMachine.setStart('start');
 
+    if (this.current.x == 0) {
+        stateMachine.put('start', undefined, 'goright1', 1);
+    } else if (this.current.y == 0) {
+        stateMachine.put('start', undefined, 'godown1', 0);
+    } else if (this.current.y == this.height - 1) {
+        stateMachine.put('start', undefined, 'goup1', 2);
+    } else if (this.current.x == this.width - 1) {
+        stateMachine.put('start', undefined, 'goleft1', 3);
+    }
+
+    stateMachine.put('goright', 0, 'godown2');
+    stateMachine.put('goright', 1, 'goright');
+    stateMachine.put('goright', 2, 'goup2');
+    stateMachine.put('godown', 0, 'godown');
+    stateMachine.put('godown', 1, 'goright2');
+    stateMachine.put('godown', 3, 'goleft2');
+    stateMachine.put('goup', 1, 'goright2');
+    stateMachine.put('goup', 2, 'goup');
+    stateMachine.put('goup', 3, 'goleft2');
+    stateMachine.put('goleft', 0, 'godown2');
+    stateMachine.put('goleft', 2, 'goup2');
+    stateMachine.put('goleft', 3, 'goleft');
+
+    stateMachine.put('goright2', undefined, 'goright1', 1);
+    stateMachine.put('godown2', undefined, 'godown1', 0);
+    stateMachine.put('goup2', undefined, 'goup1', 2);
+    stateMachine.put('goleft2', undefined, 'goleft1', 3);
+
+    stateMachine.put('goright1', undefined, 'goright', 1);
+    stateMachine.put('godown1', undefined, 'godown', 0);
+    stateMachine.put('goup1', undefined, 'goup', 2);
+    stateMachine.put('goleft1', undefined, 'goleft', 3);
+
+    while (this.pathLength < this.pathMinLength) {
+        // timeout handling
+        if (new Date().getTime() - startTime > 5000) {
+            console.log("Timeout after 5 seconds!! total=" + this.pathLength);
+            console.log("current.x=" + this.current.x + "; current.y=" + this.current.y);
+            console.log("start.x=" + this.start.x + "; start.y=" + this.start.y);
+            console.log("finish.x=" + this.finish.x + "; finish.y=" + this.finish.y);
+            break;
+        }
+
+        var direction = Math.floor(Math.random() * 4),
+            point1 = this.getInDirection(this.current, direction),
+            point2 = this.getInDirection(point1, direction);
+
+        // FIXME backtracking
+
+        if (this.isOnPath(point1) || this.isOnPath(point2)) {
+            continue;
+        }
+
+        var result = stateMachine.transition(direction);
+        if (result !== undefined && result.output !== undefined) {
+            this.createPathElement(result.output);
+        } else if (result !== undefined) {
+            this.createPathElement(direction);
+        }
+    }
+
+    // continue to finish
+    this.continuePathTo(this.finish.x, this.finish.y);
 };
 
 
