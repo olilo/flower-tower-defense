@@ -163,8 +163,8 @@ Game = {
             "LifeLost": ["assets/sounds/LifeLost.mp3", "assets/sounds/LifeLost.ogg", "assets/sounds/LifeLost.wav"]
         },
         "images": ["assets/ftd-logo.jpg", "assets/transparent.png", "assets/flower.png", "assets/squid.png",
-                "assets/preview-level1.jpg", "assets/preview-level2.jpg", "assets/preview-level3.jpg",
-                "assets/preview-level4.jpg", "assets/preview-level5.jpg"],
+                "assets/levels/preview-level1.jpg", "assets/levels/preview-level2.jpg", "assets/levels/preview-level3.jpg",
+                "assets/levels/preview-level4.jpg", "assets/levels/preview-level5.jpg"],
         "sprites": {
             "assets/background.jpg": {
                 "tile": 800,

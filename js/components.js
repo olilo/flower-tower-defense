@@ -251,7 +251,7 @@ Crafty.c('LevelSelector', {
 
     level: function(level) {
         this.text('Level ' + level);
-        this.image('assets/preview-level' + level + '.jpg');
+        this.image('assets/levels/preview-level' + level + '.jpg');
         this.bind('Click', function() {
             Crafty.scene('InitializeLevel' + level);
         });
