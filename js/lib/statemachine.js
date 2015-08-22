@@ -29,14 +29,21 @@ StateMachine.prototype.put = function(fromState, input, toState, output, conditi
     this.states[this.produceFromState(fromState, input)] = {state: toState, output: output, condition: condition};
 };
 
-StateMachine.prototype.get = function(){
-    return this.current;
+StateMachine.prototype.get = function(index){
+    if (index === undefined) {
+        return this.current;
+    } else {
+        // get state at the given index position (negative values wrap around to the end,
+        // like history[0], history[1], history[2], history [-2], history[-1] could be the history in correct order
+        return this.history[(this.history.length + index) % this.history.length];
+    }
 };
 
-StateMachine.prototype.set = function(state) {
+StateMachine.prototype.resetBy = function(index) {
     var previous = this.current;
-    this.current = state;
-    this.history.push(this.current);
+    for (var i = 0; i < index; i++) {
+        this.current = this.history.pop();
+    }
     return previous;
 };
 
@@ -49,6 +56,24 @@ StateMachine.prototype.transition = function(input) {
     if (result !== undefined && (result.condition === undefined || result.condition.call())) {
         this.current = result.state;
         this.history.push(this.current);
+        return result;
+    } else {
+        return undefined;
+    }
+};
+
+/**
+ * Returns the same output as StateMachine.transition, but without the side effects.
+ * @param input
+ * @returns {*}
+ */
+StateMachine.prototype.simulate = function(input) {
+    var result = this.states[this.produceFromState(this.current, input)];
+    if (!result) {
+        result = this.states[this.produceFromState(this.current, undefined)];
+    }
+
+    if (result !== undefined && (result.condition === undefined || result.condition.call())) {
         return result;
     } else {
         return undefined;

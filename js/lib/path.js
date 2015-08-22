@@ -1,4 +1,4 @@
-const BOTTOM = 0, RIGHT = 1, TOP = 2, LEFT = 3;
+const DOWN = 0, BOTTOM = 0, RIGHT = 1, UP = 2, TOP = 2, LEFT = 3;
 
 function Path(config) {
     this.width = config.width;
@@ -79,6 +79,31 @@ Path.prototype.addToPath = function(point) {
     this.pointPath.push({x: point.x, y: point.y});
 };
 
+Path.prototype.addObstacle = function(point) {
+    if (point.x < 0 || point.x > this.width - 1) {
+        console.log("Illegal point for addObstacle!! at x=" + point.x + ";y=" + point.y);
+        return;
+    }
+    this.occupied[point.x][point.y] = true;
+};
+
+Path.prototype.remove = function(point) {
+    if (point.x < 0 || point.x > this.width - 1) {
+        console.log("Illegal point!! at x=" + point.x + ";y=" + point.y);
+        return;
+    }
+    this.path[point.x][point.y] = false;
+    this.occupied[point.x][point.y] = false;
+
+    for (var i = this.pointPath.length - 1; i >= 0; i--) {
+        if (this.pointPath.x == point.x && this.pointPath.y == point.y) {
+            this.pointPath.splice(i, 1);
+            return;
+        }
+    }
+    console.log("Could not find point at " + point.x + ", " + point.y + " to remove.");
+};
+
 Path.prototype.getPath = function() {
     return this.pointPath;
 };
@@ -91,6 +116,14 @@ Path.prototype.isOnEdge = function(x, y) {
         return false;
     }
     return x == 0 || x == this.width - 1 || y == 0 || y == this.height - 1;
+};
+
+Path.prototype.isOccupied = function(x, y) {
+    if (typeof x == 'number' && typeof y == 'number' && x < this.occupied.length && x >= 0) {
+        return this.occupied[x][y];
+    } else {
+        return false;
+    }
 };
 
 Path.prototype.isOnPath = function(x, y) {
@@ -354,7 +387,9 @@ Path.prototype.generateLabyrinth = function() {
     this.right = this.width - 4;
     this.bottom = this.height - 4;
 
-    var stateMachine = new StateMachine(), startTime = new Date().getTime();
+    var stateMachine = new StateMachine(),
+        startTime = new Date().getTime(),
+        retryCount = 0;
     stateMachine.setStart('start');
 
     if (this.current.x == 0) {
@@ -367,20 +402,35 @@ Path.prototype.generateLabyrinth = function() {
         stateMachine.put('start', undefined, 'goleft', 3);
     }
 
-    stateMachine.put('goright', 0, 'godown');
-    stateMachine.put('goright', 1, 'goright');
-    stateMachine.put('goright', 2, 'goup');
-    stateMachine.put('godown', 0, 'godown');
-    stateMachine.put('godown', 1, 'goright');
-    stateMachine.put('godown', 3, 'goleft');
-    stateMachine.put('goup', 1, 'goright');
-    stateMachine.put('goup', 2, 'goup');
-    stateMachine.put('goup', 3, 'goleft');
-    stateMachine.put('goleft', 0, 'godown');
-    stateMachine.put('goleft', 2, 'goup');
-    stateMachine.put('goleft', 3, 'goleft');
+    stateMachine.put('goright', DOWN, 'godown_or_right');
+    stateMachine.put('goright', RIGHT, 'goright');
+    stateMachine.put('goright', UP, 'goup_or_right');
 
-    while (this.pathLength < this.pathMinLength) {
+    stateMachine.put('godown', RIGHT, 'godown_or_right');
+    stateMachine.put('godown', DOWN, 'godown');
+    stateMachine.put('godown', LEFT, 'godown_or_left');
+
+    stateMachine.put('goup', RIGHT, 'goup_or_right');
+    stateMachine.put('goup', UP, 'goup');
+    stateMachine.put('goup', LEFT, 'goup_or_left');
+
+    stateMachine.put('goleft', DOWN, 'godown_or_left');
+    stateMachine.put('goleft', LEFT, 'goleft');
+    stateMachine.put('goleft', UP, 'goup_or_left');
+
+    stateMachine.put('godown_or_left', DOWN, 'godown');
+    stateMachine.put('godown_or_left', LEFT, 'goleft');
+
+    stateMachine.put('godown_or_right', 0, 'godown');
+    stateMachine.put('godown_or_right', 1, 'goright');
+
+    stateMachine.put('goup_or_left', 2, 'goup');
+    stateMachine.put('goup_or_left', 3, 'goleft');
+
+    stateMachine.put('goup_or_right', 1, 'goright');
+    stateMachine.put('goup_or_right', 2, 'goup');
+
+    while (this.pathLength < 0.9 * this.pathMinLength) {
         // timeout handling
         if (new Date().getTime() - startTime > 5000) {
             console.log("Timeout after 5 seconds!! total=" + this.pathLength);
@@ -396,29 +446,90 @@ Path.prototype.generateLabyrinth = function() {
             point3 = this.getInDirection(point1, (direction + 1) % 4),
             point4 = this.getInDirection(point1, (direction + 3) % 4);
 
-        // FIXME backtracking
+        // backtracking
+        if (retryCount > 50) {
+            this.remove(this.current);
+            this.addObstacle(this.current);
+            stateMachine.resetBy(1);
 
-        if (this.isOnPath(point1.x, point1.y) || this.isOnPath(point2.x, point2.y) ||
+            // we search for the next adjacent path tile and move there.
+            // this works because in this part we don't let the path cross itself.
+            if (this.isOnPath(this.current.x - 1, this.current.y)) {
+                this.current.x--;
+            } else if (this.isOnPath(this.current.x + 1, this.current.y)) {
+                this.current.x++;
+            } else if (this.isOnPath(this.current.x, this.current.y - 1)) {
+                this.current.y--;
+            } else if (this.isOnPath(this.current.x, this.current.y + 1)) {
+                this.current.y++;
+            }
+
+            retryCount = 0;
+            continue;
+        }
+
+        retryCount++;
+
+        if (this.isOccupied(point1.x, point1.y) || this.isOnPath(point2.x, point2.y) ||
             this.isOnPath(point3.x, point3.y) || this.isOnPath(point4.x, point4.y)) {
 
             continue;
         }
 
-        var result = stateMachine.transition(direction),
-            created;
+        var result = stateMachine.transition(direction), created;
         if (result !== undefined && result.output !== undefined) {
             created = this.createPathElement(result.output);
         } else if (result !== undefined) {
-            this.createPathElement(direction);
+            created = this.createPathElement(direction);
+        }
+
+        if (created) {
+            retryCount = 0;
         }
     }
 
     // continue to finish
-
     this.left = 1;
     this.top = 1;
     this.right = this.width - 2;
     this.bottom = this.height - 2;
+
+    var direction1 = -1, direction2 = -1;
+
+    if (this.current.x < this.width / 4 && this.finish.x == 0) {
+        direction1 = LEFT;
+        direction2 = this.current.y < this.finish.y ? UP : DOWN;
+    } else if (this.current.x > this.width * 3 / 4 && this.finish.x == this.width - 1) {
+        direction1 = RIGHT;
+        direction2 = this.current.y < this.finish.y ? UP : DOWN;
+    } else if (this.current.y < this.height / 4 && this.finish.y == 0) {
+        direction1 = UP;
+        direction2 = this.current.x < this.finish.x ? LEFT : RIGHT;
+    } else if (this.current.y > this.height * 3 / 4 && this.finish.y == this.height - 1) {
+        direction1 = DOWN;
+        direction2 = this.current.x < this.finish.x ? LEFT : RIGHT;
+    } else {
+        direction1 = Math.floor(Math.random() * 4);
+        if (direction1 == LEFT || direction1 == RIGHT) {
+            direction2 = this.current.y < this.finish.y ? UP : DOWN;
+        } else {
+            direction2 = this.current.x < this.finish.x ? LEFT : RIGHT;
+        }
+    }
+
+    switch (direction1) {
+        case LEFT: this.continuePathTo(1, this.current.y); break;
+        case UP: this.continuePathTo(this.current.x, 1); break;
+        case RIGHT: this.continuePathTo(this.width - 2, this.current.y); break;
+        case DOWN: this.continuePathTo(this.current.x, this.height - 2); break;
+    }
+
+    switch (direction2) {
+        case LEFT: this.continuePathTo(this.finish.x, this.current.y); break;
+        case UP: this.continuePathTo(this.current.x, this.finish.y); break;
+        case RIGHT: this.continuePathTo(this.width - 2, this.current.y); break;
+        case DOWN: this.continuePathTo(this.current.x, this.height - 2); break;
+    }
 
     var finishX = Math.max(this.left, Math.min(this.finish.x, this.right)),
         finishY = Math.max(this.top, Math.min(this.finish.y, this.bottom));

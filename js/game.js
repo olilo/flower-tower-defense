@@ -166,14 +166,14 @@ Game = {
                 "assets/levels/preview-level1.jpg", "assets/levels/preview-level2.jpg", "assets/levels/preview-level3.jpg",
                 "assets/levels/preview-level4.jpg", "assets/levels/preview-level5.jpg"],
         "sprites": {
-            "assets/background.jpg": {
+            "assets/levels/background.jpg": {
                 "tile": 800,
                 "tileh": 480,
                 "map": {
                     background1: [0, 0]
                 }
             },
-            "assets/background2.jpg": {
+            "assets/levels/background2.jpg": {
                 "tile": 800,
                 "tileh": 600,
                 "map": {
@@ -183,7 +183,7 @@ Game = {
                     background5: [1, 1]
                 }
             },
-            "assets/background3.jpg": {
+            "assets/levels/background3.jpg": {
                 "tile": 800,
                 "tileh": 600,
                 "map": {
