@@ -234,6 +234,11 @@ Crafty.c('Button', {
         image.image(imageUrl).attr({x: this.x, y: this.y});
         this.attach(image);
         return this;
+    },
+
+    withSprite: function(spriteId) {
+        this.addComponent(spriteId);
+        return this;
     }
 });
 
@@ -241,21 +246,6 @@ Crafty.c('DOMButton', {
     init: function() {
         this.requires('DOM, Button');
         this.css(Game.buttonCss);
-    }
-});
-
-Crafty.c('LevelSelector', {
-    init: function() {
-        this.requires('DOMButton, Image, TweenXY');
-    },
-
-    level: function(level) {
-        this.text('Level ' + level);
-        this.image('assets/levels/preview-level' + level + '.jpg');
-        this.bind('Click', function() {
-            Crafty.scene('InitializeLevel' + level);
-        });
-        return this;
     }
 });
 
@@ -529,6 +519,21 @@ Crafty.c('HudElement', {
     }
 });
 
+Crafty.c('LevelSelector', {
+    init: function() {
+        this.requires('DOMButton, TweenXY');
+    },
+
+    level: function(level) {
+        this.text('Level ' + level);
+        this.addComponent('preview_level' + level);
+        this.bind('Click', function() {
+            Crafty.scene('InitializeLevel' + level);
+        });
+        return this;
+    }
+});
+
 Crafty.c('TowerSelector', {
     init: function() {
         this.requires('DOMButton, Grid, Keyboard');
@@ -795,8 +800,7 @@ Crafty.c('Tower', {
 
 Crafty.c('FlowerTower', {
     init: function() {
-        this.requires('Tower, Image');
-        this.image("assets/flower.png");
+        this.requires('Tower, flower_tower1');
         this.range = 4;
         this.maxLevel = 10;
         this.shootingSpeed = 0.4;
@@ -811,6 +815,9 @@ Crafty.c('FlowerTower', {
                     this.range = 6;
                     this.disableUpgrade();
                 }
+
+                this.removeComponent('flower_tower' + Math.floor(this.level / 2));
+                this.addComponent('flower_tower' + Math.ceil(this.level / 2));
 
                 this.updateTooltip();
             }
@@ -992,8 +999,7 @@ Crafty.c('MightyWitch', {
 
 Crafty.c('Squid', {
     init: function() {
-        this.requires('Enemy, Image');
-        this.image("assets/squid.png");
+        this.requires('Enemy, squid');
         this.attr({
             health: 30,
             reward: 3,
@@ -1005,8 +1011,7 @@ Crafty.c('Squid', {
 
 Crafty.c('FastSquid', {
     init: function() {
-        this.requires('Enemy, Image');
-        this.image("assets/squid.png");
+        this.requires('Enemy, squid');
         this.attr({
             health: 23,
             reward: 5,

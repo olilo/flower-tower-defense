@@ -203,6 +203,21 @@ Game = {
                     background9: [0, 0]
                 }
             },
+            "assets/levels/preview-levels.png": {
+                "tile": 133,
+                "tileh": 80,
+                "map": {
+                    preview_level1: [0, 0],
+                    preview_level2: [0, 1],
+                    preview_level3: [0, 2],
+                    preview_level4: [0, 3],
+                    preview_level5: [0, 4],
+                    preview_level6: [1, 0],
+                    preview_level7: [1, 1],
+                    preview_level8: [1, 2],
+                    preview_level9: [1, 3]
+                }
+            },
             "assets/enemies.png": {
                 "tile": 32,
                 "tileh": 32,

@@ -701,12 +701,12 @@ Crafty.scene('Game', function() {
         .attr({tooltipWidth: 500, tooltipHeight: 130})
         .tooltip('Click here to select the Flower Tower.<br> If you click anywhere on the map you build this tower.<br>' +
                  'It shoots in all 4 directions with limited range.<br> Gains higher range on upgrade.<br> Hotkey: C')
-        .withImage("assets/flower.png").withHotkey('C').at(1, Game.map_grid.height - 1);
+        .withSprite("flower_tower5").withHotkey('C').at(1, Game.map_grid.height - 1);
     Crafty.e('TowerSelector').forTower('SniperTower')
         .attr({tooltipWidth: 500, tooltipHeight: 130})
         .tooltip('Click here to select the Sniper Tower.<br> If you click anywhere on the map you build this tower.<br> ' +
                  'It shoots anywhere on the map, but cost increases.<br> Gains instant kill on highest level.<br> Hotkey: V')
-        .withImage("assets/leafs.png").withHotkey('V').at(3, Game.map_grid.height - 1);
+        .withSprite("sniper_tower4").withHotkey('V').at(3, Game.map_grid.height - 1);
 
     // win/lose conditions
     Crafty.bind('EnterFrame', function() {
