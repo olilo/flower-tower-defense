@@ -14,10 +14,10 @@ Crafty.scene('Loading', function() {
     var x = 3;
     loading.delay(function() {
         if (x >= 22) {
-            Crafty('Image Loading').destroy();
+            Crafty('flower Loading').destroy();
             x = 3;
         }
-        Crafty.e('2D, DOM, Grid, Image, Loading').image('assets/flower.png').at(x, 10);
+        Crafty.e('2D, DOM, Grid, flower, Loading').at(x, 10);
 
         x += 2;
     }, 500, -1);
@@ -683,11 +683,15 @@ Crafty.scene('Game', function() {
     Crafty.e('HudElement').observe('Enemies', 'enemyCount').at(10);
     Crafty.e('HudElement').observe('Wave', 'currentWave').at(14);
 
-    Crafty.e('RestartButton, Grid')
+    Crafty.e('DOMButton, Grid')
+        .text('Restart level')
+        .textColor(Game.highlightColor)
         .textFont(Game.hudFont)
         .unbind('Click')
         .bind('Click', function() {
-            Crafty.scene('InitializeLevel' + Game.level);
+            if (window.confirm('Really restart this level? You will restart at wave 1 with no towers!')) {
+                Crafty.scene('InitializeLevel' + Game.level);
+            }
         })
         .at(18, 0)
         .attr({w: 200});

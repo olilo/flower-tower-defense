@@ -162,9 +162,7 @@ Game = {
             "EnemyDead": ["assets/sounds/Shot.mp3", "assets/sounds/Shot.ogg", "assets/sounds/Shot.wav"],
             "LifeLost": ["assets/sounds/LifeLost.mp3", "assets/sounds/LifeLost.ogg", "assets/sounds/LifeLost.wav"]
         },
-        "images": ["assets/ftd-logo.jpg", "assets/transparent.png", "assets/flower.png", "assets/squid.png",
-                "assets/levels/preview-level1.jpg", "assets/levels/preview-level2.jpg", "assets/levels/preview-level3.jpg",
-                "assets/levels/preview-level4.jpg", "assets/levels/preview-level5.jpg"],
+        "images": ["assets/ftd-logo.jpg", "assets/transparent.png"],
         "sprites": {
             "assets/levels/background.jpg": {
                 "tile": 800,
@@ -190,16 +188,40 @@ Game = {
                     background6: [0, 0]
                 }
             },
-            "assets/witch.png": {
-                "tile": 29,
-                "tileh": 30,
+            "assets/levels/background4.jpg": {
+                "tile": 800,
+                "tileh": 480,
                 "map": {
-                    witch_right: [2, 2],
-                    witch_up: [0, 0],
-                    witch_down: [1, 2]
-                },
-                "paddingX": 4,
-                "paddingY": 3
+                    background7: [0, 0],
+                    background8: [0, 1]
+                }
+            },
+            "assets/levels/background5.jpg": {
+                "tile": 800,
+                "tileh": 565,
+                "map": {
+                    background9: [0, 0]
+                }
+            },
+            "assets/enemies.png": {
+                "tile": 32,
+                "tileh": 32,
+                "map": {
+                    witch_right: [5, 2],
+                    witch_up: [3, 0],
+                    witch_down: [4, 2],
+
+                    knight_right: [0, 3],
+                    knight_left: [1, 3],
+                    knight_down: [2, 3],
+                    knight_up: [3, 3],
+
+                    green_dragon: [2, 0],
+                    silver_dragon: [1, 1],
+                    orc: [2, 2],
+                    spider: [1, 2],
+                    squid: [4, 3]
+                }
             },
             "assets/leafs.png": {
                 "tile": 16,
@@ -211,24 +233,23 @@ Game = {
                     leaf_right: [1, 1]
                 }
             },
-            "assets/knight.png": {
+            "assets/flower.png": {
                 "tile": 32,
                 "tileh": 32,
                 "map": {
-                    knight_right: [0, 0],
-                    knight_left: [1, 0],
-                    knight_down: [2, 0],
-                    knight_up: [3, 0]
-                }
-            },
-            "assets/roguelikebosses.png": {
-                "tile": 32,
-                "tileh": 32,
-                "map": {
-                    green_dragon: [0, 0],
-                    silver_dragon: [1, 1],
-                    orc: [0, 2],
-                    spider: [1, 2]
+                    flower: [4, 0],
+
+                    flower_tower1: [0, 0],
+                    flower_tower2: [1, 0],
+                    flower_tower3: [2, 0],
+                    flower_tower4: [3, 0],
+                    flower_tower5: [4, 0],
+                    sniper_tower1: [5, 0],
+                    sniper_tower2: [6, 0],
+                    sniper_tower3: [10, 0],
+                    sniper_tower4: [11, 0],
+                    hero_tower:    [12, 0],
+                    spiral_tower:  [14, 0]
                 }
             }
         }

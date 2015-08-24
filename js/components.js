@@ -1090,7 +1090,7 @@ Crafty.c('SilverDragon', {
             health: 800,
             reward: 150,
             speed: 1.8,
-            livesTaken: 10,
+            livesTaken: 7,
             noInstantKill: true,
             tooltipHeight: 60,
             tooltipTextBase: "Silver Dragon"
