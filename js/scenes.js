@@ -764,6 +764,9 @@ Crafty.scene('Game', function() {
     // initialize wave
     Crafty.e('Wave').at(Game.map_grid.width - 5, Game.map_grid.height - 1);
 
+    // initialize sidebar
+    Crafty.e('Sidebar');
+
     Crafty.e('DOMButton, Grid')
         .text('Help')
         .textFont(Game.waveFont)

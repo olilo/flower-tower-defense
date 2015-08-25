@@ -26,6 +26,7 @@ Game = {
     centerCss: { 'text-align': 'center'},
     buttonCss: { 'text-align': 'center', 'cursor': 'pointer'},
     generalTooltipCss: { 'padding': '5px', 'border': '1px solid black', 'background-color': 'grey'},
+    closeCss: { 'line-height': '16px', 'border': '1px solid black', 'cursor': 'pointer'},
 
     loadingFont: { 'size': '48px', 'family': 'Arial' },
     hudFont: { 'size': '20px', 'family': 'Comic Sans MS' },
@@ -34,6 +35,7 @@ Game = {
     difficultyFont: { 'size': '36px', 'family': 'Comic Sans MS' },
     mapSelectionFont: { 'size': '30px', 'family': 'Comic Sans MS' },
     waveFont: { 'size': '25px', 'family': 'sans-serif', 'weight': 'bold' },
+    closeFont: { 'size': '16px', 'family': 'sans-serif' },
 
     creditsFont: { 'size': '28px', 'family': 'sans-serif', weight: 'bold' },
     creditsTextFont: { 'size': '20px', 'family': 'sans-serif', variant: 'italic' },
@@ -45,6 +47,7 @@ Game = {
     continueColor: 'brown',
     restartFont: { 'size': '36px', 'family': 'sans-serif' },
     restartColor: 'brown',
+    closeColor: 'black',
 
     generalButtonFont: { 'size': '36px', 'family': 'sans-serif' },
     generalTooltipFont: { 'size': '20px', 'family': 'sans-serif' },
