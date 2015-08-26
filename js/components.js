@@ -104,11 +104,11 @@ Crafty.c('Tooltip', {
         }
 
         this._tooltip = Crafty.e('2D, DOM, Mouse')
-            .attr({x: x, y: y, w: this.tooltipWidth, h: this.tooltipHeight, z: 5})
+            .attr({x: x, y: y, w: this.tooltipWidth, h: this.tooltipHeight, z: 500})
             .css(Game.generalTooltipCss);
 
         var tooltipText = Crafty.e('2D, DOM, Text')
-            .attr({x: x + 2, y: y + 2, w: this.tooltipWidth, h: this.tooltipHeight, z: 6})
+            .attr({x: x + 2, y: y + 2, w: this.tooltipWidth, h: this.tooltipHeight, z: 520})
             .text(this.tooltipText)
             .textFont(Game.generalTooltipFont)
             .textColor(Game.textColor)
@@ -133,21 +133,27 @@ Crafty.c('Tooltip', {
 
 Crafty.c('Sidebar', {
     init: function() {
-        this.requires('2D, DOM, Color');
+        this.requires('2D, DOM, Mouse,  Color');
         this.attr({
             x: 0,
             y: Game.map_grid.tile.height,
-            w: 150,
+            w: 170,
             h: Game.height() - 2 * Game.map_grid.tile.height,
             z: 100
         });
         this.color("#777777", 0.42);
 
+        this.bind('MouseOver', function(e) {
+            e.preventDefault();
+        });
+
         var sidebar = this;
         var closeButton = Crafty.e('DOMButton')
-            .attr({x: sidebar.w - 25, y: this.y, w: 25, h: 25, z: 101})
+            .attr({x: sidebar.w - 27, y: this.y, w: 25, h: 25, z: 101, tooltipWidth: 50, tooltipHeight: 75})
+            .textFont(Game.closeFont)
             .css(Game.closeCss)
             .text('x')
+            .tooltip('Closes the sidebar')
             .bind('Click', function() {
                 sidebar.close();
             });
@@ -155,24 +161,20 @@ Crafty.c('Sidebar', {
         this.upgradeHeadline = Crafty.e('2D, DOM, Text')
             .attr({x: 0, y: 70, w: sidebar.w, z: 101})
             .textColor(Game.textColor)
-            .textFont(Game.explanationFont)
-            .text('Upgrade for:');
+            .textFont(Game.sidebarFont);
         this.upgradeButton = Crafty.e('DOMButton')
-            .attr({x: 0, y: 100, w: sidebar.w, z: 101})
-            .text('9999$')
+            .attr({x: 0, y: 160, w: sidebar.w, h: 40, z: 101})
             .bind('Click', function() {
                 sidebar.selectedTower.upgrade();
             });
         this.sellHeadline = Crafty.e('2D, DOM, Text')
-            .attr({x: 0, y: 200, w: sidebar.w, z: 101})
+            .attr({x: 0, y: 260, w: sidebar.w, z: 101})
             .textColor(Game.textColor)
-            .textFont(Game.explanationFont)
-            .text('Sell for:');
+            .textFont(Game.sidebarFont);
         this.sellButton = Crafty.e('DOMButton')
-            .attr({x: 0, y: 230, w: sidebar.w, z: 101})
-            .text('9999$')
+            .attr({x: 0, y: 330, w: sidebar.w, h: 40, z: 101})
             .bind('Click', function() {
-                Crafty.e('TowerPlace').at(this.selectedTower.at().x, this.selectedTower.at().y);
+                Crafty.e('TowerPlace').at(sidebar.selectedTower.at().x, sidebar.selectedTower.at().y);
                 sidebar.selectedTower.sell();
                 sidebar.close();
             });
@@ -192,10 +194,10 @@ Crafty.c('Sidebar', {
 
     openFor: function(selectedTower) {
         this.selectedTower = selectedTower;
-        if (this.selectedTower.x < this.w) {
-            this.x = Game.width() - this.w;
+        if (this.selectedTower.x < Game.width() / 2) {
+            this.x = Game.width() - this.w - Game.map_grid.tile.width;
         } else {
-            this.x = 0;
+            this.x = Game.map_grid.tile.width;
         }
 
         this.updateTexts();
@@ -203,10 +205,27 @@ Crafty.c('Sidebar', {
 
     updateTexts: function() {
         var towerType = this.selectedTower.has('SniperTower') ? 'Sniper Tower' : 'Flower Tower';
-        this.upgradeHeadline.text('Upgrade ' + towerType + ' to level ' + (this.selectedTower.level + 1) + ':');
-        this.upgradeButton.text(this.selectedTower.getUpgradeCost() + '$');
-        this.sellHeadline.text('Sell ' + towerType + ' to get:');
-        this.sellButton.text(this.selectedTower.getSellValue() + '$');
+
+        if (this.selectedTower.isUpgradable()) {
+            this.upgradeHeadline.text('Upgrade ' + towerType + ' to level ' + (this.selectedTower.level + 1) + ':');
+            this.upgradeButton
+                .text('-' + this.selectedTower.getUpgradeCost() + '$')
+                .tooltip('Upgrade ' + towerType +
+                ' at position (' + this.selectedTower.at().x + '/' + this.selectedTower.at().y + ')' +
+                ' to level ' + (this.selectedTower.level + 1) + ' for ' + this.selectedTower.getUpgradeCost() + '$');
+        } else {
+            this.upgradeHeadline.text(towerType + ': Maximum level reached');
+            this.upgradeButton
+                .text('-')
+                .tooltip('Maximum level reached, can\'t upgrade tower');
+        }
+
+        this.sellHeadline.text('Sell ' + towerType + ':');
+        this.sellButton
+            .text('+' + this.selectedTower.getSellValue() + '$')
+            .tooltip('Sell ' + towerType +
+                     ' at position (' + this.selectedTower.at().x + '/' + this.selectedTower.at().y + ')' +
+                     ' to get back ' + this.selectedTower.getSellValue() + '$');
     },
 
     close: function() {
@@ -319,7 +338,6 @@ Crafty.c('Enemy', {
     init: function() {
         this.requires('Actor, Collision, PathWalker, Delay, Tooltip');
         this.attr({tooltipWidth: 150, tooltipHeight: 30});
-        this.permanentTooltip();
 
         Game.enemyCount++;
 
@@ -729,6 +747,7 @@ Crafty.c('TowerPlace', {
                 Game.money -= Game.towers[Game.selectedTower];
                 Game.towerLevel = 1;
                 Crafty.trigger('TowerCreated', tower);
+                Crafty('Sidebar').openFor(tower);
                 this.destroy();
             }
         });
@@ -817,6 +836,7 @@ Crafty.c('Tower', {
 
     sell: function() {
         Game.money += this.getSellValue();
+        Crafty.trigger('TowerSold', this);
         this.destroy();
         console.log('Sold tower for ' + this.getSellValue() + "$");
     },
@@ -824,7 +844,10 @@ Crafty.c('Tower', {
     getSellValue: function() {
         var totalCost = 0;
         for (var level = 1; level <= this.level; level++) {
-            totalCost += this.getUpgradeCost(level);
+            var levelCost = this.getUpgradeCost(level);
+            if (levelCost != 'MAX') {
+                totalCost += levelCost;
+            }
         }
         return Math.floor(totalCost * 0.5);
     }
@@ -836,29 +859,44 @@ Crafty.c('FlowerTower', {
         this.range = 4;
         this.maxLevel = 10;
         this.shootingSpeed = 0.4;
-        this.updateTooltip();
 
-        // max level and range increase
+        // handle setting range, correct sprite (according to level) and tooltip text
         this.bind('TowerUpgraded', function(actor) {
             if (actor == this) {
-                if (this.level == 4) {
-                    this.range = 5;
-                } else if (this.level == this.maxLevel) {
-                    this.range = 6;
-                }
-
-                this.removeComponent('flower_tower' + Math.floor(this.level / 2));
-                this.addComponent('flower_tower' + Math.ceil(this.level / 2));
-
-                this.updateTooltip();
+                this.handleLevelup();
             }
         });
+
+        // initialize according to level (has to be delayed because level is set after initialization)
+        this.delay(function() {
+            this.handleLevelup();
+        }, 100, 0);
 
         this.delay(function() {
             if (this.has('Enabled') && this.isEnemyNear()) {
                 this.shoot();
             }
         }, this.shootingSpeed * 1000, -1);
+    },
+
+    handleLevelup: function() {
+        // set range according to level
+        if (this.level == this.maxLevel) {
+            this.range = 6;
+        } else if (this.level >= 4) {
+            this.range = 5;
+        } else {
+            this.range = 4;
+        }
+
+        // set sprite according to level
+        for (var i = 1; i < Math.ceil(this.level / 2); i++) {
+            this.removeComponent('flower_tower' + i);
+        }
+        this.addComponent('flower_tower' + Math.ceil(this.level / 2));
+
+        // update tooltip (what a surprise)
+        this.updateTooltip();
     },
 
     updateTooltip: function() {
@@ -906,33 +944,36 @@ Crafty.c('FlowerTower', {
         if (level === undefined) {
             level = this.level;
         }
-        if (level < this.maxLevel) {
-            return Math.floor(Game.towers['FlowerTower'] * Math.pow(1.4, level));
-        } else {
-            return "MAX";
-        }
+
+        return Math.floor(Game.towers['FlowerTower'] * Math.pow(1.4, level));
     }
 });
 
 Crafty.c('SniperTower', {
     init: function() {
-        this.requires('Tower, leaf_right, SpriteAnimation');
+        this.requires('Tower, SpriteAnimation, sniper_tower1');
         this.attr({w: 32, h: 32});
-        this.reel('LeafSpinning', 2000, [[0, 0], [0, 1], [1, 1], [1, 0]]);
-        this.animate('LeafSpinning', -1);
+        //this.reel('LeafSpinning', 2000, [[0, 0], [0, 1], [1, 1], [1, 0]]);
+        //this.animate('LeafSpinning', -1);
         this.maxLevel = 6;
-        this.updateTooltip();
 
-        // max level and range increase
+        // show correct sprite for level and update tooltip
         this.bind('TowerUpgraded', function(actor) {
             if (actor == this) {
-                this.updateTooltip();
+                this.handleLevelup();
+            }
+        });
+        // if this tower is sold we reduce the cost for the next sniper tower again
+        this.bind('TowerSold', function(actor) {
+            if (actor == this) {
+                Game.towers['SniperTower'] = Math.floor(Game.towers['SniperTower'] / 1.25);
             }
         });
 
         // increase cost for next sniper tower (we don't want to make it tooo easy ;) )
         this.delay(function() {
             Game.towers['SniperTower'] = Math.floor(1.25 * Game.towers['SniperTower']);
+            this.handleLevelup();
         }, 100, 0);
 
         this.delay(function() {
@@ -940,6 +981,17 @@ Crafty.c('SniperTower', {
                 this.shoot();
             }
         }, 4000, -1);
+    },
+
+    handleLevelup: function() {
+        // set sprite according to level
+        for (var i = 1; i < Math.ceil((this.level + 1) / 2); i++) {
+            this.removeComponent('sniper_tower' + i);
+        }
+        this.addComponent('sniper_tower' + Math.ceil((this.level + 1) / 2));
+
+        // update tooltip (what a surprise)
+        this.updateTooltip();
     },
 
     updateTooltip: function() {
@@ -974,11 +1026,8 @@ Crafty.c('SniperTower', {
         if (level === undefined) {
             level = this.level;
         }
-        if (level < this.maxLevel) {
-            return Math.floor(Game.towers['SniperTowerUpgrade'] * 1.5 * Math.sqrt(level));
-        } else {
-            return "MAX";
-        }
+
+        return Math.floor(Game.towers['SniperTowerUpgrade'] * 1.5 * Math.sqrt(level));
     }
 });
 
