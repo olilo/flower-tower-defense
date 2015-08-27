@@ -549,7 +549,11 @@ Crafty.c('HudElement', {
         this.textColor(Game.textColor);
     },
 
-    observe: function(prefix, observable) {
+    observe: function(prefix, observable, suffix) {
+        if (suffix === undefined) {
+            suffix = '';
+        }
+
         this.observable = observable;
         this.bind('EnterFrame', function() {
             if (this.oldValue != Game[this.observable]) {
@@ -558,7 +562,7 @@ Crafty.c('HudElement', {
             }
         });
         this.bind('ValueChanged', function(data) {
-            this.text(prefix + ": " + data);
+            this.text(prefix + ": " + data + suffix);
         });
         return this;
     },
@@ -809,7 +813,13 @@ Crafty.c('Tower', {
             });
         } else {
             this.bind('Click', function() {
-                Crafty('Sidebar').openFor(this);
+                if (this.previousClick) {
+                    this.upgrade();
+                    this.previousClick = false;
+                } else {
+                    this.previousClick = true;
+                    Crafty('Sidebar').openFor(this);
+                }
             });
         }
     },
@@ -900,11 +910,19 @@ Crafty.c('FlowerTower', {
     },
 
     updateTooltip: function() {
-        this.tooltip(
+        var tooltipText =
             "Flower Tower at level " + this.level + ", <br>" +
             this.getDamage() + " damage per petal, <br>" +
-            (this.getDamage() / this.shootingSpeed) + " dps in a square of " + this.range + " tiles <br>" +
-            (this.maxLevel == this.level ? "(maximum level reached)" : "(Upgrade cost: " + this.getUpgradeCost() + " gold)"));
+            (this.getDamage() / this.shootingSpeed) + " dps in a square of " + this.range + " tiles <br>";
+
+        if (this.isUpgradable()) {
+            tooltipText += "Double-click to upgrade (costs " + this.getUpgradeCost() + "$) <br>";
+        } else {
+            tooltipText += "(maximum level reached)";
+        }
+
+        this.tooltip(tooltipText);
+
     },
 
     shoot: function() {

@@ -58,82 +58,26 @@ Crafty.scene('Difficulty', function() {
         .textColor(Game.textColor)
         .css(Game.centerCss);
 
-    Crafty.e('DOMButton')
-        .text('Easy')
-        .tooltip('normal prices, 100 lifes, lots of money')
-        .attr({ x: 0, y: Game.height()*7/12 - 24, w: Game.width() / 2, h: 50 })
-        .textFont(Game.difficultyFont)
-        .textColor('green')
-        .bind('Click', function() {
-            Game.difficulty = "Easy";
-            Game.money = 60;
-            Game.lifes = 100;
-            Game.moneyAfterWave = 20;
-            Game.towers = {
-                'FlowerTower': 10,
-                'SniperTower': 20,
-                'SniperTowerUpgrade': 20
-            };
-            Crafty.scene('MapSelection');
-        });
+    for (var e in Game.difficulties) {
+        if (!Game.difficulties.hasOwnProperty(e)) continue; //skip
 
-    Crafty.e('DOMButton')
-        .text('Normal')
-        .tooltip('normal prices, 40 lifes, normal amount of money')
-        .attr({ x: Game.width() / 2, y: Game.height()*7/12 - 24, w: Game.width() / 2, h: 50 })
-        .textFont(Game.difficultyFont)
-        .textColor('yellow')
-        .bind('Click', function() {
-            Game.difficulty = "Normal";
-            Game.money = 30;
-            Game.lifes = 40;
-            Game.moneyAfterWave = 10;
-            Game.towers = {
-                'FlowerTower': 10,
-                'SniperTower': 20,
-                'SniperTowerUpgrade': 20
-            };
-            Crafty.scene('MapSelection');
-        });
-
-    Crafty.e('DOMButton')
-        .text('Hard')
-        .tooltip('normal prices, 15 lifes, less money after waves')
-        .attr({ x: 0, y: Game.height()*9/12 - 24, w: Game.width() / 2, h: 50 })
-        .textFont(Game.difficultyFont)
-        .textColor('red')
-        .bind('Click', function() {
-            Game.difficulty = "Hard";
-            Game.money = 25;
-            Game.lifes = 15;
-            Game.moneyAfterWave = 5;
-            Game.towers = {
-                'FlowerTower': 12,
-                'SniperTower': 20,
-                'SniperTowerUpgrade': 25
-            };
-            Crafty.scene('MapSelection');
-        });
-
-    Crafty.e('DOMButton')
-        .text('Impossible')
-        .tooltip('higher prices, 10 lifes, no money after waves')
-        .attr({ x: Game.width() / 2, y: Game.height()*9/12 - 24, w: Game.width() / 2, h: 50 })
-        .textFont(Game.difficultyFont)
-        .textColor('#880044')
-        .highlightColor('#880000')
-        .bind('Click', function() {
-            Game.difficulty = "Impossible";
-            Game.money = 20;
-            Game.lifes = 10;
-            Game.moneyAfterWave = 0;
-            Game.towers = {
-                'FlowerTower': 15,
-                'SniperTower': 25,
-                'SniperTowerUpgrade': 50
-            };
-            Crafty.scene('MapSelection');
-        });
+        Crafty.e('DOMButton')
+            .text(e)
+            .tooltip(Game.difficulties[e].tooltip)
+            .attr({
+                x: Game.difficulties[e].x * Game.width() / 2,
+                y: ((Game.difficulties[e].y * 2 + 7) / 12) * Game.height(),
+                w: Game.width() / 2,
+                h: 50
+            })
+            .textFont(Game.difficultyFont)
+            .textColor(Game.difficulties[e].textColor)
+            .bind('Click', function() {
+                console.log("Chosen difficulty: " + this.text());
+                Game.setDifficultyProperties(this.text());
+                Crafty.scene('MapSelection');
+            });
+    }
 
 
     Crafty.e('DOMButton')
@@ -686,7 +630,7 @@ Crafty.scene('Game', function() {
     Crafty.audio.play('Background', -1);
 
     // HUD
-    Crafty.e('HudElement').observe('Money', 'money').at(1);
+    Crafty.e('HudElement').observe('Money', 'money', '$').at(1);
     Crafty.e('HudElement').observe('Lifes', 'lifes').at(6).alertIfBelow(3);
     Crafty.e('HudElement').observe('Enemies', 'enemyCount').at(10);
     Crafty.e('HudElement').observe('Wave', 'currentWave').at(14);
@@ -700,6 +644,8 @@ Crafty.scene('Game', function() {
         .bind('Click', function() {
             if (window.confirm('Really restart this level? You will restart at wave 1 with no towers!')) {
                 console.log('Restarting level ' + Game.level);
+                // reset difficulty-related properties
+                Game.setDifficultyProperties(Game.difficulty);
                 Crafty.scene('InitializeLevel' + Game.level);
             }
         })
