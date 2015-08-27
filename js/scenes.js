@@ -4,15 +4,22 @@
 Crafty.scene('Loading', function() {
     // Draw some text for the player to see in case the file
     //  takes a noticeable amount of time to load
-    var loading = Crafty.e('2D, DOM, Text, Delay')
+    var loading = Crafty.e('2D, Grid, DOM, Text, Delay')
         .text('Loading...')
-        .attr({ x: 0, y: Game.height()/2 - 24, w: Game.width() })
+        .attr({w: Game.width()})
+        .at(0, 5)
         .textFont(Game.loadingFont)
         .textColor(Game.textColor)
         .css(Game.centerCss);
 
+    Crafty.e('Actor, Progress, Text')
+        .at(Game.map_grid.width / 2 - 2, 8)
+        .textFont(Game.loadingFont)
+        .textColor(Game.textColor)
+        .text('0%');
+
     var x = 3;
-    loading.delay(function() {
+    loading.delay(function () {
         if (x >= 22) {
             Crafty('flower Loading').destroy();
             x = 3;
@@ -23,18 +30,20 @@ Crafty.scene('Loading', function() {
     }, 500, -1);
 
     // Load all our assets
-    Crafty.load(Game.assets, function() {
+    Crafty.load(Game.assets, function () {
         // Now that our sprites are ready to draw, start the game
         Game.endless = false;
 
         var savegame = Crafty.storage('ftd_save1');
-        if(savegame){
+        if (savegame) {
             // we have a savegame, continue from savegame
             Crafty.scene('LoadSaveGame');
         } else {
             // no savegame, start new game
             Crafty.scene('Difficulty');
         }
+    }, function (progress) {
+        Crafty('Progress').text(Math.floor(progress.percent) + "%");
     });
 });
 
@@ -429,22 +438,8 @@ Crafty.scene('InitializeLevel1', function() {
 
     Game.level = '1';
     Game.backgroundAsset = 'background1';
-    Game.endless = false;
     Game.waves.current = Game.waves.level1;
-    Game.enemyCount = 0;
-    Game.currentWave = 0;
-    Game.selectedTower = 'SniperTower';
-    Game.sniperTowerInitial = Game.towers['SniperTower'];
-    Game.towerMap = new Array(Game.map_grid.width);
-    for (var x = 0; x < Game.map_grid.width; x++) {
-        Game.towerMap[x] = new Array(Game.map_grid.height);
-        for (var y = 0; y < Game.map_grid.height; y++) {
-            Game.towerMap[x][y] = {
-                name: '',
-                level: 0
-            };
-        }
-    }
+    Game.setGeneralProperties();
 
     // generate path like this:
     // -  /-----------\
@@ -476,21 +471,7 @@ Crafty.scene('InitializeLevel2', function() {
     Game.level = '2';
     Game.backgroundAsset = 'background2';
     Game.waves.current = Game.waves.level2;
-    Game.endless = false;
-    Game.enemyCount = 0;
-    Game.currentWave = 0;
-    Game.selectedTower = 'SniperTower';
-    Game.sniperTowerInitial = Game.towers['SniperTower'];
-    Game.towerMap = new Array(Game.map_grid.width);
-    for (var x = 0; x < Game.map_grid.width; x++) {
-        Game.towerMap[x] = new Array(Game.map_grid.height);
-        for (var y = 0; y < Game.map_grid.height; y++) {
-            Game.towerMap[x][y] = {
-                name: '',
-                level: 0
-            };
-        }
-    }
+    Game.setGeneralProperties();
 
     // generate path
     Game.path = new Path(Game.map_grid);
@@ -512,21 +493,7 @@ Crafty.scene('InitializeLevel3', function() {
     Game.level = '3';
     Game.backgroundAsset = 'background6';
     Game.waves.current = Game.waves.level3;
-    Game.endless = false;
-    Game.enemyCount = 0;
-    Game.currentWave = 0;
-    Game.selectedTower = 'SniperTower';
-    Game.sniperTowerInitial = Game.towers['SniperTower'];
-    Game.towerMap = new Array(Game.map_grid.width);
-    for (var x = 0; x < Game.map_grid.width; x++) {
-        Game.towerMap[x] = new Array(Game.map_grid.height);
-        for (var y = 0; y < Game.map_grid.height; y++) {
-            Game.towerMap[x][y] = {
-                name: '',
-                level: 0
-            };
-        }
-    }
+    Game.setGeneralProperties();
 
     // generate path
     Game.path = new Path(Game.map_grid);
@@ -550,21 +517,7 @@ Crafty.scene('InitializeLevel4', function() {
     Game.level = '4';
     Game.backgroundAsset = 'background5';
     Game.waves.current = Game.waves.level4;
-    Game.endless = false;
-    Game.enemyCount = 0;
-    Game.currentWave = 0;
-    Game.selectedTower = 'SniperTower';
-    Game.sniperTowerInitial = Game.towers['SniperTower'];
-    Game.towerMap = new Array(Game.map_grid.width);
-    for (var x = 0; x < Game.map_grid.width; x++) {
-        Game.towerMap[x] = new Array(Game.map_grid.height);
-        for (var y = 0; y < Game.map_grid.height; y++) {
-            Game.towerMap[x][y] = {
-                name: '',
-                level: 0
-            };
-        }
-    }
+    Game.setGeneralProperties();
 
     // generate path
     var map_config = {
@@ -595,21 +548,7 @@ Crafty.scene('InitializeLevel5', function() {
     Game.level = '5';
     Game.backgroundAsset = 'background9';
     Game.waves.current = Game.waves.level5;
-    Game.endless = false;
-    Game.enemyCount = 0;
-    Game.currentWave = 0;
-    Game.selectedTower = 'SniperTower';
-    Game.sniperTowerInitial = Game.towers['SniperTower'];
-    Game.towerMap = new Array(Game.map_grid.width);
-    for (var x = 0; x < Game.map_grid.width; x++) {
-        Game.towerMap[x] = new Array(Game.map_grid.height);
-        for (var y = 0; y < Game.map_grid.height; y++) {
-            Game.towerMap[x][y] = {
-                name: '',
-                level: 0
-            };
-        }
-    }
+    Game.setGeneralProperties();
 
     // generate path
     Game.path = new Path(Game.map_grid);

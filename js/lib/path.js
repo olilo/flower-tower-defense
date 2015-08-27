@@ -96,8 +96,9 @@ Path.prototype.remove = function(point) {
     this.occupied[point.x][point.y] = false;
 
     for (var i = this.pointPath.length - 1; i >= 0; i--) {
-        if (this.pointPath.x == point.x && this.pointPath.y == point.y) {
+        if (this.pointPath[i].x == point.x && this.pointPath[i].y == point.y) {
             this.pointPath.splice(i, 1);
+            console.log('Removed ' + point.x + "/" + point.y + " from pointPath");
             return;
         }
     }
@@ -494,26 +495,29 @@ Path.prototype.generateLabyrinth = function() {
     this.right = this.width - 2;
     this.bottom = this.height - 2;
 
-    var direction1 = -1, direction2 = -1;
+    var direction1 = -1, direction2 = -1, pointInDirection1 = {x: 0, y: 0};
 
-    if (this.current.x < this.width / 4 && this.finish.x == 0) {
+    if (this.current.x <= 3) {
         direction1 = LEFT;
-        direction2 = this.current.y < this.finish.y ? UP : DOWN;
-    } else if (this.current.x > this.width * 3 / 4 && this.finish.x == this.width - 1) {
+        direction2 = this.current.y > this.finish.y ? UP : DOWN;
+    } else if (this.current.x >= this.width - 4) {
         direction1 = RIGHT;
-        direction2 = this.current.y < this.finish.y ? UP : DOWN;
-    } else if (this.current.y < this.height / 4 && this.finish.y == 0) {
+        direction2 = this.current.y > this.finish.y ? UP : DOWN;
+    } else if (this.current.y <= 3) {
         direction1 = UP;
-        direction2 = this.current.x < this.finish.x ? LEFT : RIGHT;
-    } else if (this.current.y > this.height * 3 / 4 && this.finish.y == this.height - 1) {
+        direction2 = this.current.x > this.finish.x ? LEFT : RIGHT;
+    } else if (this.current.y >= this.height - 4) {
         direction1 = DOWN;
-        direction2 = this.current.x < this.finish.x ? LEFT : RIGHT;
+        direction2 = this.current.x > this.finish.x ? LEFT : RIGHT;
     } else {
-        direction1 = Math.floor(Math.random() * 4);
+        while (direction1 < 0 || this.isOnPath(pointInDirection1.x, pointInDirection1.y)) {
+            direction1 = Math.floor(Math.random() * 4);
+            pointInDirection1 = this.getInDirection(this.current, direction1);
+        }
         if (direction1 == LEFT || direction1 == RIGHT) {
-            direction2 = this.current.y < this.finish.y ? UP : DOWN;
+            direction2 = this.current.y > this.finish.y ? UP : DOWN;
         } else {
-            direction2 = this.current.x < this.finish.x ? LEFT : RIGHT;
+            direction2 = this.current.x > this.finish.x ? LEFT : RIGHT;
         }
     }
 
@@ -525,8 +529,8 @@ Path.prototype.generateLabyrinth = function() {
     }
 
     switch (direction2) {
-        case LEFT: this.continuePathTo(this.finish.x, this.current.y); break;
-        case UP: this.continuePathTo(this.current.x, this.finish.y); break;
+        case LEFT: this.continuePathTo(1, this.current.y); break;
+        case UP: this.continuePathTo(this.current.x, 1); break;
         case RIGHT: this.continuePathTo(this.width - 2, this.current.y); break;
         case DOWN: this.continuePathTo(this.current.x, this.height - 2); break;
     }

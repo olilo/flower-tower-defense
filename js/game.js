@@ -138,22 +138,22 @@ Game = {
             ['SilverDragon']
         ],
         level5: [
-            ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch'],
-            ['Witch', 'Squid', 'Witch', 'Witch', 'Squid', 'Witch', 'Witch', 'Squid', 'Witch', 'Witch', 'Squid'],
-            ['Squid', 'Squid', 'Squid', 'FastSquid', 'Squid', 'Squid', 'Squid', 'FastSquid'],
-            ['Squid', 'FastSquid', 'Knight', 'Squid', 'FastSquid', 'Squid', 'Knight', 'Squid', 'Knight'],
-            ['FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight'],
-            ['FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid',
-                'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid'],
-            ['FastSquid', 'MightyWitch', 'FastSquid', 'Spider', 'MightyWitch', 'MightyWitch', 'Knight', 'FastKnight', 'MightyWitch',
-                'FastKnight', 'MightyWitch'],
-            ['Spider', 'Orc', 'Spider', 'MightyWitch', 'FastSquid', 'FastSquid', 'Spider', 'Orc', 'MightyWitch', 'FastSquid',
-                'Spider', 'Orc', 'MightyWitch', 'FastSquid', 'Spider', 'MightyWitch'],
-            ['Orc', 'Orc', 'Orc', 'Orc', 'Orc', 'FastSquid', 'FastSquid', 'MightyWitch', 'FastKnight', 'Spider', 'Spider',
-                'Spider', 'Spider', 'Orc', 'GreenDragon', 'Spider', 'Orc', 'Spider', 'MightyWitch', 'FastSquid', 'FastSquid',
-                'Spider', 'Orc', 'MightyWitch', 'FastSquid', 'Spider', 'Orc', 'MightyWitch', 'FastSquid', 'Spider', 'GreenDragon'],
-            ['Spider', 'Orc', 'Spider', 'MightyWitch', 'FastSquid', 'FastSquid', 'Spider', 'Orc', 'MightyWitch', 'FastSquid',
-                'Spider', 'Orc', 'MightyWitch', 'FastSquid', 'Spider', 'MightyWitch', 'SilverDragon']
+            ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch'],
+            ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Squid'],
+            ['Witch', 'Witch', 'Witch', 'Witch', 'Squid', 'Witch', 'Witch', 'Squid'],
+            ['Squid', 'Squid', 'Squid', 'FastSquid'],
+            ['Squid', 'FastSquid', 'Knight', 'Squid', 'FastSquid', 'Witch', 'Witch', 'Witch', 'Knight'],
+            ['FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight',
+                'FastSquid', 'Knight'],
+            ['FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid'],
+            ['FastSquid', 'Spider', 'FastSquid', 'Spider', 'Witch', 'Witch', 'Knight', 'Knight', 'MightyWitch'],
+            ['Spider', 'Witch', 'MightyWitch', 'FastSquid', 'Witch', 'MightyWitch', 'Orc'],
+            ['Orc', 'Orc', 'Orc', 'Orc', 'Orc', 'FastSquid', 'FastSquid', 'Witch', 'FastKnight'],
+            ['FastKnight', 'FastKnight', 'FastKnight', 'MightyWitch', 'MightyWitch', 'MightyWitch'],
+            ['Spider', 'FastSquid', 'Spider', 'FastSquid', 'Orc', 'Orc', 'Squid', 'GreenDragon'],
+            ['Spider', 'Spider', 'Orc', 'Orc', 'GreenDragon', 'FastSquid', 'FastSquid', 'Orc', 'GreenDragon'],
+            ['Witch', 'Squid', 'FastSquid', 'Knight', 'Spider', 'MightyWitch', 'Orc', 'FastKnight', 'GreenDragon'],
+            ['SilverDragon']
         ]
     },
 
@@ -344,6 +344,24 @@ Game = {
     //  this is just the height of a tile times the height of the grid
     height: function() {
         return this.map_grid.height * this.map_grid.tile.height;
+    },
+
+    setGeneralProperties: function() {
+        this.endless = false;
+        this.enemyCount = 0;
+        this.currentWave = 0;
+        this.selectedTower = 'SniperTower';
+        this.sniperTowerInitial = this.towers['SniperTower'];
+        this.towerMap = new Array(this.map_grid.width);
+        for (var x = 0; x < this.map_grid.width; x++) {
+            this.towerMap[x] = new Array(this.map_grid.height);
+            for (var y = 0; y < this.map_grid.height; y++) {
+                this.towerMap[x][y] = {
+                    name: '',
+                    level: 0
+                };
+            }
+        }
     },
 
     setDifficultyProperties: function(difficulty) {
