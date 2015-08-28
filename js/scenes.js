@@ -366,7 +366,9 @@ Crafty.scene('LoadSaveGame', function() {
     Crafty.e('DOMButton')
         .text('Load Saved game')
         .attr({ x: 0, y: Game.height()*7/12 - 24, w: Game.width(), h: 50 })
-        .tooltip('Continue the game you played last time with difficulty ' +  Crafty.storage('ftd_save1').difficulty)
+        .tooltip('Continue the game you played last time ' +
+                 'with difficulty ' +  Crafty.storage('ftd_save1').difficulty + ' ' +
+                 'on wave ' + Crafty.storage('ftd_save1').currentWave)
         .bind('Click', function() {
             var savegame = Crafty.storage('ftd_save1');
 
@@ -573,6 +575,7 @@ Crafty.scene('Game', function() {
     Crafty.e('HudElement').observe('Lifes', 'lifes').at(6).alertIfBelow(3);
     Crafty.e('HudElement').observe('Enemies', 'enemyCount').at(10);
     Crafty.e('HudElement').observe('Wave', 'currentWave').at(14);
+    Crafty.e('HudElement').observe('FPS', Game.actualFPS.FPS).at(18);
 
     Crafty.e('DOMButton, Grid')
         .text('Restart level')
@@ -583,13 +586,17 @@ Crafty.scene('Game', function() {
         .bind('Click', function() {
             if (window.confirm('Really restart this level? You will restart at wave 1 with no towers!')) {
                 console.log('Restarting level ' + Game.level);
+                // we need crafty unpaused for initialization
+                if (Crafty.isPaused()) {
+                    Crafty.pause();
+                }
                 // reset difficulty-related properties
                 Game.setDifficultyProperties(Game.difficulty);
                 Crafty.scene('InitializeLevel' + Game.level);
             }
         })
-        .at(18, 0)
-        .attr({w: 200});
+        .at(20, 0)
+        .attr({w: 180});
 
     // tower selectors
     Crafty.e('TowerSelector').forTower('FlowerTower')

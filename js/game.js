@@ -17,6 +17,12 @@ Game = {
         pathMaxLength: 80
     },
 
+    options: {
+        bulletImages: true,
+        music: true,
+        soundEffects: true
+    },
+
     // text colors and fonts (maybe we get fancy later on)
     textColor: 'white',
     highlightColor: 'black',
@@ -347,16 +353,16 @@ Game = {
     },
 
     setGeneralProperties: function() {
-        this.endless = false;
-        this.enemyCount = 0;
-        this.currentWave = 0;
-        this.selectedTower = 'SniperTower';
-        this.sniperTowerInitial = this.towers['SniperTower'];
-        this.towerMap = new Array(this.map_grid.width);
-        for (var x = 0; x < this.map_grid.width; x++) {
-            this.towerMap[x] = new Array(this.map_grid.height);
-            for (var y = 0; y < this.map_grid.height; y++) {
-                this.towerMap[x][y] = {
+        Game.endless = false;
+        Game.enemyCount = 0;
+        Game.currentWave = 0;
+        Game.selectedTower = 'SniperTower';
+        Game.sniperTowerInitial = this.towers['SniperTower'];
+        Game.towerMap = new Array(Game.map_grid.width);
+        for (var x = 0; x < Game.map_grid.width; x++) {
+            Game.towerMap[x] = new Array(Game.map_grid.height);
+            for (var y = 0; y < Game.map_grid.height; y++) {
+                Game.towerMap[x][y] = {
                     name: '',
                     level: 0
                 };
@@ -365,13 +371,13 @@ Game = {
     },
 
     setDifficultyProperties: function(difficulty) {
-        var config = this.difficulties[difficulty];
+        var config = Game.difficulties[difficulty];
 
-        this.difficulty = difficulty;
-        this.money = config.money;
-        this.lifes = config.lifes;
-        this.moneyAfterWave = config.moneyAfterWave;
-        this.towers = {
+        Game.difficulty = difficulty;
+        Game.money = config.money;
+        Game.lifes = config.lifes;
+        Game.moneyAfterWave = config.moneyAfterWave;
+        Game.towers = {
             'FlowerTower': config.towers.FlowerTower,
             'SniperTower': config.towers.SniperTower,
             'SniperTowerUpgrade': config.towers.SniperTowerUpgrade
@@ -382,6 +388,7 @@ Game = {
     start: function() {
         Crafty.init(Game.width(), Game.height());
         Crafty.background('rgb(169, 153, 145)');
+        Game.actualFPS = Crafty.e('ActualFPS');
         Crafty.scene('Loading');
     }
 };
