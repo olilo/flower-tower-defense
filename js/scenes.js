@@ -34,14 +34,7 @@ Crafty.scene('Loading', function() {
         // Now that our sprites are ready to draw, start the game
         Game.endless = false;
 
-        var savegame = Crafty.storage('ftd_save1');
-        if (savegame) {
-            // we have a savegame, continue from savegame
-            Crafty.scene('LoadSaveGame');
-        } else {
-            // no savegame, start new game
-            Crafty.scene('Difficulty');
-        }
+        Crafty.scene('MainMenu');
     }, function (progress) {
         Crafty('Progress').text(Math.floor(progress.percent) + "%");
     });
@@ -354,7 +347,7 @@ Crafty.scene('Credits', function(targetScene) {
 
 // Load variables from savegame
 // ----------------------------
-Crafty.scene('LoadSaveGame', function() {
+Crafty.scene('MainMenu', function() {
     Crafty.background('rgb(169, 153, 145)');
     Crafty.audio.stop();
     Crafty.audio.play('Menu', -1);
@@ -363,35 +356,41 @@ Crafty.scene('LoadSaveGame', function() {
         .image('assets/ftd-logo.jpg')
         .attr({ x: 80, y: Game.height()*1/12 - 24, w: Game.width(), h: 200 });
 
-    Crafty.e('DOMButton')
+    var savegame = Crafty.storage('ftd_save1');
+    var loadButton = Crafty.e('DOMButton')
         .text('Load Saved game')
-        .attr({ x: 0, y: Game.height()*7/12 - 24, w: Game.width(), h: 50 })
-        .tooltip('Continue the game you played last time ' +
-                 'with difficulty ' +  Crafty.storage('ftd_save1').difficulty + ' ' +
-                 'on wave ' + Crafty.storage('ftd_save1').currentWave)
-        .bind('Click', function() {
-            var savegame = Crafty.storage('ftd_save1');
+        .attr({ x: 0, y: Game.height()*7/12 - 24, w: Game.width(), h: 50, tooltipWidth: 350 })
+    if (savegame) {
+        loadButton
+            .tooltip('Continue the game you played last time ' +
+                'with difficulty ' + savegame.difficulty + ' ' +
+                'on wave ' + savegame.currentWave)
+            .bind('Click', function () {
+                Game.difficulty = savegame.difficulty;
+                Game.money = savegame.money;
+                Game.lifes = savegame.lifes;
+                Game.moneyAfterWave = savegame.moneyAfterWave;
+                Game.towers = savegame.towers;
+                Game.level = savegame.level;
 
-            Game.difficulty = savegame.difficulty;
-            Game.money = savegame.money;
-            Game.lifes = savegame.lifes;
-            Game.moneyAfterWave = savegame.moneyAfterWave;
-            Game.towers = savegame.towers;
-            Game.level = savegame.level;
+                Game.backgroundAsset = savegame.backgroundAsset;
+                Game.waves.current = savegame.waves.current;
+                Game.endless = savegame.currentWave >= Game.waves.current.length;
+                Game.enemyCount = savegame.enemyCount;
+                Game.currentWave = savegame.currentWave;
+                Game.selectedTower = savegame.selectedTower;
+                Game.sniperTowerInitial = savegame.sniperTowerInitial;
+                Game.towerMap = savegame.towerMap;
+                Game.path = new Path(Game.map_grid);
+                Game.path.copy(savegame.path);
 
-            Game.backgroundAsset = savegame.backgroundAsset;
-            Game.waves.current = savegame.waves.current;
-            Game.endless = savegame.currentWave >= Game.waves.current.length;
-            Game.enemyCount = savegame.enemyCount;
-            Game.currentWave = savegame.currentWave;
-            Game.selectedTower = savegame.selectedTower;
-            Game.sniperTowerInitial = savegame.sniperTowerInitial;
-            Game.towerMap = savegame.towerMap;
-            Game.path = new Path(Game.map_grid);
-            Game.path.copy(savegame.path);
-
-            Crafty.scene('Game');
-        });
+                Crafty.scene('Game');
+            });
+    } else {
+        loadButton
+            .tooltip('No savegame exists yet.')
+            .disable();
+    }
 
     Crafty.e('DOMButton')
         .text('Start new game')
@@ -410,7 +409,7 @@ Crafty.scene('LoadSaveGame', function() {
         .attr({ x: 70, y: Game.height() - 50, w: 200, h: 50 })
         .tooltip('Click here for some instructions')
         .bind('Click', function() {
-            Crafty.scene('Help', 'LoadSaveGame');
+            Crafty.scene('Help', 'MainMenu');
         });
 
     Crafty.e('DOMButton')
@@ -418,7 +417,7 @@ Crafty.scene('LoadSaveGame', function() {
         .attr({ x: 280, y: Game.height() - 50, w: 200, h: 50 })
         .tooltip('View the credits for this game ^^')
         .bind('Click', function() {
-            Crafty.scene('Credits', 'LoadSaveGame');
+            Crafty.scene('Credits', 'MainMenu');
         });
 
     Crafty.e('SoundButton')
@@ -684,8 +683,14 @@ Crafty.scene('Game', function() {
             } else {
                 overlay = document.createElement('div');
                 overlay.setAttribute('id', 'helpOverlay');
-                overlay.style = 'position: absolute; width: ' + (Game.width() - 40) + "px; padding: 10px; " +
-                    "left: 10px; top: 30px; border: 1px solid black; background: grey; z-index: 100";
+                overlay.style.position = 'absolute';
+                overlay.style.width = (Game.width() - 40) + 'px';
+                overlay.style.padding = '10px';
+                overlay.style.left = '10px';
+                overlay.style.top = '30px';
+                overlay.style.border = '1px solid black';
+                overlay.style.background = 'grey';
+                overlay.style.zIndex = '1000';
                 overlay.innerHTML =
                 '<p>Click anywhere to build the selected tower type. ' +
                 'You can find the selected tower type in the lower left of the screen (black is selected).' +

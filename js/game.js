@@ -23,6 +23,8 @@ Game = {
         soundEffects: true
     },
 
+    speedup: 1,
+
     // text colors and fonts (maybe we get fancy later on)
     textColor: 'white',
     highlightColor: 'black',
@@ -71,11 +73,11 @@ Game = {
                 'FastSquid', 'Knight'],
             ['FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid',
                 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid',
-                'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid'],
-            ['FastSquid', 'MightyWitch', 'FastSquid', 'Spider', 'MightyWitch', 'MightyWitch', 'Knight', 'FastKnight',
+                'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'MightyWitch'],
+            ['FastSquid', 'MightyWitch', 'FastSquid', 'Spider', 'Witch', 'FastKnight', 'Knight', 'FastKnight',
                 'MightyWitch', 'FastKnight', 'MightyWitch'],
             ['Spider', 'Orc', 'Spider', 'MightyWitch', 'FastSquid', 'FastSquid', 'Spider', 'Orc', 'MightyWitch', 'FastSquid',
-                'Spider', 'Orc', 'MightyWitch', 'FastSquid', 'Spider', 'MightyWitch'],
+                'Spider', 'Orc', 'FastSquid', 'Spider', 'MightyWitch'],
             ['Orc', 'Orc', 'Orc', 'Orc', 'Orc', 'FastSquid', 'FastSquid', 'MightyWitch', 'FastKnight', 'Spider', 'Spider',
                 'Spider', 'Spider', 'Orc', 'GreenDragon', 'Spider', 'Orc', 'Spider', 'MightyWitch', 'FastSquid', 'FastSquid',
                 'Spider', 'Orc', 'MightyWitch', 'FastSquid', 'Spider', 'Orc', 'MightyWitch', 'FastSquid', 'Spider', 'GreenDragon'],

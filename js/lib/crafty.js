@@ -7166,8 +7166,8 @@ Crafty.DrawManager = (function () {
 
                     obj._changed = false;
                 }
-                changed_objs.length = 0;
-                dirty_rects.length = 0;
+                changed_objs = [];
+                dirty_rects = [];
 
             },
 
@@ -7397,7 +7397,7 @@ Crafty.DrawManager = (function () {
             //if the amount of changed objects is over 60% of the total objects
             //do the naive method redrawing
             // TODO: I'm not sure this condition really makes that much sense!
-            if (l / DM.total2D > 0.6 || dirtyViewport) {
+            if (l / DM.total2D > 0.15 || dirtyViewport) {
                 DM.drawAll();
                 rectManager.clean();
                 return;
