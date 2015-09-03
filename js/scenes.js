@@ -19,15 +19,29 @@ Crafty.scene('Loading', function() {
         .text('0%');
 
     var x = 3;
-    loading.delay(function () {
-        if (x >= 22) {
-            Crafty('flower Loading').destroy();
-            x = 3;
+    Crafty.load({
+        "audio": {},
+        "images": [],
+        "sprites": {
+            "assets/flower.png": {
+                "tile": 32,
+                "tileh": 32,
+                "map": {
+                    flower: [4, 0]
+                }
+            }
         }
-        Crafty.e('2D, DOM, Grid, flower, Loading').at(x, 10);
+    }, function() {
+        loading.delay(function () {
+            if (x >= 22) {
+                Crafty('flower Loading').destroy();
+                x = 3;
+            }
+            Crafty.e('2D, DOM, Grid, flower, Loading').at(x, 10);
 
-        x += 2;
-    }, 500, -1);
+            x += 2;
+        }, 500, -1);
+    });
 
     // Load all our assets
     Crafty.load(Game.assets, function () {

@@ -324,8 +324,6 @@ Game = {
                 "tile": 32,
                 "tileh": 32,
                 "map": {
-                    flower: [4, 0],
-
                     flower_tower1: [0, 0],
                     flower_tower2: [1, 0],
                     flower_tower3: [2, 0],

@@ -2,9 +2,22 @@
 <html>
 <head>
     <title>Flower Tower Defense</title>
+    <style>
+        .DOMButton:hover {
+            color: black !important;
+        }
+        .DOMButton.disabledButton {
+            color: grey !important;
+            cursor: default !important;
+        }
+        .DOMButton.disabledButton:hover {
+            color: grey !important;
+        }
+    </style>
 </head>
 <body>
     <script src="js/lib/crafty.js"></script>
+    <script src="js/lib/statemachine.js"></script>
     <script src="js/lib/path.js"></script>
 
     <script src='https://cdn1.kongregate.com/javascripts/kongregate_api.js'></script>
