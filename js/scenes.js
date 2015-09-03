@@ -733,6 +733,20 @@ Crafty.scene('Game', function() {
             }
         });
 
+    var pauseOverlay = document.createElement('div');
+    pauseOverlay.style.border = '1px solid black';
+    pauseOverlay.style.backgroundColor = 'grey';
+    pauseOverlay.style.display = 'none';
+    pauseOverlay.style.position = 'absolute';
+    pauseOverlay.style.padding = '10px';
+    pauseOverlay.style.left = '350px';
+    pauseOverlay.style.top = '200px';
+    pauseOverlay.style.font = 'bold 36px "sans-serif"';
+    pauseOverlay.style.color = 'white';
+    pauseOverlay.style.zIndex = '900';
+    pauseOverlay.innerHTML = "Paused";
+    document.getElementById('cr-stage').appendChild(pauseOverlay);
+
     Crafty.e('DOMButton, Grid, Keyboard, Delay')
         .text('Pause')
         .textFont(Game.waveFont)
@@ -741,9 +755,19 @@ Crafty.scene('Game', function() {
         .tooltip('Pause or unpause the game (Hotkey: P)')
         .bind('Click', function() {
             Crafty.pause();
+            if (Crafty.isPaused()) {
+                pauseOverlay.style.display = 'block';
+            } else {
+                pauseOverlay.style.display = 'none';
+            }
         }).bind('KeyDown', function() {
             if (this.isDown('P')) {
                 Crafty.pause();
+                if (Crafty.isPaused()) {
+                    pauseOverlay.style.display = 'block';
+                } else {
+                    pauseOverlay.style.display = 'none';
+                }
             }
         });
 
