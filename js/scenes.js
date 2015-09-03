@@ -366,15 +366,15 @@ Crafty.scene('MainMenu', function() {
                 'with difficulty ' + savegame.difficulty + ' ' +
                 'on wave ' + savegame.currentWave)
             .bind('Click', function () {
-                Game.difficulty = savegame.difficulty;
+                Game.difficulty = savegame.difficulty || 'Normal';
                 Game.money = savegame.money;
                 Game.lifes = savegame.lifes;
                 Game.moneyAfterWave = savegame.moneyAfterWave;
                 Game.towers = savegame.towers;
-                Game.level = savegame.level;
+                Game.level = savegame.level || '1';
 
-                Game.backgroundAsset = savegame.backgroundAsset;
-                Game.waves.current = savegame.waves.current;
+                Game.backgroundAsset = savegame.backgroundAsset || 'background1';
+                Game.waves.current = savegame.waves.current || Game.waves.level1;
                 Game.endless = savegame.currentWave >= Game.waves.current.length;
                 Game.enemyCount = savegame.enemyCount;
                 Game.currentWave = savegame.currentWave;
