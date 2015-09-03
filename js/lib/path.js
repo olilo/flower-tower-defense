@@ -1,5 +1,9 @@
 const DOWN = 0, BOTTOM = 0, RIGHT = 1, UP = 2, TOP = 2, LEFT = 3;
 
+function pointsEqual(point1, point2) {
+    return point1.x == point2.x && point1.y == point2.y;
+}
+
 function Path(config) {
     this.width = config.width;
     this.height = config.height;
@@ -422,16 +426,20 @@ Path.prototype.generateLabyrinth = function() {
     stateMachine.put('godown_or_left', DOWN, 'godown');
     stateMachine.put('godown_or_left', LEFT, 'goleft');
 
-    stateMachine.put('godown_or_right', 0, 'godown');
-    stateMachine.put('godown_or_right', 1, 'goright');
+    stateMachine.put('godown_or_right', DOWN, 'godown');
+    stateMachine.put('godown_or_right', RIGHT, 'goright');
 
-    stateMachine.put('goup_or_left', 2, 'goup');
-    stateMachine.put('goup_or_left', 3, 'goleft');
+    stateMachine.put('goup_or_left', UP, 'goup');
+    stateMachine.put('goup_or_left', LEFT, 'goleft');
 
-    stateMachine.put('goup_or_right', 1, 'goright');
-    stateMachine.put('goup_or_right', 2, 'goup');
+    stateMachine.put('goup_or_right', RIGHT, 'goright');
+    stateMachine.put('goup_or_right', UP, 'goup');
 
-    while (this.pathLength < 0.9 * this.pathMinLength) {
+    while (this.pathLength < 0.95 * this.pathMaxLength &&
+            !pointsEqual(this.getInDirection(this.current, UP), this.finish) &&
+            !pointsEqual(this.getInDirection(this.current, RIGHT), this.finish) &&
+            !pointsEqual(this.getInDirection(this.current, DOWN), this.finish) &&
+            !pointsEqual(this.getInDirection(this.current, LEFT), this.finish)) {
         // timeout handling
         if (new Date().getTime() - startTime > 5000) {
             console.log("Timeout after 5 seconds!! total=" + this.pathLength);
@@ -448,7 +456,7 @@ Path.prototype.generateLabyrinth = function() {
             point4 = this.getInDirection(point1, (direction + 3) % 4);
 
         // backtracking
-        if (retryCount > 50) {
+        if (retryCount > 15) {
             this.remove(this.current);
             this.addObstacle(this.current);
             stateMachine.resetBy(1);
@@ -487,59 +495,23 @@ Path.prototype.generateLabyrinth = function() {
         if (created) {
             retryCount = 0;
         }
+
+        if (this.pathLength >= 0.9 * this.pathMinLength) {
+            this.left = 1;
+            this.top = 1;
+            this.right = this.width - 2;
+            this.bottom = this.height - 2;
+        }
     }
 
     // continue to finish
-    this.left = 1;
-    this.top = 1;
-    this.right = this.width - 2;
-    this.bottom = this.height - 2;
-
-    var direction1 = -1, direction2 = -1, pointInDirection1 = {x: 0, y: 0};
-
-    if (this.current.x <= 3) {
-        direction1 = LEFT;
-        direction2 = this.current.y > this.finish.y ? UP : DOWN;
-    } else if (this.current.x >= this.width - 4) {
-        direction1 = RIGHT;
-        direction2 = this.current.y > this.finish.y ? UP : DOWN;
-    } else if (this.current.y <= 3) {
-        direction1 = UP;
-        direction2 = this.current.x > this.finish.x ? LEFT : RIGHT;
-    } else if (this.current.y >= this.height - 4) {
-        direction1 = DOWN;
-        direction2 = this.current.x > this.finish.x ? LEFT : RIGHT;
-    } else {
-        while (direction1 < 0 || this.isOnPath(pointInDirection1.x, pointInDirection1.y)) {
-            direction1 = Math.floor(Math.random() * 4);
-            pointInDirection1 = this.getInDirection(this.current, direction1);
-        }
-        if (direction1 == LEFT || direction1 == RIGHT) {
-            direction2 = this.current.y > this.finish.y ? UP : DOWN;
-        } else {
-            direction2 = this.current.x > this.finish.x ? LEFT : RIGHT;
-        }
-    }
-
-    switch (direction1) {
-        case LEFT: this.continuePathTo(1, this.current.y); break;
-        case UP: this.continuePathTo(this.current.x, 1); break;
-        case RIGHT: this.continuePathTo(this.width - 2, this.current.y); break;
-        case DOWN: this.continuePathTo(this.current.x, this.height - 2); break;
-    }
-
-    switch (direction2) {
-        case LEFT: this.continuePathTo(1, this.current.y); break;
-        case UP: this.continuePathTo(this.current.x, 1); break;
-        case RIGHT: this.continuePathTo(this.width - 2, this.current.y); break;
-        case DOWN: this.continuePathTo(this.current.x, this.height - 2); break;
-    }
-
     var finishX = Math.max(this.left, Math.min(this.finish.x, this.right)),
         finishY = Math.max(this.top, Math.min(this.finish.y, this.bottom));
 
     this.continuePathTo(finishX, finishY);
     this.continuePathTo(this.finish.x, this.finish.y, true);
+
+    console.log("Finished creating random labyrinth path \\o/ (length=" + this.pathLength + ")");
 };
 
 

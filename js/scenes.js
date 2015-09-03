@@ -371,10 +371,10 @@ Crafty.scene('MainMenu', function() {
                 Game.lifes = savegame.lifes;
                 Game.moneyAfterWave = savegame.moneyAfterWave;
                 Game.towers = savegame.towers;
-                Game.level = savegame.level || '1';
+                Game.level = savegame.level || '2';
 
                 Game.backgroundAsset = savegame.backgroundAsset || 'background1';
-                Game.waves.current = savegame.waves.current || Game.waves.level1;
+                Game.waves.current = savegame.waves.current || Game.waves.level2;
                 Game.endless = savegame.currentWave >= Game.waves.current.length;
                 Game.enemyCount = savegame.enemyCount;
                 Game.currentWave = savegame.currentWave;
@@ -430,8 +430,8 @@ Crafty.scene('MainMenu', function() {
 
 Crafty.scene('InitializeLevel1', function() {
     // show loading if initialization takes up some time ...
-    Crafty.e('2D, DOM, Text')
-        .text('Loading...')
+    var loading = Crafty.e('2D, DOM, Text, Delay')
+        .text('Loading level, generating map...')
         .attr({ x: 0, y: Game.height()/2 - 24, w: Game.width() })
         .textFont(Game.loadingFont)
         .textColor(Game.textColor)
@@ -452,18 +452,19 @@ Crafty.scene('InitializeLevel1', function() {
     // |  \-----/  |  |
     // |           |  |
     // \-----------/  -
+    loading.delay(function() {
+        Game.path = new Path(Game.map_grid);
+        Game.path.generateSpiral();
 
-    Game.path = new Path(Game.map_grid);
-    Game.path.generateSpiral();
-
-    Crafty.scene('Game');
+        Crafty.scene('Game');
+    }, 400);
 });
 
 
 Crafty.scene('InitializeLevel2', function() {
     // show loading if initialization takes up some time ...
-    Crafty.e('2D, DOM, Text')
-        .text('Loading...')
+    var loading = Crafty.e('2D, DOM, Text, Delay')
+        .text('Loading level, generating map...')
         .attr({ x: 0, y: Game.height()/2 - 24, w: Game.width() })
         .textFont(Game.loadingFont)
         .textColor(Game.textColor)
@@ -474,18 +475,20 @@ Crafty.scene('InitializeLevel2', function() {
     Game.waves.current = Game.waves.level2;
     Game.setGeneralProperties();
 
-    // generate path
-    Game.path = new Path(Game.map_grid);
-    Game.path.generatePath();
+    loading.delay(function() {
+        // generate path
+        Game.path = new Path(Game.map_grid);
+        Game.path.generatePath();
 
-    Crafty.scene('Game');
+        Crafty.scene('Game');
+    }, 400)
 });
 
 
 Crafty.scene('InitializeLevel3', function() {
     // show loading if initialization takes up some time ...
-    Crafty.e('2D, DOM, Text')
-        .text('Loading...')
+    var loading = Crafty.e('2D, DOM, Text, Delay')
+        .text('Loading level, generating map...')
         .attr({ x: 0, y: Game.height()/2 - 24, w: Game.width() })
         .textFont(Game.loadingFont)
         .textColor(Game.textColor)
@@ -496,20 +499,22 @@ Crafty.scene('InitializeLevel3', function() {
     Game.waves.current = Game.waves.level3;
     Game.setGeneralProperties();
 
-    // generate path
-    Game.path = new Path(Game.map_grid);
-    Game.path.generateStartOnRow(0);
-    Game.path.finish = { x: 14, y: Game.map_grid.height - 1 };
-    Game.path.generatePath();
+    loading.delay(function() {
+        // generate path
+        Game.path = new Path(Game.map_grid);
+        Game.path.generateStartOnRow(0);
+        Game.path.finish = { x: 14, y: Game.map_grid.height - 1 };
+        Game.path.generatePath();
 
-    Crafty.scene('Game');
+        Crafty.scene('Game');
+    }, 400);
 });
 
 
 Crafty.scene('InitializeLevel4', function() {
     // show loading if initialization takes up some time ...
-    Crafty.e('2D, DOM, Text')
-        .text('Loading...')
+    var loading = Crafty.e('2D, DOM, Text, Delay')
+        .text('Loading level, generating map...')
         .attr({ x: 0, y: Game.height()/2 - 24, w: Game.width() })
         .textFont(Game.loadingFont)
         .textColor(Game.textColor)
@@ -520,27 +525,29 @@ Crafty.scene('InitializeLevel4', function() {
     Game.waves.current = Game.waves.level4;
     Game.setGeneralProperties();
 
-    // generate path
-    var map_config = {
-        width: Game.map_grid.width,
-        height: Game.map_grid.height,
-        tile: Game.map_grid.tile,
-        pathMinLength: 5,
-        pathMaxLength: 20
-    };
-    Game.path = new Path(map_config);
-    Game.path.start = { x: 9, y: 0 };
-    Game.path.finish = { x: 14, y: Game.map_grid.height - 1 };
-    Game.path.generatePath();
+    loading.delay(function() {
+        // generate path
+        var map_config = {
+            width: Game.map_grid.width,
+            height: Game.map_grid.height,
+            tile: Game.map_grid.tile,
+            pathMinLength: 5,
+            pathMaxLength: 20
+        };
+        Game.path = new Path(map_config);
+        Game.path.start = { x: 9, y: 0 };
+        Game.path.finish = { x: 14, y: Game.map_grid.height - 1 };
+        Game.path.generatePath();
 
-    Crafty.scene('Game');
+        Crafty.scene('Game');
+    }, 400)
 });
 
 
 Crafty.scene('InitializeLevel5', function() {
     // show loading if initialization takes up some time ...
-    Crafty.e('2D, DOM, Text')
-        .text('Loading...')
+    var loading = Crafty.e('2D, DOM, Text, Delay')
+        .text('Loading level, generating map...')
         .attr({ x: 0, y: Game.height()/2 - 24, w: Game.width() })
         .textFont(Game.loadingFont)
         .textColor(Game.textColor)
@@ -551,13 +558,16 @@ Crafty.scene('InitializeLevel5', function() {
     Game.waves.current = Game.waves.level5;
     Game.setGeneralProperties();
 
-    // generate path
-    Game.path = new Path(Game.map_grid);
-    Game.path.generateStartOnRow(0);
-    Game.path.generateFinishInColumn(0);
-    Game.path.generateLabyrinth();
+    loading.delay(function() {
+        // generate path
+        Game.path = new Path(Game.map_grid);
+        Game.path.pathMaxLength = 110;
+        Game.path.generateStartOnRow(0);
+        Game.path.generateFinishInColumn(0);
+        Game.path.generateLabyrinth();
 
-    Crafty.scene('Game');
+        Crafty.scene('Game');
+    }, 400);
 });
 
 
@@ -723,7 +733,7 @@ Crafty.scene('Game', function() {
             }
         });
 
-    Crafty.e('DOMButton, Grid, Keyboard')
+    Crafty.e('DOMButton, Grid, Keyboard, Delay')
         .text('Pause')
         .textFont(Game.waveFont)
         .at(11, Game.map_grid.height - 1)
