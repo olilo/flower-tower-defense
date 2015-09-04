@@ -18,20 +18,9 @@ Crafty.scene('Loading', function() {
         .textColor(Game.textColor)
         .text('0%');
 
+    // pre-load some (small) assets that we need immediately
     var x = 3;
-    Crafty.load({
-        "audio": {},
-        "images": [],
-        "sprites": {
-            "assets/flower.png": {
-                "tile": 32,
-                "tileh": 32,
-                "map": {
-                    flower: [4, 0]
-                }
-            }
-        }
-    }, function() {
+    Crafty.load(Game.preLoadAssets, function() {
         loading.delay(function () {
             if (x >= 22) {
                 Crafty('flower Loading').destroy();

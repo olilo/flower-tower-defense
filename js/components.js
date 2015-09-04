@@ -545,8 +545,17 @@ Crafty.c('Sidebar', {
         });
     },
 
+    highlightTower: function() {
+        Crafty('Sidebar').selectedTower.color("#ffffff", 0.3);
+    },
+
     openFor: function(selectedTower) {
+        if (this.selectedTower) {
+            this.selectedTower.unbind('MouseOut', this.highlightTower);
+            this.selectedTower.color("#ffffff", 0.0);
+        }
         this.selectedTower = selectedTower;
+        this.selectedTower.bind('MouseOut', this.highlightTower);
         if (this.selectedTower.x < Game.width() / 2) {
             this.x = Game.width() - this.w - Game.map_grid.tile.width;
         } else {
@@ -583,6 +592,10 @@ Crafty.c('Sidebar', {
 
     close: function() {
         this.x = -this.w - 50;
+        if (this.selectedTower) {
+            this.selectedTower.unbind('MouseOut', this.highlightTower);
+            this.selectedTower.color("#ffffff", 0.0);
+        }
         this.selectedTower = null;
     }
 });

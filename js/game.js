@@ -67,7 +67,7 @@ Game = {
         level1: [
             ['Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch', 'Witch'],
             ['Witch', 'Squid', 'Witch', 'Witch', 'Squid', 'Witch', 'Witch', 'Squid', 'Witch', 'Witch', 'Squid'],
-            ['Squid', 'Squid', 'Squid', 'FastSquid', 'Squid', 'Squid', 'Squid', 'FastSquid'],
+            ['Squid', 'Squid', 'Witch', 'FastSquid', 'Squid', 'Squid', 'Witch', 'FastSquid'],
             ['Squid', 'FastSquid', 'Knight', 'Squid', 'FastSquid', 'Squid', 'Knight', 'Squid', 'Knight'],
             ['FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight', 'FastSquid', 'Knight',
                 'FastSquid', 'Knight'],
@@ -75,7 +75,7 @@ Game = {
                 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid',
                 'FastSquid', 'FastSquid', 'FastSquid', 'FastSquid', 'MightyWitch'],
             ['FastSquid', 'MightyWitch', 'FastSquid', 'Spider', 'Witch', 'FastKnight', 'Knight', 'FastKnight',
-                'MightyWitch', 'FastKnight', 'MightyWitch'],
+                'Squid', 'FastKnight', 'MightyWitch'],
             ['Spider', 'Orc', 'Spider', 'MightyWitch', 'FastSquid', 'FastSquid', 'Spider', 'Orc', 'MightyWitch', 'FastSquid',
                 'Spider', 'Orc', 'FastSquid', 'Spider', 'MightyWitch'],
             ['Orc', 'Orc', 'Orc', 'Orc', 'Orc', 'FastSquid', 'FastSquid', 'MightyWitch', 'FastKnight', 'Spider', 'Spider',
@@ -225,6 +225,32 @@ Game = {
     },
 
     // sounds, images, spritesheets, all handy at one place
+    preLoadAssets: {
+        "audio": {},
+        "images": [],
+        "sprites": {
+            "assets/flower.png": {
+                "tile": 32,
+                "tileh": 32,
+                "map": {
+                    flower: [4, 0],
+
+                    flower_tower1: [0, 0],
+                    flower_tower2: [1, 0],
+                    flower_tower3: [2, 0],
+                    flower_tower4: [3, 0],
+                    flower_tower5: [4, 0],
+                    sniper_tower1: [5, 0],
+                    sniper_tower2: [6, 0],
+                    sniper_tower3: [10, 0],
+                    sniper_tower4: [11, 0],
+                    hero_tower: [12, 0],
+                    spiral_tower: [14, 0]
+                }
+            }
+        }
+    },
+
     assets: {
         "audio": {
             "Background": ["assets/sounds/background.wav", "assets/sounds/background.mp3", "assets/sounds/background.ogg"],
@@ -318,23 +344,6 @@ Game = {
                     leaf_up: [1, 0],
                     leaf_down: [0, 1],
                     leaf_right: [1, 1]
-                }
-            },
-            "assets/flower.png": {
-                "tile": 32,
-                "tileh": 32,
-                "map": {
-                    flower_tower1: [0, 0],
-                    flower_tower2: [1, 0],
-                    flower_tower3: [2, 0],
-                    flower_tower4: [3, 0],
-                    flower_tower5: [4, 0],
-                    sniper_tower1: [5, 0],
-                    sniper_tower2: [6, 0],
-                    sniper_tower3: [10, 0],
-                    sniper_tower4: [11, 0],
-                    hero_tower:    [12, 0],
-                    spiral_tower:  [14, 0]
                 }
             }
         }
