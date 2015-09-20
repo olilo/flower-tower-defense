@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "build": "coffee -j game_compiled.js --compile --output dist src"
+    "build": "node ./bin/buildjs"
   },
   "dependencies": {
     "body-parser": "~1.13.2",

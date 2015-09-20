@@ -43,24 +43,25 @@
         y: Game.height() - 50,
         w: 200,
         h: 50
-      }).tooltip('Continue to next screen').bind('Click', function() {});
-      Crafty.scene(targetScene.scene);
-      return;
+      }).tooltip('Continue to next screen').bind('Click', function() {
+        Crafty.scene(targetScene.scene);
+      });
     } else {
       Crafty.e('DOMButton').text('Back').attr({
         x: 280,
         y: Game.height() - 50,
         w: 200,
         h: 50
-      }).tooltip('Go back to where you came from').bind('Click', function() {});
-      Crafty.scene(targetScene);
-      return;
+      }).tooltip('Go back to where you came from').bind('Click', function() {
+        Crafty.scene(targetScene);
+      });
     }
     Crafty.e('SoundButton').attr({
       x: 470,
       y: Game.height() - 50,
       w: 200,
-      h: 50
+      h: 50,
+      blablubb: 10
     });
   });
 

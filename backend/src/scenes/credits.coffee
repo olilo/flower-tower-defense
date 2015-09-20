@@ -44,19 +44,20 @@ Crafty.scene 'Credits', (targetScene) ->
       y: Game.height() - 50
       w: 200
       h: 50).tooltip('Continue to next screen').bind 'Click', ->
-    Crafty.scene targetScene.scene
-    return
+        Crafty.scene targetScene.scene
+        return
   else
     Crafty.e('DOMButton').text('Back').attr(
       x: 280
       y: Game.height() - 50
       w: 200
       h: 50).tooltip('Go back to where you came from').bind 'Click', ->
-    Crafty.scene targetScene
-    return
+        Crafty.scene targetScene
+        return
   Crafty.e('SoundButton').attr
     x: 470
     y: Game.height() - 50
     w: 200
     h: 50
+    blablubb: 10
   return

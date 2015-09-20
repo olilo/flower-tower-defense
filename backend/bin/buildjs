@@ -1,0 +1,19 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('js:server');
+var path = require('path');
+var fs   = require('fs');
+var lib  = path.join(path.dirname(fs.realpathSync(__filename)), '../lib');
+var coffee = require(path.join('coffee-script', 'lib', 'coffee-script', 'command'));
+
+// this is really dirty, maybe there is another way to do this
+process.argv[2] = '--compile';
+process.argv[3] = '--output';
+process.argv[4] = 'dist';
+process.argv[5] = 'src';
+coffee.run();
