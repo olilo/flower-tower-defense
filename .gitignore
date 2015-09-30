@@ -1,3 +1,4 @@
 *.iml
 **/*.iml
 *.zip
+backend/dist/*

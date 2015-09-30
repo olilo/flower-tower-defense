@@ -20,9 +20,9 @@ Crafty.scene 'Won', ->
     y: Game.height() * 9 / 12 - 24
     w: Game.width()
     h: 50).textFont(Game.continueFont).textColor(Game.continueColor).bind 'Click', ->
-  Game.endless = true
-  Crafty.scene 'Game'
-  return
+      Game.endless = true
+      Crafty.scene 'Game'
+      return
   Crafty.e('RestartButton').attr
     x: 0
     y: Game.height() * 11 / 12 - 24

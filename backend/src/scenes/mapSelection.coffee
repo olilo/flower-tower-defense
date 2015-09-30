@@ -19,37 +19,37 @@ Crafty.scene 'MapSelection', ->
     y: Game.height() * 8 / 12 - 24
     w: Game.width() * 2 / 24
     h: 32).tooltip('Show previous page of levels').disable().bind 'Click', ->
-  if @buttonEnabled
-    currentPage--
-    @disable()
-    @delay (->
-      if currentPage > 1
-        @enable()
-      Crafty('DOMButton Next').enable()
+      if @buttonEnabled
+        currentPage--
+        @disable()
+        @delay (->
+          if currentPage > 1
+            @enable()
+          Crafty('DOMButton Next').enable()
+          return
+        ), 1000
+        Crafty('LevelSelector').each ->
+          @moveTo @x + Game.width(), @y, 800
+          return
       return
-    ), 1000
-    Crafty('LevelSelector').each ->
-      @moveTo @x + Game.width(), @y, 800
-      return
-  return
   Crafty.e('DOMButton, Delay, Next').text('Next').attr(
     x: Game.width() * 21 / 24
     y: Game.height() * 8 / 12 - 24
     w: Game.width() * 2 / 24
     h: 32).tooltip('Show next page of levels').bind 'Click', ->
-  if @buttonEnabled
-    currentPage++
-    @disable()
-    @delay (->
-      if currentPage < Crafty('Level').length / 3.0
-        @enable()
-      Crafty('DOMButton Previous').enable()
+      if @buttonEnabled
+        currentPage++
+        @disable()
+        @delay (->
+          if currentPage < Crafty('Level').length / 3.0
+            @enable()
+          Crafty('DOMButton Previous').enable()
+          return
+        ), 1000
+        Crafty('LevelSelector').each ->
+          @moveTo @x - Game.width(), @y, 800
+          return
       return
-    ), 1000
-    Crafty('LevelSelector').each ->
-      @moveTo @x - Game.width(), @y, 800
-      return
-  return
   Crafty.e('LevelSelector').level('1').tooltip('10 Waves of enemies who travel through a large spiral.').attr
     x: Game.width() * 4 / 24
     y: Game.height() * 8 / 12 - 24
@@ -81,15 +81,15 @@ Crafty.scene 'MapSelection', ->
     y: Game.height() - 50
     w: 200
     h: 50).tooltip('Click here for some instructions').bind 'Click', ->
-  Crafty.scene 'Help', 'MapSelection'
-  return
+      Crafty.scene 'Help', 'MapSelection'
+      return
   Crafty.e('DOMButton').text('Credits').attr(
     x: 280
     y: Game.height() - 50
     w: 200
     h: 50).tooltip('View the credits for this game ^^').bind 'Click', ->
-  Crafty.scene 'Credits', 'MapSelection'
-  return
+      Crafty.scene 'Credits', 'MapSelection'
+      return
   Crafty.e('SoundButton').attr
     x: 470
     y: Game.height() - 50

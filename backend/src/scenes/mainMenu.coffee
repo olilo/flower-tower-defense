@@ -43,24 +43,24 @@ Crafty.scene 'MainMenu', ->
     y: Game.height() * 9 / 12 - 24
     w: Game.width()
     h: 50).tooltip('Starts a new game. You can select the difficulty on the next screen.').bind 'Click', ->
-  if Crafty.storage('ftd_save1') and !confirm('Starting a new game will overwrite your already saved game. Continue?')
-    return
-  Crafty.scene 'Difficulty'
-  return
+      if Crafty.storage('ftd_save1') and !confirm('Starting a new game will overwrite your already saved game. Continue?')
+        return
+      Crafty.scene 'Difficulty'
+      return
   Crafty.e('DOMButton').text('Instructions').attr(
     x: 70
     y: Game.height() - 50
     w: 200
     h: 50).tooltip('Click here for some instructions').bind 'Click', ->
-  Crafty.scene 'Help', 'MainMenu'
-  return
+      Crafty.scene 'Help', 'MainMenu'
+      return
   Crafty.e('DOMButton').text('Credits').attr(
     x: 280
     y: Game.height() - 50
     w: 200
     h: 50).tooltip('View the credits for this game ^^').bind 'Click', ->
-  Crafty.scene 'Credits', 'MainMenu'
-  return
+      Crafty.scene 'Credits', 'MainMenu'
+      return
   Crafty.e('SoundButton').attr
     x: 470
     y: Game.height() - 50

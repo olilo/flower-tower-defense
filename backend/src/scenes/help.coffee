@@ -28,8 +28,8 @@ Crafty.scene 'Help', (targetScene) ->
     y: Game.height() - 50
     w: 200
     h: 50).tooltip('Go back to where you came from').bind 'Click', ->
-  Crafty.scene targetScene
-  return
+      Crafty.scene targetScene
+      return
   Crafty.e('SoundButton').attr
     x: 470
     y: Game.height() - 50

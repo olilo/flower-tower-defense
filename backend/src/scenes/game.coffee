@@ -67,17 +67,17 @@ Crafty.scene 'Game', ->
   x = 0
   while x < Game.map_grid.width
     y = 0
-  while y < Game.map_grid.height
-    if Game.path.isOnEdge(x, y)
-      Crafty.e('Tree').at x, y
-    else if Game.path.isOnPath(x, y)
-      Crafty.e('Path').at x, y
-    else if Game.towerMap[x][y].level > 0
-      Crafty.e(Game.towerMap[x][y].name).at(x, y).attr('level': Game.towerMap[x][y].level).updateTooltip()
-    else
-      Crafty.e('TowerPlace').at x, y
-    y++
-  x++
+    while y < Game.map_grid.height
+      if Game.path.isOnEdge(x, y)
+        Crafty.e('Tree').at x, y
+      else if Game.path.isOnPath(x, y)
+        Crafty.e('Path').at x, y
+      else if Game.towerMap[x][y].level > 0
+        Crafty.e(Game.towerMap[x][y].name).at(x, y).attr('level': Game.towerMap[x][y].level).updateTooltip()
+      else
+        Crafty.e('TowerPlace').at x, y
+      y++
+    x++
   # initialize wave (handles spawning of every wave)
   Crafty.e('Wave').at Game.map_grid.width - 5, Game.map_grid.height - 1
   # initialize sidebar
@@ -143,13 +143,13 @@ Crafty.scene 'Game', ->
     else
       pauseOverlay.style.display = 'none'
   ).bind 'KeyDown', ->
-  if @isDown('P')
-    Crafty.pause()
-    if Crafty.isPaused()
-      pauseOverlay.style.display = 'block'
-    else
-      pauseOverlay.style.display = 'none'
-  return
+    if @isDown('P')
+      Crafty.pause()
+      if Crafty.isPaused()
+        pauseOverlay.style.display = 'block'
+      else
+        pauseOverlay.style.display = 'none'
+    return
 
   Crafty.e('SoundButton, Grid').textFont(Game.waveFont).attr(
     w: 150

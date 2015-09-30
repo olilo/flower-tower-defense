@@ -24,24 +24,24 @@ Crafty.scene 'Difficulty', ->
       y: (Game.difficulties[e].y * 2 + 7) / 12 * Game.height()
       w: Game.width() / 2
       h: 50).textFont(Game.difficultyFont).textColor(Game.difficulties[e].textColor).bind 'Click', ->
-    console.log 'Chosen difficulty: ' + @text()
-    Game.setDifficultyProperties @text()
-    Crafty.scene 'MapSelection'
-    return
+        console.log 'Chosen difficulty: ' + @text()
+        Game.setDifficultyProperties @text()
+        Crafty.scene 'MapSelection'
+        return
   Crafty.e('DOMButton').text('Instructions').attr(
     x: 70
     y: Game.height() - 50
     w: 200
     h: 50).tooltip('Click here for some instructions').bind 'Click', ->
-  Crafty.scene 'Help', 'Difficulty'
-  return
+      Crafty.scene 'Help', 'Difficulty'
+      return
   Crafty.e('DOMButton').text('Credits').attr(
     x: 280
     y: Game.height() - 50
     w: 200
     h: 50).tooltip('View the credits for this game ^^').bind 'Click', ->
-  Crafty.scene 'Credits', 'Difficulty'
-  return
+      Crafty.scene 'Credits', 'Difficulty'
+      return
   Crafty.e('SoundButton').attr
     x: 470
     y: Game.height() - 50

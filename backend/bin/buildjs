@@ -10,10 +10,74 @@ var path = require('path');
 var fs   = require('fs');
 var lib  = path.join(path.dirname(fs.realpathSync(__filename)), '../lib');
 var coffee = require(path.join('coffee-script', 'lib', 'coffee-script', 'command'));
+var compressor = require('node-minify');
 
-// this is really dirty, maybe there is another way to do this
-process.argv[2] = '--compile';
-process.argv[3] = '--output';
-process.argv[4] = 'dist';
-process.argv[5] = 'src';
-coffee.run();
+fs.createWriteStream('src/all.coffee', {'flags': 'w'}).end();
+
+var i = 0, componentFiles = fs.readdirSync('src/components'),
+    enemyFiles = fs.readdirSync('src/enemies'),
+    sceneFiles = fs.readdirSync('src/scenes'),
+    towerFiles = fs.readdirSync('src/towers');
+
+function compileCoffee() {
+    var processName = process.argv[0];
+
+    process.stdout.write('Compiling coffee script ...');
+
+    // this is really dirty, maybe there is another way to do this
+    process.argv[2] = '--compile';
+    process.argv[3] = '--output';
+    process.argv[4] = 'dist';
+    process.argv[5] = 'src';
+    coffee.run();
+
+    setTimeout(function() {
+        process.argv[0] = processName;
+
+        // Using UglifyJS for JS
+        new compressor.minify({
+            type: 'uglifyjs',
+            fileIn: 'dist/all.js',
+            fileOut: '../js/all.js',
+            callback: function(err, min){
+                console.log(err);
+            }
+        });
+
+        process.stdout.write(' done!\n');
+    }, 10000);
+}
+
+function appendNextFile() {
+    var writer = fs.createWriteStream('src/all.coffee', {'flags': 'a'});
+    writer.write('\n\n');
+    process.stdout.write('Appending source file #' + (i + 1) + '\n');
+
+    if (i < componentFiles.length) {
+        var reader = fs.createReadStream('src/components/' + componentFiles[i]);
+        reader.pipe(writer, { end: false });
+        reader.on('end', appendNextFile);
+        i++;
+    } else if (i < componentFiles.length + enemyFiles.length) {
+        var reader = fs.createReadStream('src/enemies/' + enemyFiles[i - componentFiles.length]);
+        reader.pipe(writer, { end: false });
+        reader.on('end', appendNextFile);
+        i++;
+    } else if (i < componentFiles.length + enemyFiles.length + sceneFiles.length) {
+        var reader = fs.createReadStream('src/scenes/' + sceneFiles[i - componentFiles.length - enemyFiles.length]);
+        reader.pipe(writer, { end: false });
+        reader.on('end', appendNextFile);
+        i++;
+    } else if (i < componentFiles.length + enemyFiles.length + sceneFiles.length + towerFiles.length) {
+        var reader = fs.createReadStream('src/towers/' +
+            towerFiles[i - componentFiles.length - enemyFiles.length - sceneFiles.length]);
+        reader.pipe(writer, { end: false });
+        reader.on('end', appendNextFile);
+        i++;
+    } else {
+        writer.end();
+        compileCoffee();
+    }
+}
+
+appendNextFile();
