@@ -10,33 +10,37 @@ function Path(config) {
     this.generateStartInColumn(0);
     this.generateFinishInColumn(config.width - 1);
 
+    // min and max length are not fix values, rather a guideline (actual min and max can vary by 10%)
+    this.pathMinLength = config.pathMinLength || 0;
+    this.pathMaxLength = config.pathMaxLength || Math.MAX_VALUE;
+
+    this.initialize();
+}
+
+Path.prototype.initialize = function() {
     this.top = 1;
     this.left = 1;
     this.bottom = this.height - 2;
     this.right = this.width - 2;
 
-    // min and max length are not fix values, rather a guideline (actual min and max can vary by 10%)
-    this.pathMinLength = config.pathMinLength || 0;
-    this.pathMaxLength = config.pathMaxLength || Math.MAX_VALUE;
-
-    this.path = new Array(config.width);
-    for (var i = 0; i < config.width; i++) {
-        this.path[i] = new Array(config.height);
-        for (var y = 0; y < config.height; y++) {
+    this.path = new Array(this.width);
+    for (var i = 0; i < this.width; i++) {
+        this.path[i] = new Array(this.height);
+        for (var y = 0; y < this.height; y++) {
             this.path[i][y] = false;
         }
     }
 
-    this.occupied = new Array(config.width);
-    for (i = 0; i < config.width; i++) {
-        this.occupied[i] = new Array(config.height);
-        for (y = 0; y < config.height; y++) {
+    this.occupied = new Array(this.width);
+    for (i = 0; i < this.width; i++) {
+        this.occupied[i] = new Array(this.height);
+        for (y = 0; y < this.height; y++) {
             this.occupied[i][y] = false;
         }
     }
 
     this.pointPath = [];
-}
+};
 
 Path.prototype.setFinish = function(x, y) {
     this.start = {x: x, y: y};
@@ -98,6 +102,8 @@ Path.prototype.remove = function(point) {
     }
     this.path[point.x][point.y] = false;
     this.occupied[point.x][point.y] = false;
+
+    this.pathLength--;
 
     for (var i = this.pointPath.length - 1; i >= 0; i--) {
         if (this.pointPath[i].x == point.x && this.pointPath[i].y == point.y) {
@@ -485,6 +491,17 @@ Path.prototype.generateLabyrinth = function() {
             continue;
         }
 
+        if (this.pathLength >= 0.9 * this.pathMinLength) {
+            this.left = 1;
+            this.top = 1;
+            this.right = this.width - 2;
+            this.bottom = this.height - 2;
+
+            if (direction == RIGHT && this.finish.x == 0) {
+                continue;
+            }
+        }
+
         var result = stateMachine.transition(direction), created;
         if (result !== undefined && result.output !== undefined) {
             created = this.createPathElement(result.output);
@@ -495,13 +512,6 @@ Path.prototype.generateLabyrinth = function() {
         if (created) {
             retryCount = 0;
         }
-
-        if (this.pathLength >= 0.9 * this.pathMinLength) {
-            this.left = 1;
-            this.top = 1;
-            this.right = this.width - 2;
-            this.bottom = this.height - 2;
-        }
     }
 
     // continue to finish
@@ -511,7 +521,12 @@ Path.prototype.generateLabyrinth = function() {
     this.continuePathTo(finishX, finishY);
     this.continuePathTo(this.finish.x, this.finish.y, true);
 
-    console.log("Finished creating random labyrinth path \\o/ (length=" + this.pathLength + ")");
+    if (this.pathLength >= this.pathMinLength) {
+        console.log("Finished creating random labyrinth path \\o/ (length=" + this.pathLength + ")");
+    } else {
+        this.initialize();
+        this.generateLabyrinth();
+    }
 };
 
 
