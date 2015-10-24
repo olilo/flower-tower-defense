@@ -253,7 +253,7 @@ Game = {
 
     assets: {
         "audio": {
-            "Background": ["assets/sounds/background.wav", "assets/sounds/background.mp3", "assets/sounds/background.ogg"],
+            "Background": ["assets/sounds/All_Her_Witches.mp3"],
             "Boss": ["assets/sounds/boss.wav", "assets/sounds/boss.mp3", "assets/sounds/boss.ogg"],
             "Menu": ["assets/sounds/Menu.mp3", "assets/sounds/Menu.ogg"],
             "Won": ["assets/sounds/Won.mp3", "assets/sounds/Won.ogg", "assets/sounds/Won.wav"],

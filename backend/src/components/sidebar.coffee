@@ -81,8 +81,8 @@ Crafty.c 'Sidebar',
   updateTexts: ->
     towerType = if @selectedTower.has('SniperTower') then 'Sniper Tower' else 'Flower Tower'
     if @selectedTower.isUpgradable()
-      @upgradeHeadline.text 'Upgrade ' + towerType + ' to level ' + @selectedTower.level + 1 + ':'
-      @upgradeButton.text('-' + @selectedTower.getUpgradeCost() + '$').tooltip 'Upgrade ' + towerType + ' at position (' + @selectedTower.at().x + '/' + @selectedTower.at().y + ')' + ' to level ' + @selectedTower.level + 1 + ' for ' + @selectedTower.getUpgradeCost() + '$'
+      @upgradeHeadline.text 'Upgrade ' + towerType + ' to level ' + (@selectedTower.level + 1) + ':'
+      @upgradeButton.text('-' + @selectedTower.getUpgradeCost() + '$').tooltip 'Upgrade ' + towerType + ' at position (' + @selectedTower.at().x + '/' + @selectedTower.at().y + ')' + ' to level ' + (@selectedTower.level + 1) + ' for ' + @selectedTower.getUpgradeCost() + '$'
     else
       @upgradeHeadline.text towerType + ': Maximum level reached'
       @upgradeButton.text('-').tooltip 'Maximum level reached, can\'t upgrade tower'
