@@ -114,9 +114,9 @@ Crafty.scene 'Game', ->
           'but each one after the first one gets more and more expensive. ' +
           'Upgrading, however, always costs the same.<br>' +
           'This tower gains a 2% chance to instantly kill an enemy on its highest level.' + '</p><p>' +
-          'You have to start the first wave by clicking “Start”. ' +
+          'You have to start the first wave by clicking "Start". ' +
           'After that the waves come automatically, ' +
-          'but you can start the next wave earlier by clicking “Next Wave” again.' + '</p><p>' +
+          'but you can start the next wave earlier by clicking "Next Wave" again.' + '</p><p>' +
           'You win if you finish all 15 waves. You can challenge yourself ' +
           'and see how far you can get in endless mode after that.' + '</p>'
       document.getElementById('cr-stage').appendChild overlay
