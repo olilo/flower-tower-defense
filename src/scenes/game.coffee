@@ -103,7 +103,7 @@ Crafty.scene 'Game', ->
   Crafty.e 'Sidebar'
 
   # help button
-  Crafty.e('DOMButton, Grid').text('Help').textFont(Game.waveFont).at(8, Game.map_grid.height - 1).attr(w: 100).tooltip('If you are lost, look here').bind 'Click', ->
+  Crafty.e('DOMButton, Grid').text('Help').textFont(Game.waveFont).at(10, Game.map_grid.height - 1).attr(w: 100).tooltip('If you are lost, look here').bind 'Click', ->
     # create an overlay that explains the general concept
     overlay = document.getElementById('helpOverlay')
     if overlay
@@ -155,7 +155,7 @@ Crafty.scene 'Game', ->
   pauseOverlay.innerHTML = 'Paused'
   document.getElementById('cr-stage').appendChild pauseOverlay
 
-  Crafty.e('DOMButton, Grid, Keyboard, Delay').text('Pause').textFont(Game.waveFont).at(11, Game.map_grid.height - 1).attr(
+  Crafty.e('DOMButton, Grid, Keyboard, Delay').text('Pause').textFont(Game.waveFont).at(13, Game.map_grid.height - 1).attr(
     w: 100
     h: 50).tooltip('Pause or unpause the game (Hotkey: P)').bind('Click', ->
     Crafty.pause()
@@ -174,6 +174,14 @@ Crafty.scene 'Game', ->
 
     return
 
+  Crafty.e('DOMButton, Grid').text('Main Menu').textFont(Game.waveFont).attr(
+    w: 200
+    h: 50).at(5, Game.map_grid.height - 1).tooltip('Clicking this button returns you to the main menu').bind('Click', ->
+      console.log 'Main Menu'
+      Crafty.scene 'MainMenu'
+      return
+  )
+
   Crafty.e('SoundButton, Grid').textFont(Game.waveFont).attr(
     w: 150
-    h: 50).at 15, Game.map_grid.height - 1
+    h: 50).at 16, Game.map_grid.height - 1
