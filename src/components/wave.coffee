@@ -1,35 +1,10 @@
 Crafty.c 'Wave',
   init: ->
-    @requires 'DOMButton, Grid, Delay'
-    @attr
-      w: 150
-      tooltipWidth: 350
-      clickEnabled: true
-
-    @text 'Start'
-    @tooltip 'Starts the next wave of enemies. Click here once you placed your towers.'
-    @textFont Game.waveFont
+    @requires 'Delay'
 
     @currentWave = Game.currentWave
 
-    @blinkBeforeStart()
     @automaticallyStartNextWave()
-    @startNextWaveOnClick()
-
-    return
-
-  blinkBeforeStart: ->
-    highlighted = false
-
-    @delay (->
-      if !@waveStarted
-        if highlighted
-          @textColor Game.textColor
-        else
-          @textColor Game.highlightColor
-        highlighted = !highlighted
-      return
-    ), 1000, -1
 
     return
 
@@ -56,29 +31,7 @@ Crafty.c 'Wave',
           @finishedEventTriggered = false
 
       return
-    return
 
-  startNextWaveOnClick: ->
-    @bind 'Click', ->
-      if @clickEnabled
-        @clickEnabled = false
-        @text 'Next Wave'
-        @textColor Game.disabledColor
-        @tooltip 'Button currently disabled.'
-
-        if @currentWave > 0
-          Game.money += Game.moneyAfterWave
-
-        @startNextWave()
-
-        @delay (->
-          @clickEnabled = true
-          @textColor Game.textColor
-          @tooltip 'Start next wave early to get wave finished bonus gold.'
-          return
-        ), 10000, 0
-
-      return
     return
 
   isWaveFinished: ->
@@ -87,6 +40,7 @@ Crafty.c 'Wave',
   isNextWavePossible: ->
     if Game.lifes == 0
       return false
+
     Game.endless or @currentWave < Game.waves.current.length
 
   startNextWave: ->

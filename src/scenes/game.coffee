@@ -1,6 +1,9 @@
 # Main game scene
 # ---------------
 Crafty.scene 'Game', ->
+  # Create wave
+  wave = Crafty.e 'Wave'
+
   # background
   Crafty.e '2D, Canvas, ' + Game.backgroundAsset
   Crafty.audio.stop()
@@ -97,7 +100,7 @@ Crafty.scene 'Game', ->
     x++
 
   # initialize wave (handles spawning of every wave)
-  Crafty.e('Wave').at Game.map_grid.width - 5, Game.map_grid.height - 1
+  Crafty.e('WaveButton').attr(wave: wave).at Game.map_grid.width - 5, Game.map_grid.height - 1
 
   # initialize sidebar
   Crafty.e 'Sidebar'
