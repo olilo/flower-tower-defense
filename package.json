@@ -4,7 +4,7 @@
   "private": true,
   "devDependencies": {
     "coffeescript": "~2.7.0",
-    "grunt": "~0.4.5",
+    "grunt": "~1.5.3",
     "grunt-contrib-coffee": "^2.1.0",
     "grunt-contrib-jshint": "~0.10.0",
     "grunt-contrib-nodeunit": "~0.4.1",
