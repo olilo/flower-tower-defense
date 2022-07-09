@@ -3,7 +3,6 @@
 # -------------------------------------
 Crafty.c 'TweeningHandler',
   init: ->
-    @requires 'Keyboard'
     @attr
       targets: []
       stepsPerGrid: 25

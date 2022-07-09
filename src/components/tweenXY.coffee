@@ -15,7 +15,7 @@ Crafty.c 'TweenXY',
         y: y
       } ]
 
-    tweening = Crafty.e('TweeningHandler')
+    tweening = Crafty.e 'TweeningHandler'
     tweening.targets.push animation
 
     this

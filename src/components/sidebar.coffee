@@ -1,6 +1,6 @@
 Crafty.c 'Sidebar',
   init: ->
-    @requires '2D, DOM, Mouse,  Color'
+    @requires '2D, DOM, Mouse, Color'
     @attr
       x: 0
       y: Game.map_grid.tile.height
