@@ -116,7 +116,42 @@ Path.prototype.remove = function(point) {
 };
 
 Path.prototype.getPath = function() {
-    return this.pointPath;
+    if (this.pointPath) {
+        return this.pointPath;
+    }
+
+    // old getPath logic for backwards compatibility
+    var returnPath = [this.start];
+    var x = this.start.x,
+        y = this.start.y,
+        prevDirection = 1,
+        startTime = new Date().getTime();
+
+    while (x != this.finish.x || y != this.finish.y) {
+        if (new Date().getTime() - startTime > 5000) {
+            console.log("Timeout!!!");
+            break;
+        }
+        //console.log("Currently at: x=" + x + ", y=" + y);
+        if (x < this.width - 1 && this.path[x + 1][y] && prevDirection != 3) {
+            x++;
+            prevDirection = 1;
+        } else if (y > 0 && this.path[x][y - 1] && prevDirection != 2) {
+            y--;
+            prevDirection = 0;
+        } else if (y < this.height - 1 && this.path[x][y + 1] && prevDirection != 0) {
+            y++;
+            prevDirection = 2;
+        } else if (x > 0 && this.path[x - 1][y] && prevDirection != 1) {
+            x--;
+            prevDirection = 3;
+        } else {
+            console.log("Help, invalid state at: x=" + x + ", y=" + y);
+        }
+        returnPath.push({x: x, y: y});
+    }
+
+    return returnPath;
 };
 
 Path.prototype.isOnEdge = function(x, y) {
