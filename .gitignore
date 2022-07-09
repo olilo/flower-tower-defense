@@ -1,4 +1,6 @@
 *.iml
 **/*.iml
 *.zip
-backend/dist/*
+
+node_modules
+backend/node_modules
