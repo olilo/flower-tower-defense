@@ -37,6 +37,7 @@ Crafty.scene 'MainMenu', ->
       Game.towerMap = savegame.towerMap
       Game.path = new Path(Game.map_grid)
       Game.path.copy savegame.path
+      Game.enemyCount = 0
       Crafty.scene 'Game'
       return
   else

@@ -42,6 +42,7 @@ Crafty.c 'WaveButton',
           Game.money += Game.moneyAfterWave
 
         @wave.startNextWave()
+        @wave.gameStarted = true
 
         @delay (->
           @clickEnabled = true

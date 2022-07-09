@@ -51,12 +51,26 @@ Crafty.scene 'Game', ->
       Crafty.scene 'GameOver'
     return
 
+  # listener once a wave is finished (auto save game, wave start indicator)
   Crafty.bind 'WaveFinished', (waveNumber) ->
+    # save game
     Crafty.storage 'ftd_save1', Game
-    if Game.lifes > 0 and waveNumber == Game.waves.current.length
-      Crafty.unbind 'EnterFrame'
-      Crafty.scene 'Won'
+    console.log('Automatically saved game')
+
+    # make all flower towers shoot to indicate new wave
+    Crafty.e('WaveStartIndicator')
+
     return
+
+  # listener once last wave was finished (game won, clear save game)
+  Crafty.bind 'LastWaveFinished', ->
+    # TODO automatically set endless rather than clearing save game
+    # clear save game
+    Crafty.storage.remove 'ftd_save1'
+
+    # game won
+    Crafty.unbind 'EnterFrame'
+    Crafty.scene 'Won'
 
   # necessary event handling
   Crafty.bind 'TowerCreated', (tower) ->
