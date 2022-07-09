@@ -2,5 +2,9 @@
 **/*.iml
 *.zip
 
+# node modules are too large too track (and possibly system dependent)
 node_modules
 backend/node_modules
+
+# generated js file should not be tracked
+js/flower-tower-defense.js
