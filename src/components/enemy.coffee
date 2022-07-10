@@ -1,6 +1,6 @@
 Crafty.c 'Enemy',
   init: ->
-    @requires 'Actor, Collision, PathWalker, Delay, Tooltip'
+    @requires '2D, Canvas, Grid, Collision, PathWalker, Delay, Tooltip'
     @attr
       tooltipWidth: 150
       tooltipHeight: 30

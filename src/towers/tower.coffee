@@ -1,6 +1,6 @@
 Crafty.c 'Tower',
   init: ->
-    @requires 'Actor, Mouse, Tooltip, Color, Delay, Enabled'
+    @requires '2D, Canvas, Grid, Mouse, Tooltip, Color, Delay, Enabled'
     @attr
       level: 1
       tooltipWidth: 250

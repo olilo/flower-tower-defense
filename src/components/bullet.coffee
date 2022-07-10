@@ -1,3 +1,3 @@
 Crafty.c 'Bullet', init: ->
-  @requires 'Actor, Collision, PathWalker'
+  @requires '2D, Canvas, Grid, Collision, PathWalker'
   @attr damage: 1

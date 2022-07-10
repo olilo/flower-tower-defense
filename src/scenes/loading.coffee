@@ -5,7 +5,7 @@ Crafty.scene 'Loading', ->
   # Draw some text for the player to see in case the file
   #  takes a noticeable amount of time to load
   loading = Crafty.e('2D, Grid, DOM, Text, Delay').text('Loading...').attr(w: Game.width()).at(0, 5).textFont(Game.loadingFont).textColor(Game.textColor).css(Game.centerCss)
-  Crafty.e('Actor, Progress, Text').at(Game.map_grid.width / 2 - 2, 8).textFont(Game.loadingFont).textColor(Game.textColor).text '0%'
+  Crafty.e('2D, Grid, DOM, Progress, Text').at(Game.map_grid.width / 2 - 2, 8).textFont(Game.loadingFont).textColor(Game.textColor).text '0%'
 
 
   # pre-load some (small) assets that we need immediately
