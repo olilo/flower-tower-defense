@@ -118,7 +118,7 @@ Crafty.c 'Wave',
   spawnEnemy: (enemy)  ->
     # spawn enemy and animate him along the game path
     enemy = Crafty.e(enemy).at(Game.path.start.x, Game.path.start.y)
-    enemy.animate_along Game.path.getPath(), enemy.speed
+    enemy.animateAlong Game.path.getPath(), enemy.speed
 
     # special handling for all waves after standard waves: increase health of enemy
     if @currentWave > Game.waves.current.length

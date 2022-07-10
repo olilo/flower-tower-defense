@@ -1,8 +1,7 @@
 # The PathWalker component allows an entity to move along a path,
 # given as an array of objects with x and y attributes
 Crafty.c 'PathWalker',
-  init: ->
-  animate_along: (path, speed) ->
+  animateAlong: (path, speed) ->
     if !speed
       speed = 1
 
@@ -24,13 +23,13 @@ Crafty.c 'PathWalker',
 
     this
 
-  animate_to: (x, y, speed) ->
-    @animate_along [ {
+  animateTo: (x, y, speed) ->
+    @animateAlong [ {
       x: x
       y: y
     } ], speed
 
-  destroy_after_animation: ->
+  destroyAfterAnimation: ->
     that = this
     Crafty.bind 'TweenEnded', (actor) ->
       if actor == that

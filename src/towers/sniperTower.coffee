@@ -72,7 +72,7 @@ Crafty.c 'SniperTower',
       x2 = Math.floor(firstEnemy.at().x)
       y2 = Math.floor(firstEnemy.at().y)
       if Game.options.bulletImages
-        Crafty.e('Bullet, leaf_right').attr(damage: 0).at(x, y).animate_to(x2, y2, 35).destroy_after_animation()
+        Crafty.e('Bullet, leaf_right').attr(damage: 0).at(x, y).animateTo(x2, y2, 35).destroyAfterAnimation()
 
     return
 

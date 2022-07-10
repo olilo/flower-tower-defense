@@ -82,10 +82,10 @@ Crafty.c 'FlowerTower',
         w: 16
         h: 16)
 
-    bulletUp.attr(damage: @getDamage()).at(x, y).animate_to(x, y - (@range), 4).destroy_after_animation()
-    bulletRight.attr(damage: @getDamage()).at(x, y).animate_to(x + @range, y, 4).destroy_after_animation()
-    bulletDown.attr(damage: @getDamage()).at(x, y).animate_to(x, y + @range, 4).destroy_after_animation()
-    bulletLeft.attr(damage: @getDamage()).at(x, y).animate_to(x - (@range), y, 4).destroy_after_animation()
+    bulletUp.attr(damage: @getDamage()).at(x, y).animateTo(x, y - (@range), 4).destroyAfterAnimation()
+    bulletRight.attr(damage: @getDamage()).at(x, y).animateTo(x + @range, y, 4).destroyAfterAnimation()
+    bulletDown.attr(damage: @getDamage()).at(x, y).animateTo(x, y + @range, 4).destroyAfterAnimation()
+    bulletLeft.attr(damage: @getDamage()).at(x, y).animateTo(x - (@range), y, 4).destroyAfterAnimation()
 
     return
 
