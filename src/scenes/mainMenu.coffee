@@ -10,7 +10,7 @@ Crafty.defineScene 'MainMenu', (attributes) ->
     Crafty.audio.stop()
     Crafty.audio.play 'Menu', -1, 0.5
 
-  if Game.userClicked and not attributes.dontRestartMenuMusic
+  if Game.userClicked and (not attributes or not attributes.dontRestartMenuMusic)
     startMainMenuMusic()
   else
     Crafty.e('2D, DOM, Mouse').attr(

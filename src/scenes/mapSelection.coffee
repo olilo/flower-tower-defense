@@ -1,10 +1,6 @@
 Crafty.scene 'MapSelection', ->
   Crafty.background 'rgb(119, 123, 125)'
 
-  # play menu music
-  Crafty.audio.stop()
-  Crafty.audio.play 'Menu', -1, 0.5
-
   currentPage = 1
 
   Crafty.e('2D, DOM, Image').image('assets/images/ftd-logo.jpg').attr
