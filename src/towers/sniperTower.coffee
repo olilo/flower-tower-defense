@@ -53,6 +53,10 @@ Crafty.c 'SniperTower',
   shoot: ->
     firstEnemy = Crafty('Enemy').get(0)
 
+    # no first enemy? then we have nothing to shoot at
+    if not firstEnemy
+      return
+
     # instant kill with 2% chance on max level
     if @level == @maxLevel and Math.floor(Math.random() * 50) == 0 and !firstEnemy.noInstantKill
       console.log 'INSTANT KILL!!'
