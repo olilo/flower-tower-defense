@@ -3,14 +3,20 @@ Wave component that handles all wave related stuff (starting waves, spawning ene
 ###
 Crafty.c 'Wave',
   init: ->
-    @requires 'Delay'
-
     @currentWave = Game.currentWave
     @gameStarted = false
 
     @automaticallyStartNextWave()
 
     return
+
+
+  ###
+  Cancel wave
+  ###
+  cancelWave: ->
+    if @enemySpawnDelay
+      @enemySpawnDelay.destroy()
 
 
   ###
@@ -39,7 +45,7 @@ Crafty.c 'Wave',
 
 
   isWaveFinished: ->
-    Game.enemyCount == 0 and @spawnFinished and not @spawnStarted
+    Game.enemyCount == 0 and @spawnFinished and not @waveStarted
 
 
   isLastWave: ->
@@ -84,14 +90,11 @@ Crafty.c 'Wave',
     enemies = @getEnemies()
     spawnedEnemies = 0
 
-    # we need spawnStarted to know whether a wave started or not
-    @spawnStarted = true
-
     # spawn all enemies using delay (so each enemy is spawned after a delay)
-    @delay (->
+    @enemySpawnDelay = Crafty.e('Delay').delay (->
       # catch error enemies[@spawnedEnemies] not defined (should not happen, but maybe wrongly configured)
       if not enemies[spawnedEnemies]
-        console.error('An error occurred: enemies[@spawnedEnemies] is empty, spawnedEnemies is at: ' + spawnedEnemies)
+        console.error('An error occurred: enemies[spawnedEnemies] is empty, spawnedEnemies is at: ' + spawnedEnemies)
         console.dir(enemies)
 
       # spawn enemy and animate him along the game path
@@ -109,7 +112,7 @@ Crafty.c 'Wave',
       # spawn finished
       if spawnedEnemies == enemies.length
         @spawnFinished = true
-        @spawnStarted = false
+        @waveStarted = false
         console.log 'spawn finished'
 
       return

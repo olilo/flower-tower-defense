@@ -195,6 +195,7 @@ Crafty.scene 'Game', ->
     w: 200
     h: 50).at(5, Game.map_grid.height - 1).tooltip('Clicking this button returns you to the main menu').bind('Click', ->
       console.log 'Main Menu'
+      wave.cancelWave()
       Crafty.scene 'MainMenu'
       return
   )
