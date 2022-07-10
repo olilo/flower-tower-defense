@@ -7,6 +7,7 @@ Crafty.scene 'Loading', ->
   loading = Crafty.e('2D, Grid, DOM, Text, Delay').text('Loading...').attr(w: Game.width()).at(0, 5).textFont(Game.loadingFont).textColor(Game.textColor).css(Game.centerCss)
   Crafty.e('Actor, Progress, Text').at(Game.map_grid.width / 2 - 2, 8).textFont(Game.loadingFont).textColor(Game.textColor).text '0%'
 
+
   # pre-load some (small) assets that we need immediately
   x = 3
   Crafty.load Game.preLoadAssets, ->
@@ -20,14 +21,20 @@ Crafty.scene 'Loading', ->
     ), 500, -1
     return
 
+
   # Load all our assets
-  Crafty.load Game.assets, (->
+  onLoad = ->
     # Now that our sprites are ready to draw, start the game
     Game.endless = false
     Crafty.scene 'MainMenu'
     return
-  ), (progress) ->
+  onProgress = (progress) ->
     Crafty('Progress').text Math.floor(progress.percent) + '%'
     return
+  onError = (asset) ->
+    console.error('Could not load asset ' + asset)
+    return
+
+  Crafty.load Game.assets, onLoad, onProgress, onError
 
   return
