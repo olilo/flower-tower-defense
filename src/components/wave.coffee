@@ -89,6 +89,7 @@ Crafty.c 'Wave',
   spawnEnemies: ->
     enemies = @getEnemies()
     spawnedEnemies = 0
+    that = @
 
     # spawn all enemies using delay (so each enemy is spawned after a delay)
     @enemySpawnDelay = Crafty.e('Delay').delay (->
@@ -97,26 +98,33 @@ Crafty.c 'Wave',
         console.error('An error occurred: enemies[spawnedEnemies] is empty, spawnedEnemies is at: ' + spawnedEnemies)
         console.dir(enemies)
 
-      # spawn enemy and animate him along the game path
-      enemy = Crafty.e(enemies[spawnedEnemies]).at(Game.path.start.x, Game.path.start.y)
-      enemy.animate_along Game.path.getPath(), enemy.speed
-
-      # special handling for all waves after standard waves: increase health of enemy
-      if @currentWave > Game.waves.current.length
-        diff = @currentWave - (Game.waves.current.length)
-        enemy.attr health: Math.floor((1 + diff * 0.05) * enemy.health + 5 * diff)
-        console.log 'new health: ' + enemy.health
+      that.spawnEnemy enemies[spawnedEnemies]
 
       spawnedEnemies++
 
       # spawn finished
       if spawnedEnemies == enemies.length
-        @spawnFinished = true
-        @waveStarted = false
+        that.spawnFinished = true
+        that.waveStarted = false
         console.log 'spawn finished'
 
       return
     ), @getSpawnInterval(), enemies.length - 1
+
+
+  ###
+  Spawn enemy
+  ###
+  spawnEnemy: (enemy)  ->
+    # spawn enemy and animate him along the game path
+    enemy = Crafty.e(enemy).at(Game.path.start.x, Game.path.start.y)
+    enemy.animate_along Game.path.getPath(), enemy.speed
+
+    # special handling for all waves after standard waves: increase health of enemy
+    if @currentWave > Game.waves.current.length
+      diff = @currentWave - (Game.waves.current.length)
+      enemy.attr health: Math.floor((1 + diff * 0.05) * enemy.health + 5 * diff)
+      console.log 'new health: ' + enemy.health
 
 
   ###

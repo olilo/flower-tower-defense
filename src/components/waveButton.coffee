@@ -38,7 +38,7 @@ Crafty.c 'WaveButton',
         @textColor Game.disabledColor
         @tooltip 'Button currently disabled.'
 
-        if @wave.currentWave > 0
+        if @wave.gameStarted
           Game.money += Game.moneyAfterWave
 
         @wave.startNextWave()
