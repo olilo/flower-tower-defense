@@ -1,11 +1,12 @@
 Game.assets.audio =
   'Background': [
-    'assets/sounds/All_Her_Witches.mp3'
+    'assets/sounds/Background.ogg'
+    'assets/sounds/Background.mp3'
   ]
   'Boss': [
-    'assets/sounds/boss.wav'
-    'assets/sounds/boss.mp3'
-    'assets/sounds/boss.ogg'
+    'assets/sounds/Boss.wav'
+    'assets/sounds/Boss.ogg'
+    'assets/sounds/Boss.mp3'
   ]
   'Menu': [
     'assets/sounds/Menu.mp3'
