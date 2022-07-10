@@ -4,7 +4,7 @@ Crafty.scene 'Won', ->
   Crafty.audio.stop()
   Crafty.audio.play 'Won', -1
 
-  Crafty.e('2D, DOM, Image').image('assets/ftd-logo.jpg').attr
+  Crafty.e('2D, DOM, Image').image('assets/images/ftd-logo.jpg').attr
     x: 80
     y: Game.height() * 1 / 12 - 24
     w: Game.width()

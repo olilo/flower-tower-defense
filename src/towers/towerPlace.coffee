@@ -1,6 +1,6 @@
 Crafty.c 'TowerPlace', init: ->
   @requires 'Actor, Delay, Mouse, Image, Color, Tooltip'
-  @image('assets/transparent.png').color '#ffffff', 0.0
+  @image('assets/images/transparent.png').color '#ffffff', 0.0
 
   @bind 'MouseOver', ->
     @color '#b66666', 0.2

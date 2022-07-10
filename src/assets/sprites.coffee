@@ -98,7 +98,7 @@ Game.assets.sprites =
         3
       ]
 
-  'assets/enemies.png':
+  'assets/sprites/enemies.png':
     'tile': 32
     'tileh': 32
     'map':
@@ -151,7 +151,7 @@ Game.assets.sprites =
         3
       ]
 
-  'assets/leafs.png':
+  'assets/sprites/leafs.png':
     'tile': 16
     'tileh': 16
     'map':

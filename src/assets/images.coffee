@@ -1,4 +1,4 @@
 Game.assets.images = [
-  'assets/ftd-logo.jpg'
-  'assets/transparent.png'
+  'assets/images/ftd-logo.jpg'
+  'assets/images/transparent.png'
 ]

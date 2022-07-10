@@ -1,7 +1,7 @@
 Game.preLoadAssets =
     'audio': {}
     'images': []
-    'sprites': 'assets/flower.png':
+    'sprites': 'assets/sprites/flower.png':
       'tile': 32
       'tileh': 32
       'map':
