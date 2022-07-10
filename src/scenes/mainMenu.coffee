@@ -34,7 +34,10 @@ Crafty.scene 'MainMenu', ->
     y: Game.height() * 7 / 12 - 24
     w: Game.width()
     h: 50
-    tooltipWidth: 350)
+    tooltipWidth: 350
+  ).bind 'Click', ->
+    Game.userClicked = true
+    console.log('User clicked, set Game.userClicked to true')
 
   if savegame
     loadButton.tooltip('Continue the game you played last time ' + 'with difficulty ' + savegame.difficulty + ' ' + 'on wave ' + savegame.currentWave).bind 'Click', ->
