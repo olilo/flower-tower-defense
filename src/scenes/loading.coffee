@@ -26,6 +26,7 @@ Crafty.scene 'Loading', ->
   onLoad = ->
     # Now that our sprites are ready to draw, start the game
     Game.endless = false
+    Game.userClicked = false
     Crafty.scene 'MainMenu'
     return
   onProgress = (progress) ->

@@ -3,9 +3,12 @@
 # User can decide on his difficulty here
 Crafty.scene 'Difficulty', ->
   Crafty.background 'rgb(169, 153, 145)'
-  Crafty.audio.stop()
-  Crafty.audio.play 'Menu', -1
 
+  # play background music
+  Crafty.audio.stop()
+  Crafty.audio.play 'Menu', -1, 0.5
+
+  # logo
   Crafty.e('2D, DOM, Image').image('assets/images/ftd-logo.jpg').attr
     x: 80
     y: Game.height() * 1 / 12 - 24

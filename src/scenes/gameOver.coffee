@@ -1,8 +1,10 @@
 Crafty.scene 'GameOver', ->
   # show GameOver screen, with "start again" button
   Crafty.background 'rgb(169, 153, 145)'
+
+  # play menu music
   Crafty.audio.stop()
-  Crafty.audio.play 'Menu', -1
+  Crafty.audio.play 'Menu', -1, 0.5
 
   Crafty.e('2D, DOM, Image').image('assets/images/ftd-logo.jpg').attr
     x: 80

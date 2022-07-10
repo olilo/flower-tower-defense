@@ -1,10 +1,27 @@
 # Main menu - load old savegame or start new game
 # ----------------------------
 Crafty.scene 'MainMenu', ->
+  # background
   Crafty.background 'rgb(169, 153, 145)'
-  Crafty.audio.stop()
-  Crafty.audio.play 'Menu', -1
 
+  # play main menu music after click
+  # we have to wait for user interaction first before we can play audio (at least the first time around)
+  if Game.userClicked
+    Crafty.audio.stop()
+    Crafty.audio.play 'Menu', -1, 0.5
+  else
+    Crafty.e('2D, DOM, Mouse').attr(
+      x: 0
+      y: 0
+      w: Game.width()
+      h: Game.height()
+    ).bind 'Click', ->
+      if not Game.userClicked
+        Crafty.audio.stop()
+        Crafty.audio.play 'Menu', -1, 0.5
+        Game.userClicked = true
+
+  # logo
   Crafty.e('2D, DOM, Image').image('assets/images/ftd-logo.jpg').attr
     x: 80
     y: Game.height() * 1 / 12 - 24

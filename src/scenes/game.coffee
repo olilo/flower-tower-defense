@@ -6,8 +6,10 @@ Crafty.scene 'Game', ->
 
   # background
   Crafty.e '2D, Canvas, ' + Game.backgroundAsset
+
+  # play background music
   Crafty.audio.stop()
-  Crafty.audio.play 'Background', -1
+  Crafty.audio.play 'Background', -1, 0.35
 
   # HUD
   Crafty.e('HudElement').observe('Money', 'money', '$').at 1
