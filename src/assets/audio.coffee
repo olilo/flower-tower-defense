@@ -18,9 +18,8 @@ Game.assets.audio =
     'assets/sounds/Won.wav'
   ]
   'EnemyDead': [
-    'assets/sounds/Shot.mp3'
-    'assets/sounds/Shot.ogg'
-    'assets/sounds/Shot.wav'
+    'assets/sounds/EnemyDead.mp3'
+    'assets/sounds/EnemyDead.ogg'
   ]
   'LifeLost': [
     'assets/sounds/LifeLost.mp3'

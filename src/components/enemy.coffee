@@ -51,6 +51,6 @@ Crafty.c 'Enemy',
     Crafty.trigger 'EnemyKilled', this
 
     if playAudio
-      Crafty.audio.play 'EnemyDead', 1
+      Crafty.audio.play 'EnemyDead', 1, 0.15
 
     return
