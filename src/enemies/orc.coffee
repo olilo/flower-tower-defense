@@ -6,4 +6,5 @@ Crafty.c 'Orc', init: ->
     speed: 0.8
     livesTaken: 2
     tooltipTextBase: 'Orc'
+
   return

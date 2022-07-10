@@ -5,4 +5,5 @@ Crafty.c 'Witch', init: ->
     reward: 1
     speed: 1.8
     tooltipTextBase: 'Witch'
+
   return

@@ -6,4 +6,5 @@ Crafty.c 'Knight', init: ->
     speed: 1.3
     tooltipWidth: 200
     tooltipTextBase: 'Knight'
+
   return

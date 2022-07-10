@@ -8,4 +8,5 @@ Crafty.c 'GreenDragon', init: ->
     noInstantKill: true
     tooltipHeight: 60
     tooltipTextBase: 'Green Dragon'
+
   return

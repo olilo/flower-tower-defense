@@ -5,4 +5,5 @@ Crafty.c 'Squid', init: ->
     reward: 3
     speed: 1.0
     tooltipTextBase: 'Squid'
+
   return

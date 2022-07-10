@@ -6,4 +6,5 @@ Crafty.c 'FastSquid', init: ->
     speed: 2.5
     tooltipWidth: 200
     tooltipTextBase: 'Fast Squid'
+
   return

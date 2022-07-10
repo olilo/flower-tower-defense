@@ -7,12 +7,14 @@ Crafty.c 'MightyWitch', init: ->
     tooltipWidth: 200
     tooltipHeight: 60
     tooltipTextBase: 'Mighty Witch (disables towers)'
+
+  # disable random tower for some time every 5 seconds
   @delay (->
-# disable random tower for some time
     towers = Crafty('Tower Enabled')
     if towers.length > 0
       tower = towers.get(Math.floor(Math.random() * towers.length))
       tower.disable()
     return
   ), 5000, -1
+
   return
