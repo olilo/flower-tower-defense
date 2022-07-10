@@ -1,14 +1,17 @@
 # Main menu - load old savegame or start new game
 # ----------------------------
-Crafty.scene 'MainMenu', ->
+Crafty.defineScene 'MainMenu', (attributes) ->
   # background
   Crafty.background 'rgb(169, 153, 145)'
 
   # play main menu music after click
   # we have to wait for user interaction first before we can play audio (at least the first time around)
-  if Game.userClicked
+  startMainMenuMusic = ->
     Crafty.audio.stop()
     Crafty.audio.play 'Menu', -1, 0.5
+
+  if Game.userClicked and not attributes.dontRestartMenuMusic
+    startMainMenuMusic()
   else
     Crafty.e('2D, DOM, Mouse').attr(
       x: 0
@@ -17,9 +20,9 @@ Crafty.scene 'MainMenu', ->
       h: Game.height()
     ).bind 'Click', ->
       if not Game.userClicked
-        Crafty.audio.stop()
-        Crafty.audio.play 'Menu', -1, 0.5
+        startMainMenuMusic()
         Game.userClicked = true
+      return
 
   # logo
   Crafty.e('2D, DOM, Image').image('assets/images/ftd-logo.jpg').attr
@@ -78,6 +81,11 @@ Crafty.scene 'MainMenu', ->
     y: Game.height() - 50
     w: 200
     h: 50).tooltip('Click here for some instructions').bind 'Click', ->
+      # start main menu music
+      if not Game.userClicked
+        startMainMenuMusic()
+        Game.userClicked = true
+
       Crafty.scene 'Help', 'MainMenu'
       return
 
@@ -86,13 +94,23 @@ Crafty.scene 'MainMenu', ->
     y: Game.height() - 50
     w: 200
     h: 50).tooltip('View the credits for this game ^^').bind 'Click', ->
+      # start main menu music
+      if not Game.userClicked
+        startMainMenuMusic()
+        Game.userClicked = true
+
       Crafty.scene 'Credits', 'MainMenu'
       return
 
-  Crafty.e('SoundButton').attr
+  Crafty.e('SoundButton').attr(
     x: 470
     y: Game.height() - 50
     w: 200
-    h: 50
+    h: 50).bind 'Click', ->
+      # start main menu music
+      if not Game.userClicked
+        startMainMenuMusic()
+        Game.userClicked = true
+      return
 
   return

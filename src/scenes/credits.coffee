@@ -73,7 +73,7 @@ Crafty.scene 'Credits', (targetScene) ->
       y: Game.height() - 50
       w: 200
       h: 50).tooltip('Go back to where you came from').bind 'Click', ->
-        Crafty.scene targetScene
+        Crafty.enterScene targetScene, {dontRestartMenuMusic: true}
         return
 
   # Sound Button
