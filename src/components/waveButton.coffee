@@ -15,6 +15,7 @@ Crafty.c 'WaveButton',
 
     return
 
+
   blinkBeforeStart: ->
     highlighted = false
 
@@ -29,6 +30,7 @@ Crafty.c 'WaveButton',
     ), 1000, -1
 
     return
+
 
   startNextWaveOnClick: ->
     @bind 'Click', ->

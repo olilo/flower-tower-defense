@@ -96,6 +96,7 @@ Crafty.c 'FlowerTower',
     y2 = @at().y + @range + 2
     result = false
 
+    # potentially very calculation intensive to do this
     Crafty('Enemy').each ->
       #noinspection JSPotentiallyInvalidUsageOfThis
       at = @at()

@@ -32,8 +32,6 @@ Crafty.c 'Tower',
       if Game.money >= upgradeCost
         @level++
         Game.money -= upgradeCost
-        Game.towerCost = @getUpgradeCost()
-        Game.towerLevel = @level
         Crafty.trigger 'TowerUpgraded', this
       console.log 'Upgraded tower (' + @at().x + '/' + @at().y + ') for ' + upgradeCost
     else

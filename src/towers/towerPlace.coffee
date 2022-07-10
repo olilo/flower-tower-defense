@@ -35,7 +35,6 @@ Crafty.c 'TowerPlace', init: ->
     if Game.money >= Game.towers[Game.selectedTower]
       tower = Crafty.e(Game.selectedTower).at(@at().x, @at().y)
       Game.money -= Game.towers[Game.selectedTower]
-      Game.towerLevel = 1
       Crafty.trigger 'TowerCreated', tower
       Crafty('Sidebar').openFor tower
       @destroy()

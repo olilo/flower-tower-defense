@@ -72,7 +72,7 @@ Crafty.scene 'Game', ->
     Crafty.unbind 'EnterFrame'
     Crafty.scene 'Won'
 
-  # necessary event handling
+  # when a tower gets built then its type and (as level 1) gets written into the tower map (for saving/loading)
   Crafty.bind 'TowerCreated', (tower) ->
     # insert in tower map
     towerNames = [
@@ -88,6 +88,7 @@ Crafty.scene 'Game', ->
       i++
     return
 
+  # when a tower gets upgraded its new level gets written into the tower map
   Crafty.bind 'TowerUpgraded', (tower) ->
     # update tower map
     Game.towerMap[tower.at().x][tower.at().y].level = tower.level
@@ -120,6 +121,7 @@ Crafty.scene 'Game', ->
   Crafty.e 'Sidebar'
 
   # help button
+  # FIXME put help button into own component, rework
   Crafty.e('DOMButton, Grid').text('Help').textFont(Game.waveFont).at(10, Game.map_grid.height - 1).attr(w: 100).tooltip('If you are lost, look here').bind 'Click', ->
     # create an overlay that explains the general concept
     overlay = document.getElementById('helpOverlay')

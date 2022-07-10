@@ -37,8 +37,6 @@ Crafty.c 'Enemy',
       Game.money += @reward
       @kill()
 
-    console.log 'Health: ' + @health
-
     return
 
   kill: (playAudio) ->

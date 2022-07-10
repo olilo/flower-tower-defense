@@ -1,4 +1,5 @@
 Crafty.scene 'Help', (targetScene) ->
+  # FIXME use separate Text nodes instead of singular text, put into component (see credits scene for example)
   Crafty.e('2D, DOM, Text').attr(
     x: 10
     y: 10

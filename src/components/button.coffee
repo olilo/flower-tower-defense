@@ -45,7 +45,7 @@ Crafty.c 'Button',
     return
 
   enable: ->
-# highlight on mouse over, but don't save the highlight color as "used text color"
+    # highlight on mouse over, but don't save the highlight color as "used text color"
     @textColor Game.textColor
     @bind 'MouseOver', @mouseOverHandler
     @bind 'MouseOut', @mouseOutHandler
