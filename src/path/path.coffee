@@ -23,6 +23,8 @@ class Path
 
     @pointPath = []
 
+    @pathLength = 0
+
     return
 
 
