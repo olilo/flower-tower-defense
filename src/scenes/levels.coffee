@@ -26,7 +26,7 @@ Crafty.scene 'InitializeLevel1', ->
 
   loading.delay (->
     Game.path = new Path(Game.map_grid)
-    Game.path.generateSpiral()
+    new PathGeneratorSpiral(Game.path).generate()
 
     Crafty.scene 'Game'
 
