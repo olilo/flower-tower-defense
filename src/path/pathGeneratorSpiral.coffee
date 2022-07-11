@@ -1,5 +1,5 @@
 ###*
-# Generates a spiral for the given path
+# Generates a spiral like path
 # @param path
 ###
 class PathGeneratorSpiral
@@ -20,6 +20,8 @@ class PathGeneratorSpiral
         x: @path.width - 1
         y: @path.height - 2
 
+    return
+
 
   generate: ->
     @path.start = @start
@@ -30,7 +32,6 @@ class PathGeneratorSpiral
 
     # start off at the top left
     @path.addToPath @path.current
-    @path.pathLength = 1
     @path.createPathElementIgnoreBorders Direction.RIGHT
 
     # actually generate the spiral
@@ -47,7 +48,7 @@ class PathGeneratorSpiral
 
     console.log 'Finished creating spiral, path length is: ' + @path.pathLength
 
-    return
+    @path
 
 
   inwardSpiral: ->
