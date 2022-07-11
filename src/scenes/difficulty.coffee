@@ -2,7 +2,7 @@
 # --------------------------
 # User can decide on his difficulty here
 Crafty.scene 'Difficulty', ->
-  Crafty.background 'rgb(169, 153, 145)'
+  Crafty.background Game.difficultyBackgroundColor
 
   # logo
   Crafty.e('2D, DOM, Image').image('assets/images/ftd-logo.jpg').attr

@@ -2,7 +2,7 @@
 # ----------------------------
 Crafty.defineScene 'MainMenu', (attributes) ->
   # background
-  Crafty.background 'rgb(169, 153, 145)'
+  Crafty.background Game.mainMenuBackgroundColor
 
   # play main menu music after click
   # we have to wait for user interaction first before we can play audio (at least the first time around)
@@ -62,6 +62,7 @@ Crafty.defineScene 'MainMenu', (attributes) ->
       Game.path = new Path(Game.map_grid)
       Game.path.copy savegame.path
       Game.enemyCount = 0
+
       Crafty.scene 'Game'
       return
   else

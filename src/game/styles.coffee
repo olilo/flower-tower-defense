@@ -1,3 +1,23 @@
+# colors
+Game.startBackgroundColor = 'rgb(169, 153, 145)'
+Game.mainMenuBackgroundColor = 'rgb(169, 153, 145)'
+Game.difficultyBackgroundColor = 'rgb(169, 153, 145)'
+Game.mapSelectionBackgroundColor = 'rgb(119, 123, 125)'
+Game.gameoverBackgroundColor = 'rgb(169, 153, 145)'
+
+Game.gameOverColor = 'red'
+Game.wonColor =  'rgb(109, 203, 105)'
+Game.continueColor ='brown'
+Game.restartColor = 'brown'
+Game.headlineColor = 'black'
+Game.closeColor = 'black'
+Game.textColor = 'white'
+Game.highlightColor = 'black'
+Game.disabledColor = 'grey'
+Game.alertColor = 'red'
+Game.overlayColor = 'rgb(179, 136, 114)'
+
+
 # custom css
 Game.centerCss =
   'text-align': 'center'
@@ -71,15 +91,6 @@ Game.generalButtonFont =
 Game.generalTooltipFont =
   'size': '20px'
   'family': 'sans-serif'
-
-
-# colors
-Game.gameOverColor = 'red'
-Game.wonColor =  'rgb(109, 203, 105)'
-Game.continueColor ='brown'
-Game.restartColor = 'brown'
-Game.closeColor = 'black'
-Game.textColor = 'white'
-Game.highlightColor = 'black'
-Game.disabledColor = 'grey'
-Game.alertColor = 'red'
+Game.overlayInfoFont =
+  'size': '20px'
+  'family': 'sans-serif'

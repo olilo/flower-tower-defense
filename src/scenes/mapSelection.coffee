@@ -1,5 +1,5 @@
 Crafty.scene 'MapSelection', ->
-  Crafty.background 'rgb(119, 123, 125)'
+  Crafty.background Game.mapSelectionBackgroundColor
 
   currentPage = 1
 
