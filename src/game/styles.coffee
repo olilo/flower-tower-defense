@@ -28,6 +28,10 @@ Game.generalTooltipCss =
   'padding': '5px'
   'border': '1px solid black'
   'background-color': 'grey'
+Game.overlayCss =
+  'padding': '5px'
+  'border': '1px solid black'
+  'background-color': Game.overlayColor
 Game.closeCss =
   'line-height': '16px'
   'border': '1px solid black'

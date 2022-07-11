@@ -33,6 +33,8 @@ Crafty.defineScene 'MainMenu', (attributes) ->
     h: 200
 
   savegame = Crafty.storage('ftd_save1')
+
+  # load savegame button
   loadButton = Crafty.e('DOMButton').text('Load Saved game').attr(
     x: 0
     y: Game.height() * 7 / 12 - 24
@@ -68,22 +70,35 @@ Crafty.defineScene 'MainMenu', (attributes) ->
   else
     loadButton.tooltip('No savegame exists yet.').disable()
 
+  # start new game button
   Crafty.e('DOMButton').text('Start new game').attr(
     x: 0
     y: Game.height() * 9 / 12 - 24
     w: Game.width()
     h: 50).tooltip('Starts a new game. You can select the difficulty on the next screen.').bind 'Click', ->
-      if Crafty.storage('ftd_save1') and !confirm('Starting a new game will overwrite your already saved game. Continue?')
-        return
+      # function to actually start the game
+      startGame = ->
+        # start main menu music
+        if not Game.userClicked
+          startMainMenuMusic()
+          Game.userClicked = true
 
-      # start main menu music
-      if not Game.userClicked
-        startMainMenuMusic()
-        Game.userClicked = true
+        Crafty.scene 'Difficulty'
 
-      Crafty.scene 'Difficulty'
+      if savegame
+        # savegame exists: show overwrite savegame overlay
+        Crafty.e('OverwriteSavegame').attr(
+          y: Game.height() * 9 / 12 - 24 - 20
+        ).showOverlay()
+        Crafty.bind 'OverwriteSavegameConfirmed', ->
+          Crafty.storage.remove('ftd_save1')
+          startGame()
+      else
+        startGame()
+
       return
 
+  # instructions button
   Crafty.e('DOMButton').text('Instructions').attr(
     x: 70
     y: Game.height() - 50
@@ -97,6 +112,7 @@ Crafty.defineScene 'MainMenu', (attributes) ->
       Crafty.scene 'Help', 'MainMenu'
       return
 
+  # credits button
   Crafty.e('DOMButton').text('Credits').attr(
     x: 280
     y: Game.height() - 50
@@ -110,6 +126,7 @@ Crafty.defineScene 'MainMenu', (attributes) ->
       Crafty.scene 'Credits', 'MainMenu'
       return
 
+  # sound button
   Crafty.e('SoundButton').attr(
     x: 470
     y: Game.height() - 50

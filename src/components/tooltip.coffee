@@ -5,11 +5,16 @@ Crafty.c 'Tooltip',
     @_tooltip = null
     @tooltipWidth = 300
     @tooltipHeight = 50
+    @baseZ = 500
 
     @bind 'MouseOver', @createTooltip
     @bind 'MouseOut', @destroyTooltip
 
     return
+
+  disableTooltip: ->
+    @unbind 'MouseOver', @createTooltip
+    @unbind 'MouseOut', @destroyTooltip
 
   createTooltip: ->
     x = Math.min(Game.width() - (@tooltipWidth) - 10, Math.max(0, @x + (@w - (@tooltipWidth)) / 2))
@@ -23,14 +28,14 @@ Crafty.c 'Tooltip',
       y: y
       w: @tooltipWidth
       h: @tooltipHeight
-      z: 500).css(Game.generalTooltipCss)
+      z: @baseZ).css(Game.generalTooltipCss)
 
     tooltipText = Crafty.e('2D, DOM, Text').attr(
       x: x + 2
       y: y + 2
       w: @tooltipWidth
       h: @tooltipHeight
-      z: 520).text(@tooltipText).textFont(Game.generalTooltipFont).textColor(Game.textColor).css(Game.centerCss)
+      z: @baseZ + 20).text(@tooltipText).textFont(Game.generalTooltipFont).textColor(Game.textColor).css(Game.centerCss)
 
     @_tooltip.attach tooltipText
     @attach @_tooltip

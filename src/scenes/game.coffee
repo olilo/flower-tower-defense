@@ -18,14 +18,20 @@ Crafty.scene 'Game', ->
   Crafty.e('HudElement').observe('Wave', 'currentWave').at 14
   Crafty.e('HudElement').observe('FPS', Game.actualFPS.FPS).at 18
 
+  # restart level button
   Crafty.e('DOMButton, Grid').text('Restart level').tooltip('Restart this level with difficulty ' + Game.difficulty + ' at wave 1')
                              .textColor(Game.highlightColor).textFont(Game.hudFont).unbind('Click').bind('Click', ->
-    if window.confirm('Really restart this level? You will restart at wave 1 with no towers!')
-      console.log 'Restarting level ' + Game.level
+    # FIXME should this rather be triggered?
+    Crafty.e('RestartLevel')
+    Crafty.bind 'RestartLevel', ->
+      console.log 'Restarting level at ' + Game.level
 
       # we need crafty unpaused for initialization
       if Crafty.isPaused()
         Crafty.pause()
+
+      # clear savegame
+      Crafty.storage.remove('ftd_save1')
 
       # reset difficulty-related properties
       Game.setDifficultyProperties Game.difficulty
@@ -46,7 +52,7 @@ Crafty.scene 'Game', ->
         'It shoots anywhere on the map, but cost increases.<br> Gains instant kill on highest level.<br> Hotkey: V'
         ).withSprite('sniper_tower4').withHotkey('V').at 3, Game.map_grid.height - 1
 
-  # win/lose conditions
+  # lose condition: no more lives
   Crafty.bind 'EnterFrame', ->
     if Game.lifes <= 0
       Crafty.unbind 'EnterFrame'
