@@ -22,6 +22,7 @@ Crafty.defineScene 'MainMenu', (attributes) ->
       if not Game.userClicked
         startMainMenuMusic()
         Game.userClicked = true
+
       return
 
   # logo
@@ -73,6 +74,12 @@ Crafty.defineScene 'MainMenu', (attributes) ->
     h: 50).tooltip('Starts a new game. You can select the difficulty on the next screen.').bind 'Click', ->
       if Crafty.storage('ftd_save1') and !confirm('Starting a new game will overwrite your already saved game. Continue?')
         return
+
+      # start main menu music
+      if not Game.userClicked
+        startMainMenuMusic()
+        Game.userClicked = true
+
       Crafty.scene 'Difficulty'
       return
 
