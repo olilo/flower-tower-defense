@@ -15,7 +15,8 @@ Game.textColor = 'white'
 Game.highlightColor = 'black'
 Game.disabledColor = 'grey'
 Game.alertColor = 'red'
-Game.overlayColor = 'rgb(179, 136, 114)'
+Game.overlayColor = 'grey'
+Game.overlayConfirmColor = 'rgb(179, 136, 114)'
 
 
 # custom css
@@ -29,13 +30,21 @@ Game.generalTooltipCss =
   'border': '1px solid black'
   'background-color': 'grey'
 Game.overlayCss =
-  'padding': '5px'
+  'padding': '10px'
   'border': '1px solid black'
   'background-color': Game.overlayColor
+Game.overlayConfirmCss =
+  'padding': '5px'
+  'border': '1px solid black'
+  'background-color': Game.overlayConfirmColor
 Game.closeCss =
   'line-height': '16px'
   'border': '1px solid black'
   'cursor': 'pointer'
+Game.hiddenCss =
+  'display': 'none'
+Game.shownCss =
+  'display': 'block'
 
 
 # fonts
@@ -97,4 +106,7 @@ Game.generalTooltipFont =
   'family': 'sans-serif'
 Game.overlayInfoFont =
   'size': '20px'
+  'family': 'sans-serif'
+Game.pauseFont =
+  'size': '36px'
   'family': 'sans-serif'
