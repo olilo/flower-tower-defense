@@ -1,7 +1,6 @@
 Crafty.c 'Overlay',
   init: ->
     @baseZ = 600
-    @css = Game.overlayCss
 
   centerOverlayHorizontally: ->
     @x = (Game.width() - @overlayWidth) / 2
@@ -16,4 +15,4 @@ Crafty.c 'Overlay',
       w: @overlayWidth
       h: @overlayHeight
       z: @baseZ
-    ).css(@css)
+    ).css(Game.overlayCss)
